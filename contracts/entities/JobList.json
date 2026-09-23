@@ -1,0 +1,146 @@
+{
+  "$defs": {
+    "ConfigurationProfile": {
+      "additionalProperties": false,
+      "description": "Store the checkpoint frequency as a whole number of minutes in seconds.",
+      "properties": {
+        "checkpoint_interval_seconds": {
+          "default": 300,
+          "exclusiveMinimum": 0,
+          "multipleOf": 60,
+          "title": "Checkpoint Interval Seconds",
+          "type": "integer"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schema_version",
+        "checkpoint_interval_seconds"
+      ],
+      "title": "ConfigurationProfile",
+      "type": "object"
+    },
+    "JobSnapshot": {
+      "additionalProperties": false,
+      "description": "Describe a saved job without executing it or exposing secret data.",
+      "properties": {
+        "available_actions": {
+          "items": {
+            "enum": [
+              "pause",
+              "resume",
+              "stop",
+              "cancel",
+              "supply_missing_inputs"
+            ],
+            "type": "string"
+          },
+          "title": "Available Actions",
+          "type": "array"
+        },
+        "configuration": {
+          "$ref": "#/$defs/ConfigurationProfile"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "estimated_seconds_remaining": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Estimated Seconds Remaining"
+        },
+        "job_identifier": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Job Identifier",
+          "type": "string"
+        },
+        "phase": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Phase",
+          "type": "string"
+        },
+        "progress": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Progress"
+        },
+        "status": {
+          "enum": [
+            "queued",
+            "running",
+            "paused",
+            "stopped",
+            "completed",
+            "cancelled",
+            "failed",
+            "interrupted",
+            "needs_input"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "job_identifier",
+        "status",
+        "phase",
+        "configuration",
+        "available_actions",
+        "created_at",
+        "updated_at",
+        "progress",
+        "estimated_seconds_remaining"
+      ],
+      "title": "JobSnapshot",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Return saved job snapshots in creation order.",
+  "properties": {
+    "items": {
+      "items": {
+        "$ref": "#/$defs/JobSnapshot"
+      },
+      "title": "Items",
+      "type": "array"
+    }
+  },
+  "required": [
+    "items"
+  ],
+  "title": "JobList",
+  "type": "object"
+}

@@ -1,0 +1,75 @@
+name: stegolab
+
+services:
+  backend_service:
+    build:
+      context: ..
+      dockerfile: backend_service/Dockerfile
+    environment:
+      STEGOLAB_DATA_DIRECTORY: /data/state
+      STEGOLAB_LOG_DIRECTORY: /data/logs
+    volumes:
+      - application_data:/data
+    expose:
+      - "8000"
+    init: true
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 10g
+    stop_grace_period: 30s
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=3)"
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+    logging: &bounded_logging
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  user_interface:
+    build:
+      context: ..
+      dockerfile: user_interface/Dockerfile
+    depends_on:
+      backend_service:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${STEGOLAB_PORT:-8080}:8080"
+    init: true
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 256m
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --quiet
+        - --spider
+        - http://127.0.0.1:8080/
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    logging: *bounded_logging
+
+volumes:
+  application_data:

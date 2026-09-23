@@ -1,0 +1,188 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "StegoLab \u00b7 Local foundation",
+    "quality_profile": "showcase",
+    "locale": "en",
+    "views": [
+      {
+        "id": "settings",
+        "label": "Save settings",
+        "focus": [
+          "browser",
+          "frontend",
+          "backend",
+          "storage"
+        ],
+        "note": "Validated settings survive a backend restart."
+      },
+      {
+        "id": "future",
+        "label": "Later sprints",
+        "focus": [
+          "backend",
+          "workers",
+          "packages"
+        ],
+        "note": "Dashed connections are planned. No training or inference runs in Sprint 1."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "browser",
+      "type": "external",
+      "label": "Browser",
+      "sublabel": "Four accessible tabs",
+      "pos": [
+        45,
+        180
+      ],
+      "size": [
+        175,
+        76
+      ]
+    },
+    {
+      "id": "frontend",
+      "type": "frontend",
+      "label": "Frontend container",
+      "sublabel": "React + reverse proxy",
+      "tag": "LOCALHOST :8080",
+      "pos": [
+        395,
+        180
+      ],
+      "size": [
+        200,
+        76
+      ]
+    },
+    {
+      "id": "backend",
+      "type": "backend",
+      "label": "Backend container",
+      "sublabel": "FastAPI \u00b7 CPU only",
+      "tag": "INTERNAL :8000",
+      "pos": [
+        775,
+        180
+      ],
+      "size": [
+        200,
+        76
+      ]
+    },
+    {
+      "id": "storage",
+      "type": "database",
+      "label": "Persistent volume",
+      "sublabel": "SQLite settings + job records",
+      "tag": "SURVIVES RESTART",
+      "pos": [
+        775,
+        400
+      ],
+      "size": [
+        240,
+        76
+      ]
+    },
+    {
+      "id": "workers",
+      "type": "backend",
+      "label": "Workers \u00b7 planned",
+      "sublabel": "Training + data preparation",
+      "tag": "LATER SPRINTS",
+      "pos": [
+        395,
+        400
+      ],
+      "size": [
+        230,
+        76
+      ]
+    },
+    {
+      "id": "packages",
+      "type": "external",
+      "label": "Models \u00b7 planned",
+      "sublabel": "Independent encoder + decoder",
+      "tag": "LATER SPRINTS",
+      "pos": [
+        45,
+        400
+      ],
+      "size": [
+        245,
+        76
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "local-access",
+      "from": "browser",
+      "to": "frontend",
+      "label": "Local HTTP",
+      "variant": "emphasis"
+    },
+    {
+      "id": "backend-access",
+      "from": "frontend",
+      "to": "backend",
+      "label": "/api/v1",
+      "variant": "emphasis"
+    },
+    {
+      "id": "save-settings",
+      "from": "backend",
+      "to": "storage",
+      "label": "Atomic save",
+      "variant": "emphasis",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "future-work",
+      "from": "backend",
+      "to": "workers",
+      "label": "Planned jobs",
+      "variant": "dashed"
+    },
+    {
+      "id": "future-exports",
+      "from": "workers",
+      "to": "packages",
+      "label": "Planned export",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Sprint 1 demo",
+      "items": [
+        "Save checkpoint frequency in Config",
+        "Restart, reload, and reset to five minutes"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Local and persistent",
+      "items": [
+        "Only the frontend port is published",
+        "Configuration changes are validated before saving"
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "Research comes later",
+      "items": [
+        "No models or usable payload capacity yet",
+        "No GPU spending or recovery-quality claims"
+      ]
+    }
+  ]
+}

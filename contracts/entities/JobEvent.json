@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Define future ordered state notifications with metadata fields only.",
+  "properties": {
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "event_identifier": {
+      "exclusiveMinimum": 0,
+      "title": "Event Identifier",
+      "type": "integer"
+    },
+    "job_identifier": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Job Identifier",
+      "type": "string"
+    },
+    "phase": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Phase",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "queued",
+        "running",
+        "paused",
+        "stopped",
+        "completed",
+        "cancelled",
+        "failed",
+        "interrupted",
+        "needs_input"
+      ],
+      "title": "Status",
+      "type": "string"
+    }
+  },
+  "required": [
+    "event_identifier",
+    "job_identifier",
+    "status",
+    "phase",
+    "created_at"
+  ],
+  "title": "JobEvent",
+  "type": "object"
+}

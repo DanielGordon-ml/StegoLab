@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Describe the CPU-only release without advertising model support.",
+  "properties": {
+    "application_version": {
+      "const": "0.1.0",
+      "default": "0.1.0",
+      "title": "Application Version",
+      "type": "string"
+    },
+    "available_devices": {
+      "default": [
+        "cpu"
+      ],
+      "items": {
+        "const": "cpu",
+        "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "title": "Available Devices",
+      "type": "array"
+    },
+    "available_models": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 0,
+      "title": "Available Models",
+      "type": "array"
+    },
+    "available_profiles": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 0,
+      "title": "Available Profiles",
+      "type": "array"
+    },
+    "decoding_available": {
+      "const": false,
+      "default": false,
+      "title": "Decoding Available",
+      "type": "boolean"
+    },
+    "encoding_available": {
+      "const": false,
+      "default": false,
+      "title": "Encoding Available",
+      "type": "boolean"
+    },
+    "maximum_payload_bytes": {
+      "default": 0,
+      "maximum": 0,
+      "minimum": 0,
+      "title": "Maximum Payload Bytes",
+      "type": "integer"
+    },
+    "training_available": {
+      "const": false,
+      "default": false,
+      "title": "Training Available",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "application_version",
+    "available_devices",
+    "available_models",
+    "available_profiles",
+    "encoding_available",
+    "decoding_available",
+    "training_available",
+    "maximum_payload_bytes"
+  ],
+  "title": "Capabilities",
+  "type": "object"
+}

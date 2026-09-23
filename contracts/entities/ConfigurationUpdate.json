@@ -1,0 +1,50 @@
+{
+  "$defs": {
+    "ConfigurationProfile": {
+      "additionalProperties": false,
+      "description": "Store the checkpoint frequency as a whole number of minutes in seconds.",
+      "properties": {
+        "checkpoint_interval_seconds": {
+          "default": 300,
+          "exclusiveMinimum": 0,
+          "multipleOf": 60,
+          "title": "Checkpoint Interval Seconds",
+          "type": "integer"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schema_version",
+        "checkpoint_interval_seconds"
+      ],
+      "title": "ConfigurationProfile",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Identify a settings change so that network retries are safe.",
+  "properties": {
+    "client_request_identifier": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+      "title": "Client Request Identifier",
+      "type": "string"
+    },
+    "configuration": {
+      "$ref": "#/$defs/ConfigurationProfile"
+    }
+  },
+  "required": [
+    "client_request_identifier",
+    "configuration"
+  ],
+  "title": "ConfigurationUpdate",
+  "type": "object"
+}

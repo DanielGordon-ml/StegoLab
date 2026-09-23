@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Report successful application startup.",
+  "properties": {
+    "application_version": {
+      "const": "0.1.0",
+      "default": "0.1.0",
+      "title": "Application Version",
+      "type": "string"
+    },
+    "status": {
+      "const": "ready",
+      "default": "ready",
+      "title": "Status",
+      "type": "string"
+    }
+  },
+  "required": [
+    "status",
+    "application_version"
+  ],
+  "title": "HealthStatus",
+  "type": "object"
+}

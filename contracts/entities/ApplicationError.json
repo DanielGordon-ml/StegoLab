@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Explain a failure and provide an opaque reference for local logs.",
+  "properties": {
+    "code": {
+      "minLength": 1,
+      "title": "Code",
+      "type": "string"
+    },
+    "diagnostic_reference": {
+      "pattern": "^[a-f0-9]{32}$",
+      "title": "Diagnostic Reference",
+      "type": "string"
+    },
+    "message": {
+      "minLength": 1,
+      "title": "Message",
+      "type": "string"
+    }
+  },
+  "required": [
+    "code",
+    "message",
+    "diagnostic_reference"
+  ],
+  "title": "ApplicationError",
+  "type": "object"
+}
