@@ -100,6 +100,23 @@ uv run uvicorn backend_service.application:create_application --factory --host 1
 npm --prefix user_interface run dev -- --host 127.0.0.1
 ```
 
+## Command line
+
+The command line uses the same configuration schema and store as the API:
+
+```sh
+uv run stegolab --help
+uv run stegolab inspect_configuration
+uv run stegolab validate_configuration /path/to/configuration.json
+```
+
+A configuration document contains `schema_version: 1` and
+`checkpoint_interval_seconds: 300`. The interval is a positive integer divisible
+by 60. Validation reads the file without saving it. Native commands use `.runtime/`
+unless `STEGOLAB_DATA_DIRECTORY` selects another location; this is separate from
+the Docker volume. Training and model commands report that they are unavailable
+and return a nonzero exit code.
+
 ## Troubleshooting
 
 | Problem | Check or action |

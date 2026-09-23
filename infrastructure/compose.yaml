@@ -6,7 +6,7 @@ services:
       context: ..
       dockerfile: backend_service/Dockerfile
     environment:
-      STEGOLAB_DATA_DIRECTORY: /data
+      STEGOLAB_DATA_DIRECTORY: /data/state
       STEGOLAB_LOG_DIRECTORY: /data/logs
     volumes:
       - application_data:/data
