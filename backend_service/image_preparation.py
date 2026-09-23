@@ -10,6 +10,7 @@ from PIL import Image, ImageOps
 
 from backend_service.failures import ApplicationFailure
 from backend_service.image_color import convert_color, resolve_color
+from backend_service.image_diagnostics import private_image_diagnostics
 from backend_service.image_output import write_png
 from backend_service.image_validation import (
     ImageSource,
@@ -33,7 +34,7 @@ def _open_pixels(data: bytes, header: SourceHeader) -> Image.Image:
     """Decode only after source precision and allocation limits were checked."""
     with warnings.catch_warnings():
         warnings.simplefilter("error", Image.DecompressionBombWarning)
-        with Image.open(BytesIO(data)) as opened:
+        with Image.open(BytesIO(data), formats=["PNG", "JPEG"]) as opened:
             if (
                 opened.format != header.format
                 or opened.mode != header.mode
@@ -85,11 +86,13 @@ def _read_pixels(source: ImageSource, *, recover: bool) -> PreparedPixels:
     try:
         data = read_source(source)
         header = inspect_header(data)
-        with warnings.catch_warnings():
+        with private_image_diagnostics(), warnings.catch_warnings():
             warnings.simplefilter("error")
             return _decode_pixels(data, header, recover=recover)
     except ApplicationFailure:
         raise
+    except MemoryError:
+        raise image_failure("image_resources") from None
     except (
         OSError,
         ValueError,

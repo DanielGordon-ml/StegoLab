@@ -9,6 +9,7 @@ from typing import BinaryIO, Literal
 from pydantic import ValidationError
 
 from backend_service.failures import ApplicationFailure
+from backend_service.image_png_stream import PixelStreamValidator
 from schemas.image_dimensions import ImageDimensions
 from schemas.images import MAXIMUM_IMAGE_FILE_BYTES
 
@@ -37,10 +38,13 @@ def image_failure(code: str = "image_invalid") -> ApplicationFailure:
         "512–4096 pixels, at most 8,850,000 pixels, and at most 50 MiB.",
         "image_color": "The image color declaration is invalid or unsupported. "
         "Convert the image to eight-bit sRGB with a valid RGB profile, then retry.",
+        "image_resources": "There is not enough memory to process the image. "
+        "Close other applications or use a smaller image, then retry.",
         "image_write": "The prepared image could not be saved. Choose a new "
         "output file and check directory access and free space, then retry.",
     }
-    return ApplicationFailure(code, messages[code], status_code=422)
+    status_code = 503 if code == "image_resources" else 422
+    return ApplicationFailure(code, messages[code], status_code=status_code)
 
 
 def _read_stream(stream: BinaryIO) -> bytes:
@@ -88,6 +92,8 @@ def _png_header(data: bytes) -> SourceHeader:
     seen: set[bytes] = set()
     width = height = color_type = 0
     saw_end = False
+    pixels_finished = False
+    pixel_stream: PixelStreamValidator | None = None
     while offset + 12 <= len(data):
         length = int.from_bytes(data[offset : offset + 4], "big")
         name = data[offset + 4 : offset + 8]
@@ -118,10 +124,23 @@ def _png_header(data: bytes) -> SourceHeader:
                 raise image_failure()
             if compression != 0 or filtering != 0 or interlace not in (0, 1):
                 raise image_failure()
+            pixel_stream = PixelStreamValidator(
+                width, height, 4 if color_type == 6 else 3, interlace
+            )
             first = False
         elif name == b"IHDR":
             raise image_failure()
-        if name in (b"acTL", b"fcTL", b"fdAT"):
+        if name == b"PLTE" and (
+            name in seen or b"IDAT" in seen or not 0 < length <= 768 or length % 3
+        ):
+            raise image_failure()
+        if name == b"IDAT":
+            if pixels_finished or pixel_stream is None:
+                raise image_failure()
+            pixel_stream.feed(content)
+        elif b"IDAT" in seen:
+            pixels_finished = True
+        if name in (b"acTL", b"fcTL", b"fdAT", b"tRNS"):
             raise image_failure()
         if name == b"cICP":
             raise image_failure("image_color")
@@ -145,6 +164,9 @@ def _png_header(data: bytes) -> SourceHeader:
             break
     if first or not saw_end or b"IDAT" not in seen:
         raise image_failure()
+    if pixel_stream is None:
+        raise image_failure()
+    pixel_stream.finish()
     if seen & {b"gAMA", b"cHRM"} and not seen & {b"iCCP", b"sRGB"}:
         raise image_failure("image_color")
     return SourceHeader(
@@ -234,7 +256,10 @@ def _jpeg_header(data: bytes) -> SourceHeader:
 def inspect_header(data: bytes) -> SourceHeader:
     """Select supported formats from file bytes rather than the extension."""
     if data.startswith(PNG_SIGNATURE):
-        return _png_header(data)
+        try:
+            return _png_header(data)
+        except (ValueError, zlib.error):
+            raise image_failure() from None
     if data.startswith(b"\xff\xd8"):
         return _jpeg_header(data)
     raise image_failure()

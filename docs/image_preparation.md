@@ -29,6 +29,9 @@ uv run stegolab prepare_image /path/to/source.jpg /path/to/prepared.png
   sixteen-bit RGB/RGBA PNG is rejected before Pillow can reduce its precision.
 - Grayscale, palette, CMYK, animation, and RGB PNG color-key transparency are
   rejected. Convert these to single-frame eight-bit sRGB RGB/RGBA first.
+- PNG validation checks chunk order and the complete compressed pixel stream,
+  including its checksum and exact expected scanline size. Adam7 interlacing is
+  supported. Expansion is checked with a bounded discarded output buffer.
 - Pillow's image-size protection remains enabled. Malformed images, metadata
   warnings, and unsupported declarations fail with a fixed safe message.
 
@@ -81,8 +84,12 @@ image = result.image  # Owned Pillow RGB/RGBA image; integer channel values.
   conversion happened in this read mode.
 - The reader keeps exactly the stored integers and returns no source metadata.
 - Failures use `ApplicationFailure` with `image_invalid`, `image_limits`,
-  `image_color`, or `image_write`. Error text never includes source values or
-  operating-system details.
+  `image_color`, `image_write`, or `image_resources`. Memory shortages return
+  `image_resources` with advice to free memory or use a smaller image.
+  Error text never includes source values or
+  operating-system details. Pillow metadata diagnostics are suppressed only in
+  the current image-service context, even when application debug logging is
+  enabled. Logging outside that context remains available.
 
 ## Verification
 
