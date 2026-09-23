@@ -94,19 +94,22 @@ image = result.image  # Owned Pillow RGB/RGBA image; integer channel values.
 ## Verification
 
 ```sh
-uv run python -m pytest tests/backend/test_image_preparation.py \
-  tests/backend/test_image_validation.py tests/backend/test_image_color.py
+uv run python -m pytest tests/backend/test_image_*.py
+uv run python scripts/measure_protocol_resources.py
 ```
 
 Tests cover all eight orientations, RGB/RGBA pixels and alpha, real sixteen-bit
 sources, ICC/sRGB precedence, malformed and unsupported declarations, complete
 JPEG profile segments, both common 4K sizes, bounded unknown-size streams,
 metadata removal, existing files/symlinks, publication races, and failed or
-pixel-corrupt writes.
+pixel-corrupt writes. Regression tests also cover real Adam7 images, complete
+compressed-stream checksums, chunk order, late transparency, metadata logging at
+DEBUG level, concurrent logging, and allocation failures.
 
-A local CPU measurement on 2026-09-23 used Python 3.12 and Pillow 12.3.0 on
-macOS arm64. Preparing and reopening a 4096 × 2160 RGBA solid-color PNG took
-0.1262 seconds wall time, 0.1221 seconds CPU time, with a process peak resident
-memory of 204.55 MiB. The 39,909-byte input is compressible; this is a repeatable
-smoke measurement, not a limit or a guarantee for all images. Peak memory also
-includes interpreter imports and source-fixture generation.
+The final local measurement on 2026-09-23 used Python 3.12.13 and Pillow 12.3.0
+on macOS 26.6.2 arm64. The script prepares and reopens a patterned RGBA PNG,
+then checks every integer channel. At 4096 × 2160 this took 0.3125 seconds wall
+time and 0.3113 seconds CPU time. The complete process peaked at 334.94 MiB,
+including imports, protocol work, and generated fixture buffers. These are
+observations, not limits or performance guarantees. The [Sprint 2 record](../plan/sprint_02.md)
+contains all three measured sizes.
