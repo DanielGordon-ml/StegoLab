@@ -1,7 +1,8 @@
 # Run StegoLab locally
 
-Sprint 1 provides four tabs and saved settings. Training, encoding, decoding,
-dataset downloads, and model installation are not available yet.
+Sprint 1 provides four tabs and saved settings. Sprint 2 adds message-protocol
+checks and image preparation through the command line. Training, image-based
+encoding/decoding, dataset downloads, and model installation are not available yet.
 
 ## Start with Docker
 
@@ -67,6 +68,7 @@ uv run ruff check .
 uv run ruff format --check .
 uv run mypy backend_service schemas
 uv run pytest tests/backend
+uv run stegolab verify_protocol
 uv run python -m backend_service.export_contracts --check
 uv run python scripts/check_file_lengths.py
 npm --prefix user_interface run lint
@@ -108,6 +110,9 @@ The command line uses the same configuration schema and store as the API:
 uv run stegolab --help
 uv run stegolab inspect_configuration
 uv run stegolab validate_configuration /path/to/configuration.json
+uv run stegolab verify_protocol
+uv run stegolab inspect_image /path/to/cover.jpg
+uv run stegolab prepare_image /path/to/cover.jpg /path/to/new_prepared.png
 ```
 
 A configuration document contains `schema_version: 1` and
@@ -116,6 +121,14 @@ by 60. Validation reads the file without saving it. Native commands use `.runtim
 unless `STEGOLAB_DATA_DIRECTORY` selects another location; this is separate from
 the Docker volume. Training and model commands report that they are unavailable
 and return a nonzero exit code.
+
+The protocol demonstration uses packaged public fixtures and accepts no secret
+inputs. Image commands return safe metadata; preparation refuses existing output
+files and preserves prepared integer pixels. These commands do not initialize
+SQLite or change saved configuration. See the [protocol guide](message_protocol.md)
+and [image guide](image_preparation.md) for supported inputs and exact rules.
+Inside a running container, the public demonstration is also available through
+`python -m backend_service.command_line verify_protocol`.
 
 ## Troubleshooting
 

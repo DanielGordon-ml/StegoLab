@@ -12,7 +12,9 @@ from schemas.configuration import (
     ConfigurationUpdate,
 )
 from schemas.errors import ApplicationError, ErrorEnvelope
+from schemas.images import ImageSummary
 from schemas.jobs import JobEvent, JobList, JobSnapshot
+from schemas.protocol import PayloadCapacity, ProtocolContext, ProtocolVerification
 
 ENTITY_MODELS = (
     ApplicationError,
@@ -26,6 +28,10 @@ ENTITY_MODELS = (
     JobSnapshot,
     JobList,
     JobEvent,
+    ProtocolContext,
+    PayloadCapacity,
+    ProtocolVerification,
+    ImageSummary,
 )
 
 

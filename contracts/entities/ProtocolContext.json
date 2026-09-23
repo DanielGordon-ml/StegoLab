@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Bind a trusted caller's dimensions and compatibility identity.",
+  "properties": {
+    "compatibility_identifier": {
+      "default": "public_fixture_v1",
+      "pattern": "^[a-z0-9][a-z0-9_.-]{0,127}$",
+      "title": "Compatibility Identifier",
+      "type": "string"
+    },
+    "height": {
+      "maximum": 4096,
+      "minimum": 512,
+      "title": "Height",
+      "type": "integer"
+    },
+    "profile_identifier": {
+      "const": "test_only_v1",
+      "default": "test_only_v1",
+      "title": "Profile Identifier",
+      "type": "string"
+    },
+    "protocol_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Protocol Version",
+      "type": "integer"
+    },
+    "width": {
+      "maximum": 4096,
+      "minimum": 512,
+      "title": "Width",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "width",
+    "height",
+    "protocol_version",
+    "profile_identifier",
+    "compatibility_identifier"
+  ],
+  "title": "ProtocolContext",
+  "type": "object"
+}
