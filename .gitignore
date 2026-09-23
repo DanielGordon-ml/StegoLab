@@ -1,0 +1,44 @@
+# Local instructions belong to the working machine.
+CLAUDE.md
+AGENT.md
+
+# Runtime data and secrets.
+.env
+.env.*
+!.env.example
+.runtime/
+.cache/
+/logs/
+/checkpoints/
+/datasets/
+/models/
+/secrets/
+*.pem
+*.key
+*.sqlite*
+*.db
+
+# Python and JavaScript build tools.
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+node_modules/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# Browser and architecture outputs are regenerated locally.
+playwright-report/
+test-results/
+docs/architecture.html
+docs/architecture.*.json
+!docs/architecture.architecture.json
+docs/architecture.*.png
+docs/architecture.*.webp
+docs/architecture.visual-check.html
+.DS_Store

@@ -1,0 +1,121 @@
+# Run StegoLab locally
+
+Sprint 1 provides four tabs and saved settings. Training, encoding, decoding,
+dataset downloads, and model installation are not available yet.
+
+## Start with Docker
+
+- Install and start Docker Desktop with Compose. Allocate enough memory for your
+  other work; the backend has a 10 GiB upper limit and the frontend has 256 MiB.
+- Run these commands from the repository root:
+
+```sh
+docker compose -f infrastructure/compose.yaml up --build --detach --wait
+docker compose -f infrastructure/compose.yaml ps
+```
+
+Open [StegoLab](http://127.0.0.1:8080). Both containers must report healthy.
+The build uses native CPU images on Apple Silicon and Linux. No GPU or cloud
+account is needed. Only the frontend publishes a port, bound to your computer.
+
+If another application uses port 8080, keep it running and choose another port:
+
+```sh
+export STEGOLAB_PORT=8081
+docker compose -f infrastructure/compose.yaml up --build --detach --wait
+```
+
+Then open [StegoLab on port 8081](http://127.0.0.1:8081). Keep this environment
+variable set for later Compose commands. The port always binds to localhost.
+
+The Config tab starts with a five-minute checkpoint frequency. Save another
+positive whole-minute value, restart the backend, then reload the page:
+
+```sh
+docker compose -f infrastructure/compose.yaml restart backend_service
+```
+
+The saved value must remain. Reset restores and saves five minutes. CPU and
+model availability are read-only in this sprint.
+
+## Storage and stopping
+
+- The `stegolab_application_data` named volume stores settings and job metadata
+  under `/data/state`, plus run logs under `/data/logs`.
+- A new volume inherits the backend's non-root ownership during first startup.
+  Do not replace it with a root-owned host directory.
+- Docker output is limited to three 10 MiB files per service. Request access
+  logs are disabled so request values do not enter proxy logs.
+- Stop containers while keeping saved data:
+
+```sh
+docker compose -f infrastructure/compose.yaml down
+```
+
+Avoid `down --volumes` for your working installation: it deletes saved settings
+and all other data in this volume. CI uses it only for disposable test data.
+
+## Development checks
+
+Install Python 3.12, uv 0.10.12, and Node.js 24. Dependency versions are locked.
+Run from the repository root:
+
+```sh
+uv sync --frozen
+npm --prefix user_interface ci
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy backend_service schemas
+uv run pytest tests/backend
+uv run python -m backend_service.export_contracts --check
+uv run python scripts/check_file_lengths.py
+npm --prefix user_interface run lint
+npm --prefix user_interface test
+npm --prefix user_interface run build
+```
+
+The file-length check includes generated source, but excludes lockfiles and
+JSON schema data. To run the browser workflow, start Compose first, then run:
+
+```sh
+cd user_interface
+npx playwright install chromium
+STEGOLAB_RESTART_BACKEND=1 npm run test:browser
+```
+
+This browser check changes and resets settings on the local test installation
+and restarts its backend. Do not run it against settings you need to preserve.
+Use `STEGOLAB_BASE_URL` to select another local test address.
+For port 8081, run with `STEGOLAB_BASE_URL=http://127.0.0.1:8081` while keeping
+`STEGOLAB_PORT=8081` set.
+
+For native application development, start the backend in one terminal and the
+frontend in another. The development server proxies API requests to port 8000.
+
+```sh
+uv run uvicorn backend_service.application:create_application --factory --host 127.0.0.1 --port 8000 --no-access-log
+```
+
+```sh
+npm --prefix user_interface run dev -- --host 127.0.0.1
+```
+
+## Troubleshooting
+
+| Problem | Check or action |
+|---|---|
+| Docker cannot connect | Start Docker Desktop, then retry `docker compose ... up`. |
+| Port 8080 is busy | Set `STEGOLAB_PORT=8081` as described above. Leave other applications running. |
+| The page shows disconnected | Check `docker compose -f infrastructure/compose.yaml ps` and the logs below. |
+| Settings cannot save | Check disk space and volume permissions. The existing saved value is preserved on a failed write. |
+| Startup reports invalid saved settings | Keep the volume for diagnosis; do not delete it or overwrite its database. Restore a known-good backup. |
+| The image build fails | Confirm network access to image and package registries, then retry the locked build. |
+
+```sh
+docker compose -f infrastructure/compose.yaml logs --tail 100 backend_service user_interface
+curl --fail http://127.0.0.1:8080/api/v1/health
+```
+
+Base images are pinned to multi-platform digests in each Dockerfile. Updating a
+digest or dependency lock requires running these checks and the restart test.
+The CI workflow runs the same CPU foundation checks; it does not train models.

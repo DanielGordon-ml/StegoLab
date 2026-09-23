@@ -1,0 +1,65 @@
+name: Foundation checks
+
+on:
+  pull_request:
+  push:
+    branches: [main, "codex/**"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: foundation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  foundation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+        with:
+          version: "0.10.12"
+          python-version: "3.12"
+          enable-cache: true
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: user_interface/package-lock.json
+      - name: Install locked dependencies
+        run: |
+          uv sync --frozen
+          npm --prefix user_interface ci
+      - name: Check Python source and contracts
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+          uv run mypy backend_service schemas
+          uv run pytest tests/backend
+          uv run python -m backend_service.export_contracts --check
+          uv run python scripts/check_file_lengths.py
+      - name: Check and build the interface
+        run: |
+          npm --prefix user_interface run lint
+          npm --prefix user_interface test
+          npm --prefix user_interface run build
+      - name: Build and start CPU containers
+        run: docker compose -f infrastructure/compose.yaml up --build --detach --wait --wait-timeout 120
+      - name: Install the test browser
+        working-directory: user_interface
+        run: npx playwright install --with-deps chromium
+      - name: Check browser settings and restart recovery
+        env:
+          STEGOLAB_BASE_URL: http://127.0.0.1:8080
+          STEGOLAB_RESTART_BACKEND: "1"
+        run: npm --prefix user_interface run test:browser
+      - name: Show container diagnostics on failure
+        if: failure()
+        run: |
+          docker compose -f infrastructure/compose.yaml ps --all
+          docker compose -f infrastructure/compose.yaml logs --no-color --tail 100
+      - name: Stop test containers
+        if: always()
+        run: docker compose -f infrastructure/compose.yaml down --volumes
