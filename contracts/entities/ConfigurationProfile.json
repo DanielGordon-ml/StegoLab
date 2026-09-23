@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Store the checkpoint frequency as a whole number of minutes in seconds.",
+  "properties": {
+    "checkpoint_interval_seconds": {
+      "default": 300,
+      "exclusiveMinimum": 0,
+      "multipleOf": 60,
+      "title": "Checkpoint Interval Seconds",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "checkpoint_interval_seconds"
+  ],
+  "title": "ConfigurationProfile",
+  "type": "object"
+}

@@ -1,0 +1,1 @@
+"""StegoLab local application services."""

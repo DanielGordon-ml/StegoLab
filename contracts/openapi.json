@@ -1,0 +1,960 @@
+{
+  "components": {
+    "schemas": {
+      "ApplicationError": {
+        "additionalProperties": false,
+        "description": "Explain a failure and provide an opaque reference for local logs.",
+        "properties": {
+          "code": {
+            "minLength": 1,
+            "title": "Code",
+            "type": "string"
+          },
+          "diagnostic_reference": {
+            "pattern": "^[a-f0-9]{32}$",
+            "title": "Diagnostic Reference",
+            "type": "string"
+          },
+          "message": {
+            "minLength": 1,
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "diagnostic_reference"
+        ],
+        "title": "ApplicationError",
+        "type": "object"
+      },
+      "Capabilities": {
+        "additionalProperties": false,
+        "description": "Describe the CPU-only release without advertising model support.",
+        "properties": {
+          "application_version": {
+            "const": "0.1.0",
+            "default": "0.1.0",
+            "title": "Application Version",
+            "type": "string"
+          },
+          "available_devices": {
+            "default": [
+              "cpu"
+            ],
+            "items": {
+              "const": "cpu",
+              "type": "string"
+            },
+            "maxItems": 1,
+            "minItems": 1,
+            "title": "Available Devices",
+            "type": "array"
+          },
+          "available_models": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 0,
+            "title": "Available Models",
+            "type": "array"
+          },
+          "available_profiles": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 0,
+            "title": "Available Profiles",
+            "type": "array"
+          },
+          "decoding_available": {
+            "const": false,
+            "default": false,
+            "title": "Decoding Available",
+            "type": "boolean"
+          },
+          "encoding_available": {
+            "const": false,
+            "default": false,
+            "title": "Encoding Available",
+            "type": "boolean"
+          },
+          "maximum_payload_bytes": {
+            "default": 0,
+            "maximum": 0.0,
+            "minimum": 0.0,
+            "title": "Maximum Payload Bytes",
+            "type": "integer"
+          },
+          "training_available": {
+            "const": false,
+            "default": false,
+            "title": "Training Available",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "application_version",
+          "available_devices",
+          "available_models",
+          "available_profiles",
+          "encoding_available",
+          "decoding_available",
+          "training_available",
+          "maximum_payload_bytes"
+        ],
+        "title": "Capabilities",
+        "type": "object"
+      },
+      "ConfigurationProfile-Input": {
+        "additionalProperties": false,
+        "description": "Store the checkpoint frequency as a whole number of minutes in seconds.",
+        "properties": {
+          "checkpoint_interval_seconds": {
+            "default": 300,
+            "exclusiveMinimum": 0.0,
+            "multipleOf": 60.0,
+            "title": "Checkpoint Interval Seconds",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": 1,
+            "default": 1,
+            "title": "Schema Version",
+            "type": "integer"
+          }
+        },
+        "title": "ConfigurationProfile",
+        "type": "object"
+      },
+      "ConfigurationProfile-Output": {
+        "additionalProperties": false,
+        "description": "Store the checkpoint frequency as a whole number of minutes in seconds.",
+        "properties": {
+          "checkpoint_interval_seconds": {
+            "default": 300,
+            "exclusiveMinimum": 0.0,
+            "multipleOf": 60.0,
+            "title": "Checkpoint Interval Seconds",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": 1,
+            "default": 1,
+            "title": "Schema Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "schema_version",
+          "checkpoint_interval_seconds"
+        ],
+        "title": "ConfigurationProfile",
+        "type": "object"
+      },
+      "ConfigurationReset": {
+        "additionalProperties": false,
+        "description": "Identify a request to restore and save the default settings.",
+        "properties": {
+          "client_request_identifier": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+            "title": "Client Request Identifier",
+            "type": "string"
+          }
+        },
+        "required": [
+          "client_request_identifier"
+        ],
+        "title": "ConfigurationReset",
+        "type": "object"
+      },
+      "ConfigurationUpdate": {
+        "additionalProperties": false,
+        "description": "Identify a settings change so that network retries are safe.",
+        "properties": {
+          "client_request_identifier": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+            "title": "Client Request Identifier",
+            "type": "string"
+          },
+          "configuration": {
+            "$ref": "#/components/schemas/ConfigurationProfile-Input"
+          }
+        },
+        "required": [
+          "client_request_identifier",
+          "configuration"
+        ],
+        "title": "ConfigurationUpdate",
+        "type": "object"
+      },
+      "ErrorEnvelope": {
+        "additionalProperties": false,
+        "description": "Keep all application errors in one predictable response envelope.",
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ApplicationError"
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "title": "ErrorEnvelope",
+        "type": "object"
+      },
+      "HealthStatus": {
+        "additionalProperties": false,
+        "description": "Report successful application startup.",
+        "properties": {
+          "application_version": {
+            "const": "0.1.0",
+            "default": "0.1.0",
+            "title": "Application Version",
+            "type": "string"
+          },
+          "status": {
+            "const": "ready",
+            "default": "ready",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "application_version"
+        ],
+        "title": "HealthStatus",
+        "type": "object"
+      },
+      "JobList": {
+        "additionalProperties": false,
+        "description": "Return saved job snapshots in creation order.",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/JobSnapshot"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "JobList",
+        "type": "object"
+      },
+      "JobSnapshot": {
+        "additionalProperties": false,
+        "description": "Describe a saved job without executing it or exposing secret data.",
+        "properties": {
+          "available_actions": {
+            "items": {
+              "enum": [
+                "pause",
+                "resume",
+                "stop",
+                "cancel",
+                "supply_missing_inputs"
+              ],
+              "type": "string"
+            },
+            "title": "Available Actions",
+            "type": "array"
+          },
+          "configuration": {
+            "$ref": "#/components/schemas/ConfigurationProfile-Output"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "estimated_seconds_remaining": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimated Seconds Remaining"
+          },
+          "job_identifier": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Job Identifier",
+            "type": "string"
+          },
+          "phase": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Phase",
+            "type": "string"
+          },
+          "progress": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Progress"
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "running",
+              "paused",
+              "stopped",
+              "completed",
+              "cancelled",
+              "failed",
+              "interrupted",
+              "needs_input"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "job_identifier",
+          "status",
+          "phase",
+          "configuration",
+          "available_actions",
+          "created_at",
+          "updated_at",
+          "progress",
+          "estimated_seconds_remaining"
+        ],
+        "title": "JobSnapshot",
+        "type": "object"
+      },
+      "ModelList": {
+        "additionalProperties": false,
+        "description": "Return an empty installed-model list until model support is available.",
+        "properties": {
+          "items": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 0,
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "ModelList",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Local CPU foundation. Model features are not available yet.",
+    "title": "StegoLab",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/capabilities": {
+      "get": {
+        "description": "Report the features actually supported by this foundation release.",
+        "operationId": "read_capabilities",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Capabilities"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Read Capabilities"
+      }
+    },
+    "/api/v1/configuration": {
+      "get": {
+        "description": "Read persisted settings through their strict schema.",
+        "operationId": "read_configuration",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurationProfile-Output"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Read Configuration"
+      },
+      "put": {
+        "description": "Save a settings update and remember its retry result atomically.",
+        "operationId": "save_configuration",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfigurationUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurationProfile-Output"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Save Configuration"
+      }
+    },
+    "/api/v1/configuration/reset": {
+      "post": {
+        "description": "Restore and persist defaults without breaking safe network retries.",
+        "operationId": "reset_configuration",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfigurationReset"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurationProfile-Output"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Reset Configuration"
+      }
+    },
+    "/api/v1/health": {
+      "get": {
+        "description": "Report that application startup and saved-state validation succeeded.",
+        "operationId": "read_health",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthStatus"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Read Health"
+      }
+    },
+    "/api/v1/jobs": {
+      "get": {
+        "description": "Return validated saved metadata without running a worker.",
+        "operationId": "list_jobs",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "List Jobs"
+      }
+    },
+    "/api/v1/jobs/{job_identifier}": {
+      "get": {
+        "description": "Return one saved job or a safe not-found error.",
+        "operationId": "read_job",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_identifier",
+            "required": true,
+            "schema": {
+              "title": "Job Identifier",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobSnapshot"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Read Job"
+      }
+    },
+    "/api/v1/models": {
+      "get": {
+        "description": "Report no installed model packages in this release.",
+        "operationId": "list_models",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "List Models"
+      }
+    }
+  }
+}
