@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "dataset_name": "uhd_iqa",
+  "source_directory": "data/UHD-IQA-database",
+  "metadata_file": "uhd-iqa-metadata.csv",
+  "output_root": "datasets",
+  "source_kind": "uhd_iqa",
+  "policy_version": "dataset_v1",
+  "seed": 0,
+  "selection_name": null,
+  "selection": null
+}

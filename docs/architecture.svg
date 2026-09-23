@@ -215,8 +215,8 @@ text { font-family: 'JetBrains Mono', monospace; }
         <path data-edge-from="service_api" data-edge-to="model_workers" data-edge-label="Spawn + progress" data-edge-key="4" data-edge-id="future_schedule" data-composition-points="892.5,146;892.5,310" d="M 892.5 146 L 892.5 310" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)" />
         <path data-edge-from="protocol_image_core" data-edge-to="model_workers" data-edge-label="Images + payloads" data-edge-key="5" data-edge-id="future_tensor_io" data-composition-points="665,353;760,353" d="M 665 353 L 760 353" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)" />
         <path data-edge-from="model_workers" data-edge-to="independent_packages" data-edge-label="Verified export" data-edge-key="6" data-edge-id="future_packages" data-composition-points="1025,346;1120,346" d="M 1025 346 L 1120 346" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)" />
-        <path data-edge-from="dataset_inputs" data-edge-to="dataset_workers" data-edge-label="Import / download" data-edge-key="7" data-edge-id="source_import" data-composition-points="305,603;400,603" d="M 305 603 L 400 603" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)" />
-        <path data-edge-from="dataset_workers" data-edge-to="prepared_datasets" data-edge-label="Validated files" data-edge-key="8" data-edge-id="validated_dataset" data-composition-points="665,603;760,603" d="M 665 603 L 760 603" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)" />
+        <path data-edge-from="dataset_inputs" data-edge-to="dataset_workers" data-edge-label="Local read" data-edge-key="7" data-edge-id="source_import" data-composition-points="305,603;400,603" d="M 305 603 L 400 603" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)" />
+        <path data-edge-from="dataset_workers" data-edge-to="prepared_datasets" data-edge-label="Validated files" data-edge-key="8" data-edge-id="validated_dataset" data-composition-points="665,603;760,603" d="M 665 603 L 760 603" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)" />
         <path data-edge-from="prepared_datasets" data-edge-to="model_workers" data-edge-label="Training batches" data-edge-key="9" data-edge-id="dataset_batches" data-composition-points="892.5,560;892.5,396" d="M 892.5 560 L 892.5 396" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)" />
         <path data-edge-from="model_workers" data-edge-to="recovery_checkpoints" data-edge-label="Save / resume" data-edge-key="10" data-edge-id="full_checkpoint" data-composition-points="1025,360;1072.5,360;1072.5,603;1120,603" d="M 1025 360 L 1064.5 360 Q 1072.5 360 1072.5 368 L 1072.5 595 Q 1072.5 603 1080.5 603 L 1120 603" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)" />
 
@@ -274,8 +274,8 @@ text { font-family: 'JetBrains Mono', monospace; }
         <text data-detail="fine" x="1252.5" y="138" class="t-database" font-size="7" text-anchor="middle">PERSISTENT VOLUME</text>
         </g>
 
-        <g id="node-headless_commands" data-node-id="headless_commands" data-node-label="Local CLI" aria-label="Focus Local CLI, Image commands · public verification, Architecture component" data-node-kind="external" data-node-sublabel="Image commands · public verification" data-node-tag="SPRINT 2 IMPLEMENTED" data-node-context="Architecture component">
-          <title>Local CLI · Image commands · public verification · Architecture component · SPRINT 2 IMPLEMENTED</title>
+        <g id="node-headless_commands" data-node-id="headless_commands" data-node-label="Local CLI" aria-label="Focus Local CLI, Image · protocol · dataset commands, Architecture component" data-node-kind="external" data-node-sublabel="Image · protocol · dataset commands" data-node-tag="SPRINTS 2–3 IMPLEMENTED" data-node-context="Architecture component">
+          <title>Local CLI · Image · protocol · dataset commands · Architecture component · SPRINTS 2–3 IMPLEMENTED</title>
           <rect x="40" y="310" width="265" height="86" rx="6" class="c-mask" />
           <rect x="40" y="310" width="265" height="86" rx="6" class="c-external" stroke-width="1.5" />
           <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(46 316) scale(0.6875)">
@@ -283,8 +283,8 @@ text { font-family: 'JetBrains Mono', monospace; }
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5" />
           </g>
           <text data-node-label="" data-detail-anchor="" x="172.5" y="351" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Local CLI</text>
-        <text data-detail="context" x="172.5" y="367" class="t-muted" font-size="9" text-anchor="middle">Image commands · public verification</text>
-        <text data-detail="fine" x="172.5" y="388" class="t-external" font-size="7" text-anchor="middle">SPRINT 2 IMPLEMENTED</text>
+        <text data-detail="context" x="172.5" y="367" class="t-muted" font-size="9" text-anchor="middle">Image · protocol · dataset commands</text>
+        <text data-detail="fine" x="172.5" y="388" class="t-external" font-size="7" text-anchor="middle">SPRINTS 2–3 IMPLEMENTED</text>
         </g>
 
         <g id="node-protocol_image_core" data-node-id="protocol_image_core" data-node-label="Protocol + image services" aria-label="Focus Protocol + image services, UTF-8 · encryption · correction · PNG, Architecture component" data-node-kind="backend" data-node-sublabel="UTF-8 · encryption · correction · PNG" data-node-tag="BACKEND PYTHON MODULES" data-node-context="Architecture component">
@@ -324,42 +324,42 @@ text { font-family: 'JetBrains Mono', monospace; }
         <text data-detail="fine" x="1252.5" y="388" class="t-external" font-size="7" text-anchor="middle">INDEPENDENT TORCH.EXPORT</text>
         </g>
 
-        <g id="node-dataset_inputs" data-node-id="dataset_inputs" data-node-label="Dataset sources · planned" aria-label="Focus Dataset sources · planned, Local folders/uploads · HF · HTTPS, Architecture component" data-node-kind="external" data-node-sublabel="Local folders/uploads · HF · HTTPS" data-node-tag="NO REMOTE CODE EXECUTION" data-node-context="Architecture component">
-          <title>Dataset sources · planned · Local folders/uploads · HF · HTTPS · Architecture component · NO REMOTE CODE EXECUTION</title>
+        <g id="node-dataset_inputs" data-node-id="dataset_inputs" data-node-label="Local UHD-IQA sources" aria-label="Focus Local UHD-IQA sources, Extracted images + official split CSV, Architecture component" data-node-kind="external" data-node-sublabel="Extracted images + official split CSV" data-node-tag="READ-ONLY SOURCE FOLDER" data-node-context="Architecture component">
+          <title>Local UHD-IQA sources · Extracted images + official split CSV · Architecture component · READ-ONLY SOURCE FOLDER</title>
           <rect x="40" y="560" width="265" height="86" rx="6" class="c-mask" />
           <rect x="40" y="560" width="265" height="86" rx="6" class="c-external" stroke-width="1.5" />
           <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(46 566) scale(0.6875)">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5" />
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5" />
           </g>
-          <text data-node-label="" data-detail-anchor="" x="172.5" y="601" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Dataset sources · planned</text>
-        <text data-detail="context" x="172.5" y="617" class="t-muted" font-size="9" text-anchor="middle">Local folders/uploads · HF · HTTPS</text>
-        <text data-detail="fine" x="172.5" y="638" class="t-external" font-size="7" text-anchor="middle">NO REMOTE CODE EXECUTION</text>
+          <text data-node-label="" data-detail-anchor="" x="172.5" y="601" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Local UHD-IQA sources</text>
+        <text data-detail="context" x="172.5" y="617" class="t-muted" font-size="9" text-anchor="middle">Extracted images + official split CSV</text>
+        <text data-detail="fine" x="172.5" y="638" class="t-external" font-size="7" text-anchor="middle">READ-ONLY SOURCE FOLDER</text>
         </g>
 
-        <g id="node-dataset_workers" data-node-id="dataset_workers" data-node-label="Data workers · planned" aria-label="Focus Data workers · planned, Inspect · fetch · validate · manifest, Architecture component" data-node-kind="backend" data-node-sublabel="Inspect · fetch · validate · manifest" data-node-tag="SPAWNED BACKEND PROCESSES" data-node-context="Architecture component">
-          <title>Data workers · planned · Inspect · fetch · validate · manifest · Architecture component · SPAWNED BACKEND PROCESSES</title>
+        <g id="node-dataset_workers" data-node-id="dataset_workers" data-node-label="Local dataset services" aria-label="Focus Local dataset services, Inspect · prepare · validate · manifest, Architecture component" data-node-kind="backend" data-node-sublabel="Inspect · prepare · validate · manifest" data-node-tag="CLI NOW · WORKERS PLANNED" data-node-context="Architecture component">
+          <title>Local dataset services · Inspect · prepare · validate · manifest · Architecture component · CLI NOW · WORKERS PLANNED</title>
           <rect x="400" y="560" width="265" height="86" rx="6" class="c-mask" />
           <rect x="400" y="560" width="265" height="86" rx="6" class="c-backend" stroke-width="1.5" />
           <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(406 566) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5" />
           </g>
-          <text data-node-label="" data-detail-anchor="" x="532.5" y="601" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Data workers · planned</text>
-        <text data-detail="context" x="532.5" y="617" class="t-muted" font-size="9" text-anchor="middle">Inspect · fetch · validate · manifest</text>
-        <text data-detail="fine" x="532.5" y="638" class="t-backend" font-size="7" text-anchor="middle">SPAWNED BACKEND PROCESSES</text>
+          <text data-node-label="" data-detail-anchor="" x="532.5" y="601" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Local dataset services</text>
+        <text data-detail="context" x="532.5" y="617" class="t-muted" font-size="9" text-anchor="middle">Inspect · prepare · validate · manifest</text>
+        <text data-detail="fine" x="532.5" y="638" class="t-backend" font-size="7" text-anchor="middle">CLI NOW · WORKERS PLANNED</text>
         </g>
 
-        <g id="node-prepared_datasets" data-node-id="prepared_datasets" data-node-label="Datasets + cache · planned" aria-label="Focus Datasets + cache · planned, Pinned revisions · frozen data splits, Architecture component" data-node-kind="database" data-node-sublabel="Pinned revisions · frozen data splits" data-node-tag="PERSISTENT FILES" data-node-context="Architecture component">
-          <title>Datasets + cache · planned · Pinned revisions · frozen data splits · Architecture component · PERSISTENT FILES</title>
+        <g id="node-prepared_datasets" data-node-id="prepared_datasets" data-node-label="Prepared datasets" aria-label="Focus Prepared datasets, Frozen revisions · official data splits, Architecture component" data-node-kind="database" data-node-sublabel="Frozen revisions · official data splits" data-node-tag="OFFLINE FILES · CHECKSUMS" data-node-context="Architecture component">
+          <title>Prepared datasets · Frozen revisions · official data splits · Architecture component · OFFLINE FILES · CHECKSUMS</title>
           <rect x="760" y="560" width="265" height="86" rx="6" class="c-mask" />
           <rect x="760" y="560" width="265" height="86" rx="6" class="c-database" stroke-width="1.5" />
           <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(766 566) scale(0.6875)">
             <ellipse cx="8" cy="4" rx="5" ry="2" />
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2" />
           </g>
-          <text data-node-label="" data-detail-anchor="" x="892.5" y="601" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Datasets + cache · planned</text>
-        <text data-detail="context" x="892.5" y="617" class="t-muted" font-size="9" text-anchor="middle">Pinned revisions · frozen data splits</text>
-        <text data-detail="fine" x="892.5" y="638" class="t-database" font-size="7" text-anchor="middle">PERSISTENT FILES</text>
+          <text data-node-label="" data-detail-anchor="" x="892.5" y="601" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Prepared datasets</text>
+        <text data-detail="context" x="892.5" y="617" class="t-muted" font-size="9" text-anchor="middle">Frozen revisions · official data splits</text>
+        <text data-detail="fine" x="892.5" y="638" class="t-database" font-size="7" text-anchor="middle">OFFLINE FILES · CHECKSUMS</text>
         </g>
 
         <g id="node-recovery_checkpoints" data-node-id="recovery_checkpoints" data-node-label="Checkpoints · planned" aria-label="Focus Checkpoints · planned, Full training state · metrics · hashes, Architecture component" data-node-kind="database" data-node-sublabel="Full training state · metrics · hashes" data-node-tag="LATEST · THREE BEST · PINNED" data-node-context="Architecture component">
@@ -404,13 +404,13 @@ text { font-family: 'JetBrains Mono', monospace; }
           <rect x="1031.5" y="326" width="82" height="14" rx="3" class="c-mask" />
           <text x="1072.5" y="336" class="t-messagebus" font-size="8" text-anchor="middle">Verified export</text>
         </g>
-        <g data-detail="context" data-edge-from="dataset_inputs" data-edge-to="dataset_workers" data-edge-label="Import / download" data-edge-key="7" data-edge-id="source_import">
-          <rect x="306.7" y="583" width="91.6" height="14" rx="3" class="c-mask" />
-          <text x="352.5" y="593" class="t-messagebus" font-size="8" text-anchor="middle">Import / download</text>
+        <g data-detail="context" data-edge-from="dataset_inputs" data-edge-to="dataset_workers" data-edge-label="Local read" data-edge-key="7" data-edge-id="source_import">
+          <rect x="323.5" y="583" width="58" height="14" rx="3" class="c-mask" />
+          <text x="352.5" y="593" class="t-backend" font-size="8" text-anchor="middle">Local read</text>
         </g>
         <g data-detail="context" data-edge-from="dataset_workers" data-edge-to="prepared_datasets" data-edge-label="Validated files" data-edge-key="8" data-edge-id="validated_dataset">
           <rect x="671.5" y="583" width="82" height="14" rx="3" class="c-mask" />
-          <text x="712.5" y="593" class="t-messagebus" font-size="8" text-anchor="middle">Validated files</text>
+          <text x="712.5" y="593" class="t-backend" font-size="8" text-anchor="middle">Validated files</text>
         </g>
         <g data-detail="context" data-edge-from="prepared_datasets" data-edge-to="model_workers" data-edge-label="Training batches" data-edge-key="9" data-edge-id="dataset_batches">
           <rect x="849.1" y="540" width="86.8" height="14" rx="3" class="c-mask" />

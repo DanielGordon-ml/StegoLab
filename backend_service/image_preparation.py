@@ -53,6 +53,8 @@ def _decode_pixels(
     """Prepare validated source pixels or keep recovery pixels unchanged."""
     if recover and header.format != "PNG":
         raise image_failure()
+    if header.mode == "L":
+        raise image_failure()
     original = _open_pixels(data, header)
     orientation = original.getexif().get(274, 1)
     if type(orientation) is not int or not 1 <= orientation <= 8:

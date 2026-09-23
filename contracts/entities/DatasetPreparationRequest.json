@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Freeze a local source, policy, and optional explicitly named subset.",
+  "properties": {
+    "dataset_name": {
+      "default": "uhd_iqa",
+      "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+      "title": "Dataset Name",
+      "type": "string"
+    },
+    "metadata_file": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "uhd-iqa-metadata.csv",
+      "title": "Metadata File"
+    },
+    "output_root": {
+      "default": "datasets",
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Output Root",
+      "type": "string"
+    },
+    "policy_version": {
+      "const": "dataset_v1",
+      "default": "dataset_v1",
+      "title": "Policy Version",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "seed": {
+      "default": 0,
+      "maximum": 9223372036854775807,
+      "minimum": 0,
+      "title": "Seed",
+      "type": "integer"
+    },
+    "selection": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 200000,
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Selection"
+    },
+    "selection_name": {
+      "anyOf": [
+        {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Selection Name"
+    },
+    "source_directory": {
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Source Directory",
+      "type": "string"
+    },
+    "source_kind": {
+      "default": "uhd_iqa",
+      "enum": [
+        "uhd_iqa",
+        "local"
+      ],
+      "title": "Source Kind",
+      "type": "string"
+    },
+    "source_url": {
+      "default": "https://database.mmsp-kn.de/uhd-iqa-benchmark-database.html",
+      "maxLength": 4096,
+      "title": "Source Url",
+      "type": "string"
+    },
+    "terms_reference": {
+      "default": "https://database.mmsp-kn.de/uhd-iqa-benchmark-database.html",
+      "maxLength": 4096,
+      "title": "Terms Reference",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "dataset_name",
+    "source_directory",
+    "metadata_file",
+    "output_root",
+    "source_kind",
+    "policy_version",
+    "seed",
+    "selection_name",
+    "selection",
+    "source_url",
+    "terms_reference"
+  ],
+  "title": "DatasetPreparationRequest",
+  "type": "object"
+}

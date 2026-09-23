@@ -81,6 +81,10 @@ The review used web search, arXiv full text, official repositories, and Hugging 
 
 ## 5. Dataset pipeline
 
+- [Sprint 3](sprint_03.md) implements local UHD-IQA preparation from repository
+  `data/`, including grayscale support, source metadata/splits, immutable manifests,
+  safe storage, and offline integrity checks. Dataset image bounds are separate from
+  production limits; this development corpus does not replace the COCO benchmark.
 - Support backend-mounted image folders, browser uploads, Hugging Face image-column/ImageFolder/Parquet sources, HTTPS ZIP archives, and direct image/text assets.
 - Inspect repository metadata, resolve a commit revision, choose configuration/split/image column, estimate download and extraction sizes, and validate the prepared result. Do not execute remote dataset scripts.
 - Use the documented Hub download APIs with revision pins, file filters, local cache, and offline checks. Preserve completed shared cache assets. [Hub downloads](https://huggingface.co/docs/huggingface_hub/guides/download), [dataset loading](https://huggingface.co/docs/datasets/en/loading)

@@ -8,21 +8,25 @@ GitHub displays the [static SVG](architecture.svg); it does not run this HTML vi
 
 ## Scope and evidence
 
-- Solid paths show implemented settings, protocol, and image-tool behavior.
+- Solid paths show implemented settings, protocol, image tools, and local
+  UHD-IQA dataset preparation with frozen manifests.
   Dashed paths and components labelled **planned** show the target system.
-- The target keeps two application containers. Protocol/image modules and future
-  model/data worker processes belong to the backend, not separate containers.
+- The target keeps two application containers. Protocol/image/dataset modules
+  and future model/data worker processes belong to the backend. Local dataset
+  commands run synchronously; they do not start background workers.
 - The API will own scheduling and job transitions for both kinds of worker.
   The map shows the main paths; detailed control, return, event, and file flows
   are described in `Architecture.md` rather than repeated as crossing arrows.
-- Dataset sources, validated data/cache, training/evaluation, checkpoints, and
-  independent encoder/decoder packages are included. Models, workers, downloads,
-  SSE, CUDA, and EC2 operations are still planned.
+- The local dataset path preserves official source splits, verifies prepared
+  copies and checksums, and works offline after the source is unmounted.
+  Remote downloads, shared cache, browser uploads, models, workers, training,
+  checkpoints, independent model packages, SSE, CUDA, and EC2 remain planned.
 - Public capacity remains zero. Protocol tests and PNG pixel preservation do
   not establish actual image hiding, model quality, or detection resistance.
-- Evidence: application/routes/storage, frontend components/contracts, protocol
-  and image modules, schemas, Docker/Compose, CI/tests, and all nine local plan
-  documents. Application baseline: `6fe874010f0c03d71b55f236c9e22723c01f8a9b`.
+- Evidence: application/routes/storage, frontend components/contracts, protocol,
+  image and dataset modules, schemas, Docker/Compose, CI/tests, and delivery
+  plans. This map includes the Sprint 3 working-tree implementation on the
+  `abcef42` application baseline; it does not imply a new committed revision.
   `Architecture.md` records how local draft notes differ from the approved plans.
 
 The source is [architecture.architecture.json](architecture.architecture.json).
@@ -56,7 +60,7 @@ and uses a white background in either GitHub theme. It is a derived documentatio
 asset, not an additional Archify validation receipt. Review the extractor if the
 Archify template changes; do not hand-edit generated SVG geometry.
 
-## Delivery record — full-system overview, 2026-09-23
+## Delivery record — Sprint 3 local dataset path, 2026-09-23
 
 | Evidence | Result |
 |---|---|
@@ -67,12 +71,12 @@ Archify template changes; do not hand-edit generated SVG geometry.
 | README image review | Passed: SVG rasterized with Sharp and inspected for labels, arrows, tags, and clipping |
 | Browser/visual correction rounds | 0; the delivered composition passed its first browser review |
 
-- Specification: 6,653 bytes; SHA-256
-  `892df6b8b84ab9867169351838155efc4d169748450c5d0ff6775bb1e8d92368`.
-- Checked HTML: 818,705 bytes; SHA-256
-  `0ff70cacd086612624eb4fb47fc4f352df26713e54b18a25d6a1af2ecf88f973`.
+- Specification: 6,647 bytes; SHA-256
+  `a1a4787da741a228fee8a6a87e30df88955ee3470280fc4a250d41f7a4121e52`.
+- Checked HTML: 818,683 bytes; SHA-256
+  `fe434f644bdadd40cd922e002716afa34e574cdf82504ac98bed80d8dceeb3ac`.
 - Static SVG: SHA-256
-  `256814406024d33850de769b4235f2e4dc333f59cbd7b161e13deb8d15472f8b`.
+  `36f698877fecdc48b7c3c8724e52209036c86bbd200c871d46878e95a2130975`.
 - Local deterministic receipt: `architecture.delivery.json`.
 - Automated browser receipt: `architecture.visual-check.json`; its
   `visualReview: pending` field intentionally makes no perceptual claim.
@@ -80,10 +84,10 @@ Archify template changes; do not hand-edit generated SVG geometry.
 - Browser engine: existing Playwright Chromium headless shell through
   `ARCHIFY_CHROME`. The packaged `visual-check` completed all measurements and
   captures before image review.
-- Before delivery, the validator diagnosed a job-edge label overlap and a
-  desktop-width issue. A label position and viewBox width correction resolved
-  them without removing meaning or shrinking typography.
+- The existing 12-node geometry and routing were preserved. Dataset labels and
+  implemented path styles changed; validation and browser review passed on the
+  first candidate without geometry corrections.
 
-This record replaces the narrower Sprint 2 map record. Historical sprint
+This record replaces the earlier full-system map record. Historical sprint
 acceptance remains in Git history. Artifact validation, browser evidence, and
 visual review are separate checks; none proves model or training quality.

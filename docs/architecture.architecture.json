@@ -75,8 +75,8 @@
       "id": "headless_commands",
       "type": "external",
       "label": "Local CLI",
-      "sublabel": "Image commands \u00b7 public verification",
-      "tag": "SPRINT 2 IMPLEMENTED",
+      "sublabel": "Image \u00b7 protocol \u00b7 dataset commands",
+      "tag": "SPRINTS 2\u20133 IMPLEMENTED",
       "pos": [
         40,
         310
@@ -134,9 +134,9 @@
     {
       "id": "dataset_inputs",
       "type": "external",
-      "label": "Dataset sources \u00b7 planned",
-      "sublabel": "Local folders/uploads \u00b7 HF \u00b7 HTTPS",
-      "tag": "NO REMOTE CODE EXECUTION",
+      "label": "Local UHD-IQA sources",
+      "sublabel": "Extracted images + official split CSV",
+      "tag": "READ-ONLY SOURCE FOLDER",
       "pos": [
         40,
         560
@@ -149,9 +149,9 @@
     {
       "id": "dataset_workers",
       "type": "backend",
-      "label": "Data workers \u00b7 planned",
-      "sublabel": "Inspect \u00b7 fetch \u00b7 validate \u00b7 manifest",
-      "tag": "SPAWNED BACKEND PROCESSES",
+      "label": "Local dataset services",
+      "sublabel": "Inspect \u00b7 prepare \u00b7 validate \u00b7 manifest",
+      "tag": "CLI NOW \u00b7 WORKERS PLANNED",
       "pos": [
         400,
         560
@@ -164,9 +164,9 @@
     {
       "id": "prepared_datasets",
       "type": "database",
-      "label": "Datasets + cache \u00b7 planned",
-      "sublabel": "Pinned revisions \u00b7 frozen data splits",
-      "tag": "PERSISTENT FILES",
+      "label": "Prepared datasets",
+      "sublabel": "Frozen revisions \u00b7 official data splits",
+      "tag": "OFFLINE FILES \u00b7 CHECKSUMS",
       "pos": [
         760,
         560
@@ -250,15 +250,15 @@
       "id": "source_import",
       "from": "dataset_inputs",
       "to": "dataset_workers",
-      "label": "Import / download",
-      "variant": "dashed"
+      "label": "Local read",
+      "variant": "emphasis"
     },
     {
       "id": "validated_dataset",
       "from": "dataset_workers",
       "to": "prepared_datasets",
       "label": "Validated files",
-      "variant": "dashed"
+      "variant": "emphasis"
     },
     {
       "id": "dataset_batches",
@@ -278,9 +278,9 @@
   "cards": [
     {
       "dot": "cyan",
-      "title": "Implemented \u00b7 Sprints 1\u20132",
+      "title": "Implemented \u00b7 Sprints 1\u20133",
       "items": [
-        "Solid paths: settings, public protocol tests, image tools",
+        "Solid paths: settings, protocol, images, local datasets",
         "Public capacity: 0 bytes; no trained models"
       ]
     },
@@ -288,7 +288,7 @@
       "dot": "emerald",
       "title": "Target \u00b7 two containers",
       "items": [
-        "Dashed paths: planned; workers stay inside the backend",
+        "Planned: downloads/cache, workers, models, live events",
         "Training-only critic / channel simulator stay out of exports"
       ]
     },

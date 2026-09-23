@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Report safe counts while distinguishing inspection from verification.",
+  "properties": {
+    "accepted_count": {
+      "title": "Accepted Count",
+      "type": "integer"
+    },
+    "completion": {
+      "const": "complete",
+      "default": "complete",
+      "title": "Completion",
+      "type": "string"
+    },
+    "dataset_name": {
+      "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+      "title": "Dataset Name",
+      "type": "string"
+    },
+    "discovered_images": {
+      "title": "Discovered Images",
+      "type": "integer"
+    },
+    "duplicate_count": {
+      "title": "Duplicate Count",
+      "type": "integer"
+    },
+    "eligible_by_split": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Eligible By Split",
+      "type": "object"
+    },
+    "eligible_count": {
+      "title": "Eligible Count",
+      "type": "integer"
+    },
+    "expected_images": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Expected Images"
+    },
+    "full_coverage": {
+      "title": "Full Coverage",
+      "type": "boolean"
+    },
+    "ineligible_count": {
+      "title": "Ineligible Count",
+      "type": "integer"
+    },
+    "integrity": {
+      "enum": [
+        "not_checked",
+        "verified"
+      ],
+      "title": "Integrity",
+      "type": "string"
+    },
+    "pilot_ready": {
+      "const": false,
+      "default": false,
+      "title": "Pilot Ready",
+      "type": "boolean"
+    },
+    "prepared_bytes": {
+      "title": "Prepared Bytes",
+      "type": "integer"
+    },
+    "rejection_count": {
+      "title": "Rejection Count",
+      "type": "integer"
+    },
+    "rejection_reasons": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Rejection Reasons",
+      "type": "object"
+    },
+    "reused": {
+      "default": false,
+      "title": "Reused",
+      "type": "boolean"
+    },
+    "revision": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Revision",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "selected_images": {
+      "title": "Selected Images",
+      "type": "integer"
+    },
+    "source_bytes": {
+      "title": "Source Bytes",
+      "type": "integer"
+    },
+    "split_counts": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Split Counts",
+      "type": "object"
+    },
+    "unique_eligible_by_split": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Unique Eligible By Split",
+      "type": "object"
+    },
+    "unique_eligible_count": {
+      "title": "Unique Eligible Count",
+      "type": "integer"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "dataset_name",
+    "revision",
+    "completion",
+    "integrity",
+    "reused",
+    "full_coverage",
+    "expected_images",
+    "discovered_images",
+    "selected_images",
+    "accepted_count",
+    "rejection_count",
+    "eligible_count",
+    "ineligible_count",
+    "duplicate_count",
+    "unique_eligible_count",
+    "split_counts",
+    "eligible_by_split",
+    "unique_eligible_by_split",
+    "rejection_reasons",
+    "source_bytes",
+    "prepared_bytes",
+    "pilot_ready",
+    "warnings"
+  ],
+  "title": "DatasetSummary",
+  "type": "object"
+}

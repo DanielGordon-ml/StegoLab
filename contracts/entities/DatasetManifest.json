@@ -1,0 +1,289 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Freeze all decisions required for source-independent dataset reuse.",
+  "properties": {
+    "accepted_count": {
+      "maximum": 200000,
+      "minimum": 1,
+      "title": "Accepted Count",
+      "type": "integer"
+    },
+    "dataset_name": {
+      "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+      "title": "Dataset Name",
+      "type": "string"
+    },
+    "discovered_by_split": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Discovered By Split",
+      "type": "object"
+    },
+    "discovered_images": {
+      "maximum": 200000,
+      "minimum": 0,
+      "title": "Discovered Images",
+      "type": "integer"
+    },
+    "duplicate_count": {
+      "maximum": 200000,
+      "minimum": 0,
+      "title": "Duplicate Count",
+      "type": "integer"
+    },
+    "eligible_by_split": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Eligible By Split",
+      "type": "object"
+    },
+    "eligible_count": {
+      "maximum": 200000,
+      "minimum": 1,
+      "title": "Eligible Count",
+      "type": "integer"
+    },
+    "expected_by_split": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Expected By Split",
+      "type": "object"
+    },
+    "expected_images": {
+      "anyOf": [
+        {
+          "maximum": 200000,
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Expected Images"
+    },
+    "full_coverage": {
+      "title": "Full Coverage",
+      "type": "boolean"
+    },
+    "ineligible_count": {
+      "maximum": 200000,
+      "minimum": 0,
+      "title": "Ineligible Count",
+      "type": "integer"
+    },
+    "metadata_checksum": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Metadata Checksum"
+    },
+    "pilot_ready": {
+      "const": false,
+      "default": false,
+      "title": "Pilot Ready",
+      "type": "boolean"
+    },
+    "policy_version": {
+      "const": "dataset_v1",
+      "default": "dataset_v1",
+      "title": "Policy Version",
+      "type": "string"
+    },
+    "prepared_bytes": {
+      "maximum": 107374182400,
+      "minimum": 1,
+      "title": "Prepared Bytes",
+      "type": "integer"
+    },
+    "records_checksum": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Records Checksum",
+      "type": "string"
+    },
+    "rejection_count": {
+      "maximum": 200000,
+      "minimum": 0,
+      "title": "Rejection Count",
+      "type": "integer"
+    },
+    "rejection_reasons": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Rejection Reasons",
+      "type": "object"
+    },
+    "rejections_checksum": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Rejections Checksum",
+      "type": "string"
+    },
+    "revision": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Revision",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "seed": {
+      "maximum": 9223372036854775807,
+      "minimum": 0,
+      "title": "Seed",
+      "type": "integer"
+    },
+    "selected_by_split": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Selected By Split",
+      "type": "object"
+    },
+    "selected_images": {
+      "maximum": 200000,
+      "minimum": 0,
+      "title": "Selected Images",
+      "type": "integer"
+    },
+    "selection": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Selection"
+    },
+    "selection_name": {
+      "anyOf": [
+        {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Selection Name"
+    },
+    "source_bytes": {
+      "maximum": 107374182400,
+      "minimum": 1,
+      "title": "Source Bytes",
+      "type": "integer"
+    },
+    "source_kind": {
+      "enum": [
+        "uhd_iqa",
+        "local"
+      ],
+      "title": "Source Kind",
+      "type": "string"
+    },
+    "source_provenance": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Source Provenance",
+      "type": "object"
+    },
+    "source_url": {
+      "title": "Source Url",
+      "type": "string"
+    },
+    "split_counts": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Split Counts",
+      "type": "object"
+    },
+    "split_mapping": {
+      "additionalProperties": {
+        "enum": [
+          "train",
+          "tuning",
+          "held_out"
+        ],
+        "type": "string"
+      },
+      "title": "Split Mapping",
+      "type": "object"
+    },
+    "terms_reference": {
+      "title": "Terms Reference",
+      "type": "string"
+    },
+    "unique_eligible_by_split": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Unique Eligible By Split",
+      "type": "object"
+    },
+    "unique_eligible_count": {
+      "maximum": 200000,
+      "minimum": 1,
+      "title": "Unique Eligible Count",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "policy_version",
+    "revision",
+    "dataset_name",
+    "source_kind",
+    "source_url",
+    "terms_reference",
+    "source_provenance",
+    "metadata_checksum",
+    "split_mapping",
+    "seed",
+    "selection_name",
+    "selection",
+    "expected_images",
+    "discovered_images",
+    "selected_images",
+    "expected_by_split",
+    "discovered_by_split",
+    "selected_by_split",
+    "full_coverage",
+    "records_checksum",
+    "rejections_checksum",
+    "accepted_count",
+    "rejection_count",
+    "eligible_count",
+    "ineligible_count",
+    "duplicate_count",
+    "unique_eligible_count",
+    "split_counts",
+    "eligible_by_split",
+    "unique_eligible_by_split",
+    "rejection_reasons",
+    "source_bytes",
+    "prepared_bytes",
+    "pilot_ready"
+  ],
+  "title": "DatasetManifest",
+  "type": "object"
+}

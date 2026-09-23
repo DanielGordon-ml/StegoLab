@@ -15,7 +15,6 @@ from schemas.base import StrictRecord
 from schemas.configuration import ConfigurationProfile
 
 PLANNED_COMMANDS = (
-    "prepare_dataset",
     "train",
     "evaluate",
     "encode",
@@ -55,6 +54,16 @@ def build_parser() -> argparse.ArgumentParser:
     commands.add_parser(
         "verify_protocol", help="Run bundled public checks; accepts no secret inputs."
     )
+    for name, help_text in (
+        (
+            "prepare_dataset",
+            "Prepare a local dataset from request JSON (or - for stdin).",
+        ),
+        ("inspect_dataset", "Read a dataset summary without checking image integrity."),
+        ("validate_dataset", "Verify an offline dataset revision and its images."),
+    ):
+        dataset = commands.add_parser(name, help=help_text)
+        dataset.add_argument("dataset_input")
     for command in PLANNED_COMMANDS:
         commands.add_parser(command, help="Planned; unavailable in this release.")
     return parser
@@ -82,6 +91,13 @@ def main(arguments: list[str] | None = None) -> int:
     """Print safe metadata on success and fixed errors on expected failures."""
     parser = build_parser()
     selected = parser.parse_args(arguments)
+    from backend_service.dataset_commands import (
+        DATASET_COMMANDS,
+        execute_dataset_command,
+    )
+
+    if selected.command in DATASET_COMMANDS:
+        return execute_dataset_command(selected.command, selected.dataset_input)
     if selected.command in PLANNED_COMMANDS:
         print(
             "This command is planned and is not available in this release.",

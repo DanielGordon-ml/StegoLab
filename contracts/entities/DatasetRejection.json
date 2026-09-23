@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Record a rejected candidate without private exception text.",
+  "properties": {
+    "reason": {
+      "pattern": "^[a-z][a-z0-9_]{0,63}$",
+      "title": "Reason",
+      "type": "string"
+    },
+    "source_bytes": {
+      "default": 0,
+      "maximum": 107374182400,
+      "minimum": 0,
+      "title": "Source Bytes",
+      "type": "integer"
+    },
+    "source_checksum": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Checksum"
+    },
+    "source_path": {
+      "title": "Source Path",
+      "type": "string"
+    },
+    "upstream_split": {
+      "anyOf": [
+        {
+          "enum": [
+            "training",
+            "validation",
+            "test"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Upstream Split"
+    }
+  },
+  "required": [
+    "source_path",
+    "source_checksum",
+    "upstream_split",
+    "reason",
+    "source_bytes"
+  ],
+  "title": "DatasetRejection",
+  "type": "object"
+}
