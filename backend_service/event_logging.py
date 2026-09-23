@@ -2,6 +2,7 @@
 
 import json
 import logging
+import sys
 from datetime import UTC, datetime
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
@@ -22,6 +23,17 @@ class EventFormatter(logging.Formatter):
         )
 
 
+class SafeRotatingFileHandler(RotatingFileHandler):
+    """Report log storage failures without printing a private exception chain."""
+
+    def handleError(self, record: logging.LogRecord) -> None:
+        """Replace the standard traceback fallback with fixed safe metadata."""
+        try:
+            print(json.dumps({"event": "event_log_write_failed"}), file=sys.stderr)
+        except OSError:
+            pass
+
+
 def create_run_logger(log_directory: Path) -> logging.Logger:
     """Open a bounded log file in a unique date-labelled run directory."""
     run_identifier = datetime.now(UTC).strftime("%Y-%m-%d_%H-%M-%S_") + uuid4().hex
@@ -30,7 +42,7 @@ def create_run_logger(log_directory: Path) -> logging.Logger:
     logger = logging.getLogger(f"stegolab.{run_identifier}")
     logger.setLevel(logging.INFO)
     logger.propagate = False
-    handler = RotatingFileHandler(
+    handler = SafeRotatingFileHandler(
         directory / "events.jsonl", maxBytes=1_000_000, backupCount=2, encoding="utf-8"
     )
     handler.setFormatter(EventFormatter())

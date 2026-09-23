@@ -86,11 +86,12 @@ class SafeFailureBoundary:
         try:
             await self.application(scope, receive, tracked_send)
         except Exception as failure:
-            response = await handle_failure(Request(scope), failure)
+            caught_failure = failure
         else:
             return
         # Leave the exception context before sending to avoid chaining a private
         # failure into a possible connection error. Started responses are left
         # for the server to close; sending another body could itself fail.
+        response = await handle_failure(Request(scope), caught_failure)
         if not response_started:
             await response(scope, receive, send)
