@@ -2,242 +2,302 @@
   "schema_version": 1,
   "diagram_type": "architecture",
   "meta": {
-    "title": "StegoLab · Message and image protocol",
+    "title": "StegoLab \u00b7 Full system architecture",
     "quality_profile": "showcase",
     "locale": "en",
-    "views": [
-      {
-        "id": "settings",
-        "label": "Save settings",
-        "focus": [
-          "browser",
-          "frontend",
-          "backend",
-          "storage"
-        ],
-        "note": "Validated settings survive a backend restart."
-      },
-      {
-        "id": "protocol",
-        "label": "Sprint 2 tools",
-        "focus": [
-          "commands",
-          "services"
-        ],
-        "note": "Local commands call reusable Python services. No model or HTTP route is added."
-      },
-      {
-        "id": "future",
-        "label": "Later sprints",
-        "focus": [
-          "backend",
-          "workers",
-          "packages"
-        ],
-        "note": "Dashed connections are planned. Training and model inference remain unavailable."
-      }
-    ],
     "viewBox": [
-      1150,
-      520
+      1395,
+      715
     ]
   },
   "components": [
     {
-      "id": "browser",
+      "id": "workspace_browser",
       "type": "external",
-      "label": "Browser",
-      "sublabel": "Four accessible tabs",
+      "label": "Browser workspace",
+      "sublabel": "Encode \u00b7 Decode \u00b7 Train \u00b7 Config",
+      "tag": "CONFIG WORKS TODAY",
       "pos": [
-        45,
-        40
+        40,
+        60
       ],
       "size": [
-        175,
-        76
+        265,
+        86
       ]
     },
     {
-      "id": "frontend",
+      "id": "web_container",
       "type": "frontend",
       "label": "Frontend container",
-      "sublabel": "React + reverse proxy",
-      "tag": "LOCALHOST :8080",
+      "sublabel": "React \u00b7 TypeScript \u00b7 nginx",
+      "tag": "LOCALHOST :8080 / :8081",
       "pos": [
-        395,
-        40
+        400,
+        60
       ],
       "size": [
-        200,
-        76
+        265,
+        86
       ]
     },
     {
-      "id": "backend",
+      "id": "service_api",
       "type": "backend",
-      "label": "Backend container",
-      "sublabel": "FastAPI · CPU only",
+      "label": "Backend API",
+      "sublabel": "FastAPI \u00b7 strict contracts",
       "tag": "INTERNAL :8000",
       "pos": [
-        775,
-        40
+        760,
+        60
       ],
       "size": [
-        200,
-        76
+        265,
+        86
       ]
     },
     {
-      "id": "storage",
+      "id": "durable_metadata",
       "type": "database",
-      "label": "Persistent volume",
-      "sublabel": "SQLite settings + job records",
-      "tag": "SURVIVES RESTART",
+      "label": "SQLite + logs",
+      "sublabel": "Settings \u00b7 job records \u00b7 retry results",
+      "tag": "PERSISTENT VOLUME",
       "pos": [
-        775,
-        190
+        1120,
+        60
       ],
       "size": [
-        240,
-        76
+        265,
+        86
       ]
     },
     {
-      "id": "workers",
-      "type": "backend",
-      "label": "Workers · planned",
-      "sublabel": "Training + data preparation",
-      "tag": "LATER SPRINTS",
-      "pos": [
-        775,
-        340
-      ],
-      "size": [
-        230,
-        76
-      ]
-    },
-    {
-      "id": "packages",
+      "id": "headless_commands",
       "type": "external",
-      "label": "Models · planned",
-      "sublabel": "Independent encoder + decoder",
-      "tag": "LATER SPRINTS",
+      "label": "Local CLI",
+      "sublabel": "Image commands \u00b7 public verification",
+      "tag": "SPRINT 2 IMPLEMENTED",
       "pos": [
-        395,
-        340
+        40,
+        310
       ],
       "size": [
-        245,
-        76
+        265,
+        86
       ]
     },
     {
-      "id": "commands",
-      "type": "external",
-      "label": "Local commands",
-      "sublabel": "Public checks + image files",
-      "tag": "SPRINT 2",
-      "pos": [
-        45,
-        190
-      ],
-      "size": [
-        230,
-        76
-      ]
-    },
-    {
-      "id": "services",
+      "id": "protocol_image_core",
       "type": "backend",
-      "label": "Message + image services",
-      "sublabel": "Encryption · correction · pixels",
-      "tag": "BACKEND PYTHON PACKAGE",
+      "label": "Protocol + image services",
+      "sublabel": "UTF-8 \u00b7 encryption \u00b7 correction \u00b7 PNG",
+      "tag": "BACKEND PYTHON MODULES",
       "pos": [
-        440,
-        190
+        400,
+        310
       ],
       "size": [
-        260,
-        76
+        265,
+        86
+      ]
+    },
+    {
+      "id": "model_workers",
+      "type": "backend",
+      "label": "Model workers \u00b7 planned",
+      "sublabel": "Encode / decode \u00b7 train / evaluate",
+      "tag": "SPAWN \u00b7 ONE GPU SLOT",
+      "pos": [
+        760,
+        310
+      ],
+      "size": [
+        265,
+        86
+      ]
+    },
+    {
+      "id": "independent_packages",
+      "type": "external",
+      "label": "Model packages \u00b7 planned",
+      "sublabel": "Separate encoder + decoder runtimes",
+      "tag": "INDEPENDENT TORCH.EXPORT",
+      "pos": [
+        1120,
+        310
+      ],
+      "size": [
+        265,
+        86
+      ]
+    },
+    {
+      "id": "dataset_inputs",
+      "type": "external",
+      "label": "Dataset sources \u00b7 planned",
+      "sublabel": "Local folders/uploads \u00b7 HF \u00b7 HTTPS",
+      "tag": "NO REMOTE CODE EXECUTION",
+      "pos": [
+        40,
+        560
+      ],
+      "size": [
+        265,
+        86
+      ]
+    },
+    {
+      "id": "dataset_workers",
+      "type": "backend",
+      "label": "Data workers \u00b7 planned",
+      "sublabel": "Inspect \u00b7 fetch \u00b7 validate \u00b7 manifest",
+      "tag": "SPAWNED BACKEND PROCESSES",
+      "pos": [
+        400,
+        560
+      ],
+      "size": [
+        265,
+        86
+      ]
+    },
+    {
+      "id": "prepared_datasets",
+      "type": "database",
+      "label": "Datasets + cache \u00b7 planned",
+      "sublabel": "Pinned revisions \u00b7 frozen data splits",
+      "tag": "PERSISTENT FILES",
+      "pos": [
+        760,
+        560
+      ],
+      "size": [
+        265,
+        86
+      ]
+    },
+    {
+      "id": "recovery_checkpoints",
+      "type": "database",
+      "label": "Checkpoints \u00b7 planned",
+      "sublabel": "Full training state \u00b7 metrics \u00b7 hashes",
+      "tag": "LATEST \u00b7 THREE BEST \u00b7 PINNED",
+      "pos": [
+        1120,
+        560
+      ],
+      "size": [
+        265,
+        86
       ]
     }
   ],
   "connections": [
     {
-      "id": "local-access",
-      "from": "browser",
-      "to": "frontend",
+      "id": "browser_web",
+      "from": "workspace_browser",
+      "to": "web_container",
       "label": "Local HTTP",
       "variant": "emphasis"
     },
     {
-      "id": "backend-access",
-      "from": "frontend",
-      "to": "backend",
+      "id": "proxy_api",
+      "from": "web_container",
+      "to": "service_api",
       "label": "/api/v1",
       "variant": "emphasis"
     },
     {
-      "id": "save-settings",
-      "from": "backend",
-      "to": "storage",
-      "label": "Atomic save",
-      "variant": "emphasis",
-      "fromSide": "bottom",
-      "toSide": "top"
+      "id": "api_metadata",
+      "from": "service_api",
+      "to": "durable_metadata",
+      "label": "Atomic state",
+      "variant": "emphasis"
     },
     {
-      "id": "future-work",
-      "from": "backend",
-      "to": "workers",
-      "label": "Planned jobs",
+      "id": "commands_services",
+      "from": "headless_commands",
+      "to": "protocol_image_core",
+      "label": "Direct Python",
+      "variant": "emphasis"
+    },
+    {
+      "id": "future_schedule",
+      "from": "service_api",
+      "to": "model_workers",
+      "label": "Spawn + progress",
       "variant": "dashed",
-      "fromSide": "right",
-      "toSide": "right",
       "labelAt": [
-        1029,
-        285
+        893,
+        225
       ]
     },
     {
-      "id": "future-exports",
-      "from": "workers",
-      "to": "packages",
-      "label": "Planned export",
+      "id": "future_tensor_io",
+      "from": "protocol_image_core",
+      "to": "model_workers",
+      "label": "Images + payloads",
       "variant": "dashed"
     },
     {
-      "id": "local-services",
-      "from": "commands",
-      "to": "services",
-      "label": "Direct Python calls",
-      "variant": "emphasis"
+      "id": "future_packages",
+      "from": "model_workers",
+      "to": "independent_packages",
+      "label": "Verified export",
+      "variant": "dashed"
+    },
+    {
+      "id": "source_import",
+      "from": "dataset_inputs",
+      "to": "dataset_workers",
+      "label": "Import / download",
+      "variant": "dashed"
+    },
+    {
+      "id": "validated_dataset",
+      "from": "dataset_workers",
+      "to": "prepared_datasets",
+      "label": "Validated files",
+      "variant": "dashed"
+    },
+    {
+      "id": "dataset_batches",
+      "from": "prepared_datasets",
+      "to": "model_workers",
+      "label": "Training batches",
+      "variant": "dashed"
+    },
+    {
+      "id": "full_checkpoint",
+      "from": "model_workers",
+      "to": "recovery_checkpoints",
+      "label": "Save / resume",
+      "variant": "dashed"
     }
   ],
   "cards": [
     {
       "dot": "cyan",
-      "title": "Settings still persist",
+      "title": "Implemented \u00b7 Sprints 1\u20132",
       "items": [
-        "Two containers; only frontend port is published",
-        "Validated SQLite settings survive restart"
+        "Solid paths: settings, public protocol tests, image tools",
+        "Public capacity: 0 bytes; no trained models"
       ]
     },
     {
       "dot": "emerald",
-      "title": "Sprint 2 commands",
+      "title": "Target \u00b7 two containers",
       "items": [
-        "verify_protocol: framing, correction, test payload map",
-        "inspect_image / prepare_image: RGB or RGBA PNG"
+        "Dashed paths: planned; workers stay inside the backend",
+        "Training-only critic / channel simulator stay out of exports"
       ]
     },
     {
       "dot": "slate",
-      "title": "Research comes later",
+      "title": "Local now \u00b7 private GPU later",
       "items": [
-        "Public capacity stays zero; model actions unavailable",
-        "No new HTTP routes, database migration, or GPU work"
+        "Mac CPU today; planned EC2 through an SSH tunnel",
+        "Persistent data; 24 GPU-instance hours; secrets in memory"
       ]
     }
   ]
