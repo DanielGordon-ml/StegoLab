@@ -2,7 +2,7 @@
   "schema_version": 1,
   "diagram_type": "architecture",
   "meta": {
-    "title": "StegoLab \u00b7 Local foundation",
+    "title": "StegoLab · Message and image protocol",
     "quality_profile": "showcase",
     "locale": "en",
     "views": [
@@ -18,6 +18,15 @@
         "note": "Validated settings survive a backend restart."
       },
       {
+        "id": "protocol",
+        "label": "Sprint 2 tools",
+        "focus": [
+          "commands",
+          "services"
+        ],
+        "note": "Local commands call reusable Python services. No model or HTTP route is added."
+      },
+      {
         "id": "future",
         "label": "Later sprints",
         "focus": [
@@ -25,8 +34,12 @@
           "workers",
           "packages"
         ],
-        "note": "Dashed connections are planned. No training or inference runs in Sprint 1."
+        "note": "Dashed connections are planned. Training and model inference remain unavailable."
       }
+    ],
+    "viewBox": [
+      1150,
+      520
     ]
   },
   "components": [
@@ -37,7 +50,7 @@
       "sublabel": "Four accessible tabs",
       "pos": [
         45,
-        180
+        40
       ],
       "size": [
         175,
@@ -52,7 +65,7 @@
       "tag": "LOCALHOST :8080",
       "pos": [
         395,
-        180
+        40
       ],
       "size": [
         200,
@@ -63,11 +76,11 @@
       "id": "backend",
       "type": "backend",
       "label": "Backend container",
-      "sublabel": "FastAPI \u00b7 CPU only",
+      "sublabel": "FastAPI · CPU only",
       "tag": "INTERNAL :8000",
       "pos": [
         775,
-        180
+        40
       ],
       "size": [
         200,
@@ -82,7 +95,7 @@
       "tag": "SURVIVES RESTART",
       "pos": [
         775,
-        400
+        190
       ],
       "size": [
         240,
@@ -92,12 +105,12 @@
     {
       "id": "workers",
       "type": "backend",
-      "label": "Workers \u00b7 planned",
+      "label": "Workers · planned",
       "sublabel": "Training + data preparation",
       "tag": "LATER SPRINTS",
       "pos": [
-        395,
-        400
+        775,
+        340
       ],
       "size": [
         230,
@@ -107,15 +120,45 @@
     {
       "id": "packages",
       "type": "external",
-      "label": "Models \u00b7 planned",
+      "label": "Models · planned",
       "sublabel": "Independent encoder + decoder",
       "tag": "LATER SPRINTS",
       "pos": [
-        45,
-        400
+        395,
+        340
       ],
       "size": [
         245,
+        76
+      ]
+    },
+    {
+      "id": "commands",
+      "type": "external",
+      "label": "Local commands",
+      "sublabel": "Public checks + image files",
+      "tag": "SPRINT 2",
+      "pos": [
+        45,
+        190
+      ],
+      "size": [
+        230,
+        76
+      ]
+    },
+    {
+      "id": "services",
+      "type": "backend",
+      "label": "Message + image services",
+      "sublabel": "Encryption · correction · pixels",
+      "tag": "BACKEND PYTHON PACKAGE",
+      "pos": [
+        440,
+        190
+      ],
+      "size": [
+        260,
         76
       ]
     }
@@ -149,7 +192,13 @@
       "from": "backend",
       "to": "workers",
       "label": "Planned jobs",
-      "variant": "dashed"
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "right",
+      "labelAt": [
+        1029,
+        285
+      ]
     },
     {
       "id": "future-exports",
@@ -157,31 +206,38 @@
       "to": "packages",
       "label": "Planned export",
       "variant": "dashed"
+    },
+    {
+      "id": "local-services",
+      "from": "commands",
+      "to": "services",
+      "label": "Direct Python calls",
+      "variant": "emphasis"
     }
   ],
   "cards": [
     {
       "dot": "cyan",
-      "title": "Sprint 1 demo",
+      "title": "Settings still persist",
       "items": [
-        "Save checkpoint frequency in Config",
-        "Restart, reload, and reset to five minutes"
+        "Two containers; only frontend port is published",
+        "Validated SQLite settings survive restart"
       ]
     },
     {
       "dot": "emerald",
-      "title": "Local and persistent",
+      "title": "Sprint 2 commands",
       "items": [
-        "Only the frontend port is published",
-        "Configuration changes are validated before saving"
+        "verify_protocol: framing, correction, test payload map",
+        "inspect_image / prepare_image: RGB or RGBA PNG"
       ]
     },
     {
       "dot": "slate",
       "title": "Research comes later",
       "items": [
-        "No models or usable payload capacity yet",
-        "No GPU spending or recovery-quality claims"
+        "Public capacity stays zero; model actions unavailable",
+        "No new HTTP routes, database migration, or GPU work"
       ]
     }
   ]

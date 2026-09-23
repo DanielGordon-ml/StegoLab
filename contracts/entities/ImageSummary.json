@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Describe image handling without paths or source metadata.",
+  "properties": {
+    "color_policy": {
+      "enum": [
+        "icc_to_srgb",
+        "declared_srgb",
+        "assumed_srgb"
+      ],
+      "title": "Color Policy",
+      "type": "string"
+    },
+    "input_size_bytes": {
+      "maximum": 52428800,
+      "minimum": 1,
+      "title": "Input Size Bytes",
+      "type": "integer"
+    },
+    "mode": {
+      "enum": [
+        "RGB",
+        "RGBA"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "orientation": {
+      "maximum": 8,
+      "minimum": 1,
+      "title": "Orientation",
+      "type": "integer"
+    },
+    "pixel_policy": {
+      "enum": [
+        "prepare_srgb",
+        "preserve_stored"
+      ],
+      "title": "Pixel Policy",
+      "type": "string"
+    },
+    "prepared_height": {
+      "title": "Prepared Height",
+      "type": "integer"
+    },
+    "prepared_width": {
+      "title": "Prepared Width",
+      "type": "integer"
+    },
+    "source_format": {
+      "enum": [
+        "JPEG",
+        "PNG"
+      ],
+      "title": "Source Format",
+      "type": "string"
+    },
+    "source_height": {
+      "title": "Source Height",
+      "type": "integer"
+    },
+    "source_width": {
+      "title": "Source Width",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "source_format",
+    "mode",
+    "pixel_policy",
+    "source_width",
+    "source_height",
+    "prepared_width",
+    "prepared_height",
+    "input_size_bytes",
+    "orientation",
+    "color_policy"
+  ],
+  "title": "ImageSummary",
+  "type": "object"
+}

@@ -1,4 +1,4 @@
-name: Foundation checks
+name: CPU application checks
 
 on:
   pull_request:
@@ -38,6 +38,7 @@ jobs:
           uv run ruff format --check .
           uv run mypy backend_service schemas
           uv run pytest tests/backend
+          uv run stegolab verify_protocol
           uv run python -m backend_service.export_contracts --check
           uv run python scripts/check_file_lengths.py
       - name: Check and build the interface

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Report only public fixture checks, never messages or passwords.",
+  "properties": {
+    "checks_passed": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Checks Passed",
+      "type": "array"
+    },
+    "fixture_count": {
+      "minimum": 1,
+      "title": "Fixture Count",
+      "type": "integer"
+    },
+    "profile_identifier": {
+      "const": "test_only_v1",
+      "default": "test_only_v1",
+      "title": "Profile Identifier",
+      "type": "string"
+    },
+    "status": {
+      "const": "passed",
+      "default": "passed",
+      "title": "Status",
+      "type": "string"
+    }
+  },
+  "required": [
+    "profile_identifier",
+    "fixture_count",
+    "checks_passed",
+    "status"
+  ],
+  "title": "ProtocolVerification",
+  "type": "object"
+}

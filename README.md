@@ -2,10 +2,12 @@
 
 A local workspace for building a text-in-image steganography system.
 
-Sprint 1 provides the application foundation: four accessible tabs, a working
-Config screen, strict backend contracts, persistent settings, and CPU containers.
-Encoding, decoding, training, and dataset downloads are planned and unavailable.
-No trained model or measured recovery quality is included.
+The application provides four accessible tabs, a working Config screen, strict
+backend contracts, persistent settings, and CPU containers. Sprint 2 adds
+encrypted message framing, error correction, test payload maps, and pixel-safe
+image preparation through reusable services and command-line tools.
+Image-based encoding, decoding, training, and dataset downloads remain unavailable.
+No trained model or measured image-message recovery quality is included.
 
 ## Start locally
 
@@ -36,6 +38,9 @@ unless you intend to delete that saved state.
 
 - [Local setup, checks, and troubleshooting](docs/local_setup.md)
 - [Sprint 1 backlog and acceptance results](plan/sprint_01.md)
+- [Sprint 2 backlog and acceptance results](plan/sprint_02.md)
+- [Message protocol and public demonstration](docs/message_protocol.md)
+- [Image inspection and PNG preparation](docs/image_preparation.md)
 - [Interactive architecture map and reproduction steps](docs/architecture.md)
 - [Frontend binding proof](docs/client_binding_proof.md)
 - [Backend plan](plan/backend.md), [frontend plan](plan/frontend.md),
