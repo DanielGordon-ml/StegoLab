@@ -18,6 +18,7 @@
 logs
 models
 datasets
+data
 checkpoints
 secrets
 **/*.pem

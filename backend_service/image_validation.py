@@ -6,12 +6,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import BinaryIO, Literal
 
-from pydantic import ValidationError
-
 from backend_service.failures import ApplicationFailure
 from backend_service.image_png_stream import PixelStreamValidator
-from schemas.image_dimensions import ImageDimensions
-from schemas.images import MAXIMUM_IMAGE_FILE_BYTES
+from backend_service.image_policy import PRODUCTION_IMAGE_POLICY, ImagePolicy
 
 ImageSource = Path | BinaryIO
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
@@ -24,7 +21,7 @@ class SourceHeader:
     format: Literal["JPEG", "PNG"]
     width: int
     height: int
-    mode: Literal["RGB", "RGBA"]
+    mode: Literal["L", "RGB", "RGBA"]
     png_chunks: frozenset[bytes] = frozenset()
     has_profile: bool = False
 
@@ -47,46 +44,49 @@ def image_failure(code: str = "image_invalid") -> ApplicationFailure:
     return ApplicationFailure(code, messages[code], status_code=status_code)
 
 
-def _read_stream(stream: BinaryIO) -> bytes:
+def _read_stream(stream: BinaryIO, policy: ImagePolicy) -> bytes:
     """Limit reads even for a stream with no known file size."""
     chunks: list[bytes] = []
     size = 0
     while True:
-        chunk = stream.read(min(64 * 1024, MAXIMUM_IMAGE_FILE_BYTES + 1 - size))
+        chunk = stream.read(min(64 * 1024, policy.maximum_bytes + 1 - size))
         if not isinstance(chunk, bytes):
             raise image_failure()
         size += len(chunk)
-        if size > MAXIMUM_IMAGE_FILE_BYTES:
-            raise image_failure("image_limits")
+        if size > policy.maximum_bytes:
+            raise policy.limit_failure()
         if not chunk:
             return b"".join(chunks)
         chunks.append(chunk)
 
 
-def read_source(source: ImageSource) -> bytes:
+def read_source(
+    source: ImageSource, policy: ImagePolicy = PRODUCTION_IMAGE_POLICY
+) -> bytes:
     """Read from a path or the current stream position within the byte limit."""
     try:
         if isinstance(source, Path):
-            if source.stat().st_size > MAXIMUM_IMAGE_FILE_BYTES:
-                raise image_failure("image_limits")
+            if source.stat().st_size > policy.maximum_bytes:
+                raise policy.limit_failure()
             with source.open("rb") as stream:
-                return _read_stream(stream)
-        return _read_stream(source)
+                return _read_stream(stream, policy)
+        return _read_stream(source, policy)
     except ApplicationFailure:
         raise
     except (OSError, ValueError, TypeError, AttributeError):
         raise image_failure() from None
 
 
-def check_dimensions(width: int, height: int) -> None:
-    """Apply shared bounds before allocating decoded pixels."""
-    try:
-        ImageDimensions(width=width, height=height)
-    except ValidationError:
-        raise image_failure("image_limits") from None
+def check_dimensions(
+    width: int, height: int, policy: ImagePolicy = PRODUCTION_IMAGE_POLICY
+) -> None:
+    """Apply trusted bounds before allocating decoded pixels."""
+    policy.check_dimensions(width, height)
 
 
-def _png_header(data: bytes) -> SourceHeader:
+def _png_header(
+    data: bytes, policy: ImagePolicy, validate_pixels: bool
+) -> SourceHeader:
     """Check source bit depth, color declarations, chunks, and dimensions."""
     offset, first = 8, True
     seen: set[bytes] = set()
@@ -119,14 +119,16 @@ def _png_header(data: bytes) -> SourceHeader:
             width, height, depth, color_type, compression, filtering, interlace = (
                 struct.unpack(">IIBBBBB", content)
             )
-            check_dimensions(width, height)
-            if depth != 8 or color_type not in (2, 6):
+            check_dimensions(width, height, policy)
+            if depth != 8 or color_type not in (
+                (0, 2, 6) if policy.allow_grayscale else (2, 6)
+            ):
                 raise image_failure()
             if compression != 0 or filtering != 0 or interlace not in (0, 1):
                 raise image_failure()
-            pixel_stream = PixelStreamValidator(
-                width, height, 4 if color_type == 6 else 3, interlace
-            )
+            if validate_pixels:
+                channels = {0: 1, 2: 3, 6: 4}[color_type]
+                pixel_stream = PixelStreamValidator(width, height, channels, interlace)
             first = False
         elif name == b"IHDR":
             raise image_failure()
@@ -135,9 +137,10 @@ def _png_header(data: bytes) -> SourceHeader:
         ):
             raise image_failure()
         if name == b"IDAT":
-            if pixels_finished or pixel_stream is None:
+            if pixels_finished:
                 raise image_failure()
-            pixel_stream.feed(content)
+            if pixel_stream is not None:
+                pixel_stream.feed(content)
         elif b"IDAT" in seen:
             pixels_finished = True
         if name in (b"acTL", b"fcTL", b"fdAT", b"tRNS"):
@@ -164,13 +167,16 @@ def _png_header(data: bytes) -> SourceHeader:
             break
     if first or not saw_end or b"IDAT" not in seen:
         raise image_failure()
-    if pixel_stream is None:
-        raise image_failure()
-    pixel_stream.finish()
+    if pixel_stream is not None:
+        pixel_stream.finish()
     if seen & {b"gAMA", b"cHRM"} and not seen & {b"iCCP", b"sRGB"}:
         raise image_failure("image_color")
     return SourceHeader(
-        "PNG", width, height, "RGBA" if color_type == 6 else "RGB", frozenset(seen)
+        "PNG",
+        width,
+        height,
+        "L" if color_type == 0 else "RGBA" if color_type == 6 else "RGB",
+        frozenset(seen),
     )
 
 
@@ -197,7 +203,7 @@ def _check_profile_chunk(content: bytes) -> None:
         raise image_failure("image_color") from None
 
 
-def _jpeg_header(data: bytes) -> SourceHeader:
+def _jpeg_header(data: bytes, policy: ImagePolicy) -> SourceHeader:
     """Read source precision and RGB component count before Pillow decoding."""
     offset = 2
     frame: SourceHeader | None = None
@@ -234,12 +240,18 @@ def _jpeg_header(data: bytes) -> SourceHeader:
             precision, height, width, components = struct.unpack(
                 ">BHHB", data[offset + 2 : offset + 8]
             )
-            check_dimensions(width, height)
-            if precision != 8 or components != 3 or length != 8 + components * 3:
+            check_dimensions(width, height, policy)
+            if (
+                precision != 8
+                or components not in ((1, 3) if policy.allow_grayscale else (3,))
+                or length != 8 + components * 3
+            ):
                 raise image_failure()
             if frame is not None:
                 raise image_failure()
-            frame = SourceHeader("JPEG", width, height, "RGB")
+            frame = SourceHeader(
+                "JPEG", width, height, "L" if components == 1 else "RGB"
+            )
         offset = end
     if frame is None:
         raise image_failure()
@@ -249,17 +261,24 @@ def _jpeg_header(data: bytes) -> SourceHeader:
     ):
         raise image_failure("image_color")
     return SourceHeader(
-        "JPEG", frame.width, frame.height, "RGB", has_profile=bool(profiles)
+        "JPEG", frame.width, frame.height, frame.mode, has_profile=bool(profiles)
     )
 
 
-def inspect_header(data: bytes) -> SourceHeader:
+def inspect_header(
+    data: bytes,
+    policy: ImagePolicy = PRODUCTION_IMAGE_POLICY,
+    *,
+    validate_pixels: bool = True,
+) -> SourceHeader:
     """Select supported formats from file bytes rather than the extension."""
+    if len(data) > policy.maximum_bytes:
+        raise policy.limit_failure()
     if data.startswith(PNG_SIGNATURE):
         try:
-            return _png_header(data)
+            return _png_header(data, policy, validate_pixels)
         except (ValueError, zlib.error):
             raise image_failure() from None
     if data.startswith(b"\xff\xd8"):
-        return _jpeg_header(data)
+        return _jpeg_header(data, policy)
     raise image_failure()

@@ -10,7 +10,7 @@ Research date: 2026-09-23. Related plans: [Backend](backend.md), [Frontend](fron
 - Use bounded in-memory process channels for secret inputs and commands. The API/scheduler owns persistent job state. Do not add Redis, Kubernetes, a distributed scheduler, or separate accounts to this release.
 - One GPU operation runs at a time. Training/evaluation occupies that slot; inference queues. Worker heartbeat failure releases stale ownership only after the supervisor confirms the old process has stopped.
 - After restart, reconcile jobs before accepting new work. Training requires explicit checkpoint resume; secret-bearing inference becomes needs_input. Never restart paid training automatically.
-- The [Archify](https://github.com/tt-a1i/archify) map to be produced during implementation will show browser, frontend container, backend API/workers, protocol/models, datasets/cache, and persistent state. Clearly mark training-only components and independent deployment packages.
+- The [Archify map](../docs/architecture.md) shows the browser, frontend container, backend API, implemented local dataset services, and planned workers/models/cache. Solid and dashed paths distinguish implemented work from planned components; independent deployment packages remain planned.
 
 ## 2. Local and cloud environments
 

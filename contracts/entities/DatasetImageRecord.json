@@ -1,0 +1,228 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Describe original bytes and the immutable prepared pixels.",
+  "properties": {
+    "assigned_split": {
+      "anyOf": [
+        {
+          "enum": [
+            "train",
+            "tuning",
+            "held_out"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Assigned Split"
+    },
+    "color_policy": {
+      "enum": [
+        "icc_to_srgb",
+        "declared_srgb",
+        "assumed_srgb"
+      ],
+      "title": "Color Policy",
+      "type": "string"
+    },
+    "duplicate_group": {
+      "default": "",
+      "pattern": "^([a-f0-9]{64})?$",
+      "title": "Duplicate Group",
+      "type": "string"
+    },
+    "eligible": {
+      "title": "Eligible",
+      "type": "boolean"
+    },
+    "grayscale_converted": {
+      "title": "Grayscale Converted",
+      "type": "boolean"
+    },
+    "height": {
+      "maximum": 8192,
+      "minimum": 1,
+      "title": "Height",
+      "type": "integer"
+    },
+    "mode": {
+      "enum": [
+        "RGB",
+        "RGBA"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "orientation": {
+      "maximum": 8,
+      "minimum": 1,
+      "title": "Orientation",
+      "type": "integer"
+    },
+    "prepared_bytes": {
+      "maximum": 134217728,
+      "minimum": 1,
+      "title": "Prepared Bytes",
+      "type": "integer"
+    },
+    "prepared_checksum": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Prepared Checksum",
+      "type": "string"
+    },
+    "prepared_path": {
+      "title": "Prepared Path",
+      "type": "string"
+    },
+    "representative_source_path": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Representative Source Path"
+    },
+    "rgb_checksum": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Rgb Checksum",
+      "type": "string"
+    },
+    "source_bytes": {
+      "maximum": 52428800,
+      "minimum": 1,
+      "title": "Source Bytes",
+      "type": "integer"
+    },
+    "source_checksum": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Source Checksum",
+      "type": "string"
+    },
+    "source_format": {
+      "enum": [
+        "JPEG",
+        "PNG"
+      ],
+      "title": "Source Format",
+      "type": "string"
+    },
+    "source_height": {
+      "maximum": 8192,
+      "minimum": 1,
+      "title": "Source Height",
+      "type": "integer"
+    },
+    "source_identity": {
+      "anyOf": [
+        {
+          "maxLength": 4096,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Identity"
+    },
+    "source_mode": {
+      "enum": [
+        "L",
+        "RGB",
+        "RGBA"
+      ],
+      "title": "Source Mode",
+      "type": "string"
+    },
+    "source_path": {
+      "title": "Source Path",
+      "type": "string"
+    },
+    "source_width": {
+      "maximum": 8192,
+      "minimum": 1,
+      "title": "Source Width",
+      "type": "integer"
+    },
+    "split_group": {
+      "default": "",
+      "pattern": "^([a-f0-9]{64})?$",
+      "title": "Split Group",
+      "type": "string"
+    },
+    "subset": {
+      "anyOf": [
+        {
+          "maxLength": 4096,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Subset"
+    },
+    "upstream_split": {
+      "anyOf": [
+        {
+          "enum": [
+            "training",
+            "validation",
+            "test"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Upstream Split"
+    },
+    "width": {
+      "maximum": 8192,
+      "minimum": 1,
+      "title": "Width",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "source_path",
+    "prepared_path",
+    "source_identity",
+    "upstream_split",
+    "subset",
+    "assigned_split",
+    "duplicate_group",
+    "split_group",
+    "representative_source_path",
+    "source_checksum",
+    "prepared_checksum",
+    "rgb_checksum",
+    "source_bytes",
+    "prepared_bytes",
+    "source_width",
+    "source_height",
+    "width",
+    "height",
+    "source_format",
+    "source_mode",
+    "mode",
+    "orientation",
+    "color_policy",
+    "grayscale_converted",
+    "eligible"
+  ],
+  "title": "DatasetImageRecord",
+  "type": "object"
+}

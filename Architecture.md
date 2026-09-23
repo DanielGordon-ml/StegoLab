@@ -5,11 +5,13 @@ steganography system. Its target flow is `(image, text, password) → PNG` and
 `(PNG, password, compatible decoder) → exact text`. The decoder will not need
 the original image. Training and deployment packages are separate concerns.
 
-**Current state:** Sprint 1 and Sprint 2 are implemented. The app can save
+**Current state:** Sprint 1, Sprint 2, and the local dataset slice of Sprint 3 are implemented. The app can save
 settings, package and recover authenticated messages through a test channel,
 and prepare images without changing the prepared pixels during PNG storage.
-It cannot yet hide text in images. No model, dataset pipeline, training worker,
-GPU runtime, or cloud deployment is implemented.
+Local UHD-IQA preparation adds grayscale support, source splits, exact duplicate
+groups, immutable manifests, safe storage, and offline validation. It cannot yet
+hide text in images. Models, remote dataset downloads, training workers, GPU
+runtime, and cloud deployment remain unimplemented.
 
 See the [system diagram in the README](README.md#system-architecture) and the
 [interactive Archify map and delivery record](docs/architecture.md).
@@ -57,13 +59,13 @@ Kubernetes, a distributed scheduler, or a multi-user account service.
 | Browser | React/TypeScript shell, Encode/Decode/Train/Config tabs, working Config, connection state | Image transfer, jobs, training charts, model selection, temporary text results |
 | Frontend container | Nginx serves bundled Vite assets and proxies `/api/v1` on the same origin | Upload handling and long-lived event streaming within coordinated limits |
 | Backend container | One Uvicorn/FastAPI process; CLI and reusable CPU services | Supervisor, scheduler, spawned GPU/download workers, model services |
-| Shared contracts | Strict Pydantic records, exported OpenAPI/entity schemas, browser validation | Dataset, artifact, model, checkpoint, and evaluation records |
-| Persistent volume | SQLite configuration/retry/job metadata; structured run logs | Prepared data/cache, checkpoints, exports, artifacts, durable job events |
+| Shared contracts | Strict Pydantic records, dataset requests/manifests, exported schemas, browser validation | Artifact, model, checkpoint, and evaluation records |
+| Persistent volume | SQLite configuration/retry/job metadata; structured run logs; prepared dataset revisions | Download cache, checkpoints, exports, artifacts, durable job events |
 | Independent packages | None yet | Separate encoder and decoder exports with their own runtime wrappers |
-| External sources | None used by the runtime | Local import, Hugging Face, and controlled HTTPS downloads |
+| External sources | Read-only local image folders and UHD-IQA metadata | Browser uploads, Hugging Face, and controlled HTTPS downloads |
 
 Current request flow is browser → frontend/proxy → API → state store.
-Sprint 2 protocol and image services are reached through Python or the CLI;
+Protocol, image, and local dataset services are reached through Python or the CLI;
 there is no HTTP connection from the browser to those services yet.
 
 ### Repository map
@@ -79,7 +81,7 @@ there is no HTTP connection from the browser to those services yet.
 | [`schemas/`](schemas/), [`contracts/`](contracts/) | Structural source records and deterministic exported contracts |
 | [`infrastructure/`](infrastructure/), [`backend_service/Dockerfile`](backend_service/Dockerfile), [`user_interface/Dockerfile`](user_interface/Dockerfile) | Compose runtime and separate locked CPU image builds |
 | [`tests/backend/`](tests/backend/), [`user_interface/browser_tests/`](user_interface/browser_tests/), [`scripts/`](scripts/) | Service/contract/browser checks, independent fixtures, resource measurements |
-| `datasets/`, `models/` | Planned dataset and deployment-model locations; these directories and production assets are not present yet |
+| `datasets/`, `models/` | Prepared immutable dataset revisions; deployment models remain future work |
 | [`plan/`](plan/), [`docs/`](docs/) | Product/delivery plans and user/developer guides |
 
 ## 3. Frontend, API, and contract flow
@@ -212,25 +214,35 @@ paid training must never restart automatically.
 |---|---|
 | Configuration, job snapshots, request retry results | SQLite now; future durable events remain metadata only |
 | `ProtocolContext`, `PayloadCapacity`, `ProtocolVerification`, `ImageSummary` | Implemented strict service records; no message/password fields |
-| Dataset/model manifests, checkpoint summaries, evaluation reports, artifacts | Planned strict records with compatibility, provenance, and checksums |
-| Prepared datasets/cache | Planned `datasets/<name>/<revision>/` and `.cache/stegolab/datasets/`; shared completed cache assets survive one job's cancellation |
+| Dataset manifests | Implemented strict records, software/source provenance, checksums, fixed splits, and coverage |
+| Model manifests, checkpoint summaries, evaluation reports, artifacts | Planned strict records with compatibility, provenance, and checksums |
+| Prepared datasets/cache | Implemented `datasets/<name>/<revision>/`; download cache remains planned |
 | Models/checkpoints | Planned separate deployment and training directories; checkpoint pruning never deletes deployment packages |
 | Uploads/previews/PNG results | Planned registered files, expiring after 24 hours or explicit deletion; never arbitrary path downloads |
 | Plaintext/passwords/keys | Temporary memory only; decoded text planned for five minutes or explicit Clear, with `Cache-Control: no-store` |
 | Logs | Current bounded `events.jsonl` files in unique date-labelled run directories; future run metrics add approved metadata only |
 
-## 7. Planned datasets, training, evaluation, and exports
+## 7. Local datasets and planned training, evaluation, and exports
 
-Dataset adapters will inspect local folders/uploads, Hugging Face sources, and
-supported HTTPS files/archives. They will pin revisions, validate counts and
-checksums, record source identities/terms, report rejected images, and publish
-manifests. Imports must not execute remote scripts. Connection-time and redirect
+The implemented local pipeline scans bounded sources, reads UHD-IQA metadata,
+preserves official splits, prepares grayscale/RGB/RGBA images, groups duplicate
+RGB pixels and shared upstream identities, and publishes verified revisions.
+Dataset limits are separate from production: 1–8192 per side, 32 million pixels,
+50 MiB source files, and 128 MiB prepared PNGs. A destination-root lock protects
+the disk budget and owned staging; completed revisions work without sources.
+The CLI exposes `prepare_dataset`, `inspect_dataset`, and `validate_dataset`.
+The offline reader supplies eligible unique examples from one requested split.
+See [the dataset guide](docs/datasets.md) for contracts and failure behavior.
+
+Future adapters cover browser uploads, Hugging Face sources, and supported HTTPS
+files/archives. Imports must not execute remote scripts. Connection-time and redirect
 checks block private/link-local/metadata destinations; extraction limits block
 traversal, escaping links, and decompression bombs. Pause depends on source
 support; cancel removes only that job's partial assets.
 
-Train/tuning/test source identities are frozen before crops, excluding near
-duplicates. Cover augmentations happen before embedding. Post-embedding channel
+Train/tuning/test source identities are frozen before crops. Exact duplicate
+checks are implemented; a near-duplicate audit is required before the pilot.
+Cover augmentations happen before embedding. Post-embedding channel
 attacks are a separate later profile. COCO supplies the main planned benchmark;
 native DIV2K/high-resolution tests are reported separately. Dataset mirrors,
 splits, licenses, and revisions are not interchangeable.
@@ -315,16 +327,17 @@ may be returned.
 The [CI workflow](.github/workflows/continuous_integration.yaml) runs locked
 installs, formatting/lint/types, backend/frontend tests, public protocol vectors,
 schema drift and file-length checks, CPU image builds, and a browser settings
-save → backend restart → reload → reset flow on disposable data. Sprint 2 records
-192 backend tests and 10 frontend tests. This architecture update does not claim
-a new execution of those suites. Image/protocol tests cover byte boundaries,
+save → backend restart → reload → reset flow on disposable data. Sprint 3 records
+291 backend tests, 10 frontend tests, and the browser restart flow passing.
+Dataset tests cover fixed splits, grayscale, duplicates, offline integrity, disk
+limits, unsafe paths, interruption, and reuse. Image/protocol tests cover byte boundaries,
 wrong context/password, correctable damage, malformed input, exact pixels, limits,
 failed writes, and privacy. Expensive GPU benchmarks belong to promotion gates.
 
 | Delivery stage | Dependency and remaining result |
 |---|---|
 | 1–2: foundation and protocol | Implemented; service/test foundations are available |
-| 3: dataset adapters | Depends on contracts; validate local data first, then complete planned remote adapters/cache and frozen manifests |
+| 3: dataset adapters | Local preparation/manifests implemented; remote adapters/cache and complete pilot data remain open |
 | 4: model/training engine | Depends on protocol and validated data; tiny-set learning, checkpoint resume, saved-PNG evaluation, CPU exports |
 | 5: complete four-tab frontend | Build against contracts; final acceptance needs real models and artifacts |
 | 6: EC2 readiness | Depends on CPU/export proof; CUDA, private access, recovery, ledger and shutdown drill |
@@ -335,7 +348,7 @@ failed writes, and privacy. Expensive GPU benchmarks belong to promotion gates.
 The target product choices are recorded, but implementation contracts still need
 work: multipart transport and temporary-storage limits; registered artifact
 ownership/expiry; worker channels, queue limits and crash reconciliation; durable
-event replay/retention; dataset/model/checkpoint schema versions and compatibility;
+event replay/retention; remote dataset adapter and model/checkpoint compatibility;
 temporary decoded-result handling; and CUDA/tiling resource policies. Neither
 these services nor their future safety guarantees should be inferred from empty
 directories, reserved CLI names, or existing metadata schemas.

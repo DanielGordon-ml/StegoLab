@@ -11,12 +11,24 @@ from schemas.configuration import (
     ConfigurationReset,
     ConfigurationUpdate,
 )
+from schemas.datasets import (
+    DatasetImageRecord,
+    DatasetManifest,
+    DatasetPreparationRequest,
+    DatasetRejection,
+    DatasetSummary,
+)
 from schemas.errors import ApplicationError, ErrorEnvelope
 from schemas.images import ImageSummary
 from schemas.jobs import JobEvent, JobList, JobSnapshot
 from schemas.protocol import PayloadCapacity, ProtocolContext, ProtocolVerification
 
 ENTITY_MODELS = (
+    DatasetPreparationRequest,
+    DatasetImageRecord,
+    DatasetRejection,
+    DatasetManifest,
+    DatasetSummary,
     ApplicationError,
     ErrorEnvelope,
     Capabilities,

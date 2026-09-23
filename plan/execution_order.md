@@ -3,9 +3,17 @@
 Status: researched delivery plan. Research date: 2026-09-23.
 Related plans: [Backend](backend.md), [Frontend](frontend.md), [Infrastructure](infrastructure.md).
 
+Delivery status: [Sprint 1](sprint_01.md) and [Sprint 2](sprint_02.md) are implemented
+and locally verified. [Sprint 3](sprint_03.md) implements the local preparation and manifest slice of
+Step 3. All 6,073 local UHD-IQA images, including 120 grayscale images, are
+prepared and verified with their source splits. The acceptance record includes
+sample and full-corpus measurements, plus offline container validation.
+Remote adapters and full pilot data readiness remain open; Sprint 3 does not
+complete the whole dataset step or replace the planned COCO benchmark.
+
 ## 1. Deliverables and shared decisions
 
-- The planning deliverable is exactly four Markdown files: backend.md, frontend.md, infrastructure.md, and execution_order.md under plan/.
+- The initial planning deliverable was four Markdown files: backend.md, frontend.md, infrastructure.md, and execution_order.md under plan/. Sprint plans and acceptance records extend those plans as delivery progresses.
 - Keep the existing CLAUDE.md and AGENT.md rules intact. Implementation follows their directory, naming, small-file, validation, and CI requirements.
 - First release includes four GUI tabs, local/Hugging Face/HTTPS data, shared-password encryption, unchanged-PNG recovery, preserved dimensions, resumable training, and independent torch.export packages.
 - Target 1,024 net UTF-8 bytes at 1024 × 1024. Other dimensions use tested capacity tiers defined by the backend.

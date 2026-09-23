@@ -5,8 +5,10 @@ A local workspace for building a text-in-image steganography system.
 The application provides four accessible tabs, a working Config screen, strict
 backend contracts, persistent settings, and CPU containers. Sprint 2 adds
 encrypted message framing, error correction, test payload maps, and pixel-safe
-image preparation through reusable services and command-line tools.
-Image-based encoding, decoding, training, and dataset downloads remain unavailable.
+image preparation through reusable services and command-line tools. Sprint 3 adds
+local UHD-IQA preparation, grayscale support, frozen splits, and offline dataset
+integrity checks. Image-based encoding, decoding, training, and dataset downloads
+remain unavailable.
 No trained model or measured image-message recovery quality is included.
 
 ## System architecture
@@ -15,13 +17,13 @@ The map covers the full planned system. **Solid lines** show implemented paths;
 **dashed lines** show planned work. The target keeps two containers: frontend
 and backend. Future model and data workers run as processes inside the backend.
 
-[![StegoLab architecture: browser and CLI, frontend and backend, message and image services, planned dataset and model workers, persistent state, checkpoints, and independent model packages](docs/architecture.svg)](Architecture.md)
+[![StegoLab architecture: browser and CLI, frontend and backend, message, image, and local dataset services, planned workers, persistent state, checkpoints, and independent model packages](docs/architecture.svg)](Architecture.md)
 
 Read [Architecture.md](Architecture.md) for component responsibilities, message
 and image flows, contracts, storage, security, training, deployment, and roadmap.
 The [Archify guide](docs/architecture.md) links the interactive local map and
-explains how to reproduce both diagrams. Only Config and the local protocol/image
-tools work today; model quality and real image-message recovery remain unmeasured.
+explains how to reproduce both diagrams. Config and the local protocol, image,
+and dataset tools work today; model quality and image-message recovery remain unmeasured.
 
 ## Start locally
 
@@ -54,6 +56,8 @@ unless you intend to delete that saved state.
 - [Local setup, checks, and troubleshooting](docs/local_setup.md)
 - [Sprint 1 backlog and acceptance results](plan/sprint_01.md)
 - [Sprint 2 backlog and acceptance results](plan/sprint_02.md)
+- [Sprint 3 plan: local UHD-IQA preparation and manifests](plan/sprint_03.md)
+- [Local datasets, grayscale support, and offline verification](docs/datasets.md)
 - [Message protocol and public demonstration](docs/message_protocol.md)
 - [Image inspection and PNG preparation](docs/image_preparation.md)
 - [Interactive architecture map and reproduction steps](docs/architecture.md)

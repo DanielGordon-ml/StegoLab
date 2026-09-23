@@ -1,7 +1,9 @@
 # Run StegoLab locally
 
 Sprint 1 provides four tabs and saved settings. Sprint 2 adds message-protocol
-checks and image preparation through the command line. Training, image-based
+checks and image preparation through the command line. Sprint 3 adds local
+dataset preparation and offline integrity checks; see [datasets](datasets.md).
+Training, image-based
 encoding/decoding, dataset downloads, and model installation are not available yet.
 
 ## Start with Docker

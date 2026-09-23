@@ -1,0 +1,9 @@
+services:
+  backend_service:
+    volumes:
+      - type: bind
+        source: ${STEGOLAB_SOURCE_DIRECTORY:-../data/UHD-IQA-database}
+        target: /sources/uhd-iqa
+        read_only: true
+        bind:
+          create_host_path: false

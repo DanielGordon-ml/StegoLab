@@ -11,6 +11,7 @@ AGENT.md
 /logs/
 /checkpoints/
 /datasets/
+/data/
 /models/
 /secrets/
 *.pem
