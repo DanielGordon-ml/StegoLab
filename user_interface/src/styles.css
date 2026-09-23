@@ -1,0 +1,268 @@
+@import './workspace.css';
+@import './controls.css';
+
+:root {
+  font-family: 'Avenir Next', Avenir, 'Segoe UI', sans-serif;
+  color: #172b40;
+  background: #f3f5f7;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+button,
+input {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+button,
+a,
+input {
+  -webkit-tap-highlight-color: transparent;
+}
+:focus-visible {
+  outline: 3px solid #008497;
+  outline-offset: 5px;
+}
+[hidden] {
+  display: none !important;
+}
+.application_shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.topbar {
+  height: 88px;
+  padding: 0 5.5%;
+  display: flex;
+  align-items: center;
+  gap: 35px;
+  background: #101e30;
+  color: white;
+}
+.brand {
+  color: inherit;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  font-size: 27px;
+  font-weight: 700;
+  letter-spacing: -0.9px;
+}
+.brand_light {
+  font-weight: 400;
+}
+.brand_mark {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  color: #72ddd3;
+}
+.brand_mark svg {
+  width: 32px;
+  height: 32px;
+}
+.workspace_label {
+  border-left: 1px solid #485564;
+  padding-left: 30px;
+  font-size: 10px;
+  letter-spacing: 1.7px;
+  color: #bac9d5;
+}
+.connection_status {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12px;
+  margin-left: auto;
+  color: #d7e4ec;
+}
+.status_dot {
+  width: 7px;
+  height: 7px;
+  background: #e5b560;
+  border-radius: 50%;
+}
+.status_dot.ready {
+  background: #75ddd0;
+  box-shadow: 0 0 0 4px #75ddd016;
+}
+.disconnected {
+  color: #ffd19b;
+}
+main {
+  width: min(1120px, 89%);
+  margin: 38px auto 0;
+  flex: 1;
+}
+.workspace_intro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30px;
+}
+.eyebrow {
+  color: #56687b;
+  font-size: 10px;
+  letter-spacing: 1.7px;
+  font-weight: 700;
+}
+.workspace_intro p {
+  margin: 7px 0 0;
+  font-size: 22px;
+  letter-spacing: -0.6px;
+  font-weight: 500;
+}
+.release_badge {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  color: #546678;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+}
+.release_badge span {
+  font-family: monospace;
+  padding: 6px 8px;
+  border: 1px solid #c7d2dc;
+  border-radius: 5px;
+}
+.tablist {
+  display: flex;
+  gap: 10px;
+  padding: 6px;
+  width: fit-content;
+  border: 1px solid #d9e1e8;
+  border-radius: 11px;
+  background: #e9eef2;
+}
+.tablist button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  padding: 11px 26px;
+  background: transparent;
+  color: #56687b;
+  font-size: 13px;
+  font-weight: 600;
+  min-height: 44px;
+}
+.tablist button[aria-selected='true'] {
+  background: white;
+  color: #142c40;
+  box-shadow: 0 2px 4px #122b4410;
+  border-color: #dbe2e8;
+}
+.tablist button:hover {
+  background: #ffffff90;
+}
+.tablist svg {
+  width: 18px;
+  height: 18px;
+}
+.tab_ready {
+  width: 5px;
+  height: 5px;
+  background: #087c76;
+  border-radius: 50%;
+}
+.workspace_content {
+  margin-top: 39px;
+}
+.section_heading {
+  margin-bottom: 28px;
+}
+h1 {
+  font-size: clamp(27px, 3vw, 36px);
+  line-height: 1.2;
+  letter-spacing: -1.25px;
+  font-weight: 600;
+  margin: 10px 0;
+}
+p {
+  line-height: 1.7;
+}
+.section_heading p {
+  font-size: 14px;
+  color: #5b6b7b;
+  margin: 0;
+}
+@media (max-width: 720px) {
+  .topbar {
+    height: 76px;
+    padding: 0 6%;
+    gap: 12px;
+  }
+  .workspace_label {
+    display: none;
+  }
+  .brand {
+    font-size: 23px;
+    gap: 8px;
+  }
+  .connection_status {
+    font-size: 10px;
+  }
+  main {
+    width: 89%;
+    margin-top: 25px;
+  }
+  .release_badge {
+    font-size: 8px;
+    letter-spacing: 0.7px;
+  }
+  .tablist {
+    width: 100%;
+    gap: 3px;
+  }
+  .tablist button {
+    flex: 1;
+    padding: 9px 7px;
+    gap: 6px;
+    font-size: 12px;
+  }
+  .tablist svg {
+    width: 16px;
+  }
+  .tab_ready {
+    display: none;
+  }
+  .workspace_content {
+    margin-top: 30px;
+  }
+  .resource_strip {
+    flex-wrap: wrap;
+    gap: 20px 32px;
+  }
+  .resource_note {
+    width: 100%;
+    margin: 0;
+  }
+  .connection_banner {
+    flex-wrap: wrap;
+    gap: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+  }
+}
