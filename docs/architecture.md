@@ -1,71 +1,89 @@
-# Interactive architecture map
+# Full system architecture map
 
-Open the locally generated [StegoLab map](architecture.html) in a browser.
-It supports search, component focus, theme switching, guided views, and export.
-Solid paths show the existing settings flow and Sprint 2 local tools.
-Dashed paths show future work.
+Read [Architecture.md](../Architecture.md) for the full system design and the
+[README overview](../README.md#system-architecture) for its embedded diagram.
+Open the generated [interactive map](architecture.html) locally for search,
+component focus, relationship tracing, theme switching, and export.
+GitHub displays the [static SVG](architecture.svg); it does not run this HTML viewer.
 
-The reviewed source is [architecture.architecture.json](architecture.architecture.json).
-Generated HTML and screenshots are local artifacts, excluded from source control.
-The map represents the two-container design and must be updated when deployment
-boundaries or persistence change.
+## Scope and evidence
 
-## Sprint 2 services
+- Solid paths show implemented settings, protocol, and image-tool behavior.
+  Dashed paths and components labelled **planned** show the target system.
+- The target keeps two application containers. Protocol/image modules and future
+  model/data worker processes belong to the backend, not separate containers.
+- The API will own scheduling and job transitions for both kinds of worker.
+  The map shows the main paths; detailed control, return, event, and file flows
+  are described in `Architecture.md` rather than repeated as crossing arrows.
+- Dataset sources, validated data/cache, training/evaluation, checkpoints, and
+  independent encoder/decoder packages are included. Models, workers, downloads,
+  SSE, CUDA, and EC2 operations are still planned.
+- Public capacity remains zero. Protocol tests and PNG pixel preservation do
+  not establish actual image hiding, model quality, or detection resistance.
+- Evidence: application/routes/storage, frontend components/contracts, protocol
+  and image modules, schemas, Docker/Compose, CI/tests, and all nine local plan
+  documents. Application baseline: `6fe874010f0c03d71b55f236c9e22723c01f8a9b`.
+  `Architecture.md` records how local draft notes differ from the approved plans.
 
-- The frontend and backend remain separate containers. Only the frontend port
-  is published, and settings still use the persistent SQLite volume.
-- Local commands call reusable Python services directly. They add no HTTP
-  routes, database migration, worker process, or model package.
-- `verify_protocol` runs bundled public examples through message framing,
-  authenticated encryption, error correction, and the test payload map.
-- `inspect_image` checks a complete input image. `prepare_image` applies the
-  supported orientation/color rules and saves RGB or RGBA PNG pixels.
-- The reusable PNG reader preserves stored integer pixels. It applies no
-  orientation or color conversion during recovery.
-- Public capacity remains zero. Training, model inference, and model exports
-  remain planned. The test payload map does not prove image hiding quality.
-
-Implementation evidence was checked in the backend application and routes,
-message services, image preparation/output services, and Compose configuration.
-The diagram groups message and image modules into one service box; that box is
-part of the backend Python package, not another container.
+The source is [architecture.architecture.json](architecture.architecture.json).
+Keep this specification, the static SVG, and the architecture documents in source
+control. The HTML viewer, delivery receipts, and screenshots are generated local
+artifacts, excluded by `.gitignore`. Regenerate them after a fresh checkout.
 
 ## Reproduce
 
-Install the [Archify skill](https://github.com/tt-a1i/archify), then replace
-`/path/to/archify` with its installed location:
+Use [Archify](https://github.com/tt-a1i/archify), version 2.17 for the receipt below.
+Replace `/path/to/archify` with the installed skill location. Run from the project
+root, preserving this order so the SVG comes from a successfully delivered HTML:
 
 ```sh
 node /path/to/archify/bin/archify.mjs validate architecture docs/architecture.architecture.json --quality showcase --json
-node /path/to/archify/bin/archify.mjs deliver architecture docs/architecture.architecture.json docs/architecture.html --quality showcase --json
+node /path/to/archify/bin/archify.mjs deliver architecture docs/architecture.architecture.json docs/architecture.html --quality showcase --json > docs/architecture.delivery.json
 node /path/to/archify/bin/archify.mjs visual-check docs/architecture.html --json
+python3 scripts/export_architecture_svg.py
 ```
 
-If Chrome is not found, set `ARCHIFY_CHROME` to a Chrome or Chromium executable
-and rerun the last command. The application itself does not depend on Archify.
+Each command must succeed before continuing. If Chrome is unavailable, set
+`ARCHIFY_CHROME` to an existing Chrome/Chromium executable and rerun `visual-check`.
+Then inspect its light/dark screenshots and the generated README image.
+The application itself does not depend on Archify or a browser renderer.
 
-## Sprint 2 delivery record — 2026-09-23
+The small [SVG exporter](../scripts/export_architecture_svg.py) verifies both
+specification and HTML hashes against the delivery receipt. It copies the checked
+SVG geometry, embedded font, and static light-theme styles without executing
+viewer code. The README image includes full node tags, excludes viewer controls,
+and uses a white background in either GitHub theme. It is a derived documentation
+asset, not an additional Archify validation receipt. Review the extractor if the
+Archify template changes; do not hand-edit generated SVG geometry.
 
-- Diagram type: architecture.
-- Archify version: 2.17.
-- Specification: 4,950 bytes; SHA-256
-  `b3db5876991d81f6ccdc17a9e855047a1698d1d044b10e81500b566ff5017039`.
-- Artifact: 808,592 bytes; SHA-256
-  `99d83e309aba199579d6f0fa7c81f59b57b438c022e00c746703cce0029b06d8`.
-- Validation: 9/9 showcase checks; zero errors and zero warnings.
-- Automated browser evidence: passed at 1440×900, 1600×1000, 1920×1080,
-  and 2048×1320; no page overflow.
-- Visual review: passed after inspecting all four light/dark screenshots at
-  1440×900 and 2048×1320. Labels, relationships, cards, and the future-work
-  distinction are readable; no visible crossings or clipping.
-- Geometry corrections: the planned-jobs path uses right-side ports and a
-  diagnosed label position to avoid the persistent volume.
-- Browser correction rounds: one, to reduce excess top/row spacing and contain
-  the diagram and cards without changing typography or clipping content.
-- Browser receipt and screenshots: local `architecture.visual-check.*` sidecars.
-- Browser runtime: existing Playwright Chromium headless shell, selected with
-  `ARCHIFY_CHROME`. The initial default lookup was unavailable; the final run
-  completed all required measurements and screenshots.
+## Delivery record — full-system overview, 2026-09-23
 
-Artifact validation, automated browser checks, and visual review are separate
-results. None is evidence of model quality or successful training.
+| Evidence | Result |
+|---|---|
+| Diagram type | Architecture; Archify 2.17; static Classic preset |
+| Deterministic artifact validation | 9/9 showcase checks; zero errors and warnings |
+| Automated browser evidence | Passed: 1440×900, 1600×1000, 1920×1080, 2048×1320; no horizontal or vertical page overflow |
+| Perceptual visual review | Passed: all four light/dark screenshots at 1440×900 and 2048×1320 inspected |
+| README image review | Passed: SVG rasterized with Sharp and inspected for labels, arrows, tags, and clipping |
+| Browser/visual correction rounds | 0; the delivered composition passed its first browser review |
+
+- Specification: 6,653 bytes; SHA-256
+  `892df6b8b84ab9867169351838155efc4d169748450c5d0ff6775bb1e8d92368`.
+- Checked HTML: 818,705 bytes; SHA-256
+  `0ff70cacd086612624eb4fb47fc4f352df26713e54b18a25d6a1af2ecf88f973`.
+- Static SVG: SHA-256
+  `256814406024d33850de769b4235f2e4dc333f59cbd7b161e13deb8d15472f8b`.
+- Local deterministic receipt: `architecture.delivery.json`.
+- Automated browser receipt: `architecture.visual-check.json`; its
+  `visualReview: pending` field intentionally makes no perceptual claim.
+- Separate image-review record: `architecture.review.json`.
+- Browser engine: existing Playwright Chromium headless shell through
+  `ARCHIFY_CHROME`. The packaged `visual-check` completed all measurements and
+  captures before image review.
+- Before delivery, the validator diagnosed a job-edge label overlap and a
+  desktop-width issue. A label position and viewBox width correction resolved
+  them without removing meaning or shrinking typography.
+
+This record replaces the narrower Sprint 2 map record. Historical sprint
+acceptance remains in Git history. Artifact validation, browser evidence, and
+visual review are separate checks; none proves model or training quality.
