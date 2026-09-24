@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Name a server-approved source root without returning its private path.",
+  "properties": {
+    "identifier": {
+      "title": "Identifier",
+      "type": "string"
+    },
+    "label": {
+      "title": "Label",
+      "type": "string"
+    }
+  },
+  "required": [
+    "identifier",
+    "label"
+  ],
+  "title": "WorkspaceSource",
+  "type": "object"
+}

@@ -52,8 +52,30 @@ from schemas.training import (
     TrainingRun,
     TrainingStep,
 )
+from schemas.workflows import TrainingPreflight, WorkflowActionRequest, WorkflowRequest
+from schemas.workspace import (
+    Workspace,
+    WorkspaceBudget,
+    WorkspaceCheckpoint,
+    WorkspaceDataset,
+    WorkspaceExport,
+    WorkspaceMetrics,
+    WorkspaceRun,
+    WorkspaceSource,
+)
 
 ENTITY_MODELS = (
+    Workspace,
+    WorkspaceBudget,
+    WorkspaceCheckpoint,
+    WorkspaceDataset,
+    WorkspaceExport,
+    WorkspaceMetrics,
+    WorkspaceRun,
+    WorkspaceSource,
+    WorkflowRequest,
+    WorkflowActionRequest,
+    TrainingPreflight,
     PilotTrainingConfiguration,
     PilotTrainingRequest,
     PilotEvaluationRequest,

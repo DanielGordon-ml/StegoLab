@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Explain eligibility without creating files or reserving experiment time.",
+  "properties": {
+    "allowed": {
+      "title": "Allowed",
+      "type": "boolean"
+    },
+    "blockers": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Blockers",
+      "type": "array"
+    },
+    "remaining_budget_seconds": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Remaining Budget Seconds",
+      "type": "number"
+    },
+    "remaining_experiment_slots": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Remaining Experiment Slots",
+      "type": "integer"
+    },
+    "resolved_settings": {
+      "additionalProperties": true,
+      "title": "Resolved Settings",
+      "type": "object"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "allowed",
+    "blockers",
+    "warnings",
+    "resolved_settings",
+    "remaining_budget_seconds",
+    "remaining_experiment_slots"
+  ],
+  "title": "TrainingPreflight",
+  "type": "object"
+}

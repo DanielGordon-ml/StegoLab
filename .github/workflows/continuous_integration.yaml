@@ -47,7 +47,9 @@ jobs:
           npm --prefix user_interface test
           npm --prefix user_interface run build
       - name: Build and start CPU containers
-        run: docker compose -f infrastructure/compose.yaml up --build --detach --wait --wait-timeout 120
+        run: |
+          sh infrastructure/setup_local_workspace.sh
+          docker compose -f infrastructure/compose.yaml up --build --detach --wait --wait-timeout 120
       - name: Install the test browser
         working-directory: user_interface
         run: npx playwright install --with-deps chromium

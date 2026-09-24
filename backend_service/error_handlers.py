@@ -27,8 +27,8 @@ async def handle_failure(request: Request, failure: Exception) -> JSONResponse:
     elif isinstance(failure, RequestValidationError):
         status_code, code = 422, "invalid_request"
         message = (
-            "The request does not match the required format. Use a positive whole "
-            "number of minutes, a supported version, and a valid request identifier."
+            "Some settings are missing or invalid. Check the highlighted fields, "
+            "supported values, and request identifier, then try again."
         )
     elif isinstance(failure, HTTPException):
         status_code = failure.status_code

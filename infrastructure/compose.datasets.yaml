@@ -1,5 +1,7 @@
 services:
   backend_service:
+    environment:
+      STEGOLAB_SOURCE_ROOTS: '{"Local image folder":"/sources/uhd-iqa"}'
     volumes:
       - type: bind
         source: ${STEGOLAB_SOURCE_DIRECTORY:-../data/UHD-IQA-database}

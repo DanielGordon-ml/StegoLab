@@ -33,6 +33,14 @@ class JobSnapshot(StrictRecord):
     updated_at: AwareDatetime
     progress: Annotated[float, Field(ge=0, le=1)] | None = None
     estimated_seconds_remaining: Annotated[int, Field(ge=0)] | None = None
+    operation: str | None = None
+    experiment_identifier: str | None = None
+    frozen_settings: dict[str, object] = Field(default_factory=dict)
+    result: dict[str, object] | None = None
+    error: dict[str, str] | None = None
+    metrics: dict[str, float | int] = Field(default_factory=dict)
+    requested_action: JobAction | None = None
+    latest_event_identifier: int | None = None
 
 
 class JobList(StrictRecord):
@@ -49,3 +57,4 @@ class JobEvent(StrictRecord):
     status: JobStatus
     phase: str = Field(min_length=1, max_length=128)
     created_at: AwareDatetime
+    snapshot: JobSnapshot | None = None

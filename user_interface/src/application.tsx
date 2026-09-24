@@ -4,9 +4,11 @@ import { read_capabilities, read_health } from './contracts/service';
 import { ConfigurationPanel } from './components/configuration_panel';
 import { ErrorNotice } from './components/error_notice';
 import { Icon } from './components/icons';
-import { UnavailablePanel } from './components/unavailable_panel';
+import { TrainingPanel } from './components/training_panel';
+import { InferencePanel } from './components/inference_panel';
+import { is_active_job, useWorkspace } from './hooks/use_workspace';
 
-const tabs = ['encode', 'decode', 'train', 'config'] as const;
+const tabs = ['train', 'encode', 'decode', 'config'] as const;
 type Tab = (typeof tabs)[number];
 const tab_labels = {
   encode: 'Encode',
@@ -15,9 +17,9 @@ const tab_labels = {
   config: 'Config',
 };
 
-/** Local workspace shell with keyboard-accessible tabs and live backend status. */
+/** Keep background jobs and connection state alive across accessible tabs. */
 export function Application() {
-  const [active_tab, set_active_tab] = useState<Tab>('encode');
+  const [active_tab, set_active_tab] = useState<Tab>('train');
   const tab_buttons = useRef<(HTMLButtonElement | null)[]>([]);
   const health = useQuery({
     queryKey: ['health'],
@@ -29,8 +31,10 @@ export function Application() {
     queryFn: read_capabilities,
     refetchInterval: 30000,
   });
+  const state = useWorkspace();
   const disconnected = health.isError || capabilities.isError;
   const connected = health.isSuccess && capabilities.isSuccess && !disconnected;
+  const active_job = state.jobs.data?.items.find(is_active_job);
 
   /** Follow the horizontal tab pattern, including Home and End. */
   function navigate_tabs(
@@ -48,7 +52,6 @@ export function Application() {
     set_active_tab(tabs[next_index]);
     tab_buttons.current[next_index]?.focus();
   }
-
   return (
     <div className="application_shell">
       <a href="#workspace" className="skip_link">
@@ -64,6 +67,18 @@ export function Application() {
           </span>
         </a>
         <span className="workspace_label">LOCAL WORKSPACE</span>
+        <div className="header_resources">
+          <span>
+            {connected
+              ? capabilities.data.available_devices.join(', ').toUpperCase()
+              : 'Compute unknown'}
+          </span>
+          <span>
+            {connected
+              ? `${capabilities.data.available_models.length} ready models`
+              : 'Models unknown'}
+          </span>
+        </div>
         <div
           className={`connection_status ${disconnected ? 'disconnected' : ''}`}
           role="status"
@@ -83,32 +98,53 @@ export function Application() {
             <p>Your local image lab.</p>
           </div>
           <span className="release_badge">
-            FOUNDATION <span>01</span>
+            TRAINING WORKSPACE <span>01</span>
           </span>
         </div>
-        <div role="tablist" aria-label="Workspace tabs" className="tablist">
-          {tabs.map((tab, index) => (
-            <button
-              key={tab}
-              id={`tab_${tab}`}
-              type="button"
-              role="tab"
-              aria-selected={active_tab === tab}
-              aria-controls={`panel_${tab}`}
-              tabIndex={active_tab === tab ? 0 : -1}
-              ref={(element) => {
-                tab_buttons.current[index] = element;
-              }}
-              onClick={() => set_active_tab(tab)}
-              onKeyDown={(event) => navigate_tabs(event, index)}
-            >
-              <Icon name={tab} />
-              {tab_labels[tab]}
-              {tab === 'config' && (
-                <span className="tab_ready" aria-label="available" />
-              )}
-            </button>
-          ))}
+        <div className="navigation_row">
+          <div role="tablist" aria-label="Workspace tabs" className="tablist">
+            {tabs.map((tab, index) => (
+              <button
+                key={tab}
+                id={`tab_${tab}`}
+                type="button"
+                role="tab"
+                aria-selected={active_tab === tab}
+                aria-controls={`panel_${tab}`}
+                tabIndex={active_tab === tab ? 0 : -1}
+                ref={(element) => {
+                  tab_buttons.current[index] = element;
+                }}
+                onClick={() => set_active_tab(tab)}
+                onKeyDown={(event) => navigate_tabs(event, index)}
+              >
+                <Icon name={tab} />
+                {tab_labels[tab]}
+              </button>
+            ))}
+          </div>
+          <button
+            className={`active_job_indicator ${active_job && !state.jobs.isError ? 'has_active_job' : ''}`}
+            onClick={() => set_active_tab('train')}
+            aria-label={
+              state.jobs.isError
+                ? 'Job status unavailable'
+                : active_job
+                  ? `View active job: ${active_job.experiment_identifier ?? active_job.operation}`
+                  : 'View training workspace'
+            }
+          >
+            <span
+              className={`status_dot ${active_job && !state.jobs.isError ? 'ready' : ''}`}
+            />
+            {state.jobs.isError
+              ? active_job
+                ? `${active_job.experiment_identifier || active_job.operation} · last known ${active_job.status}`
+                : 'Job status unavailable'
+              : active_job
+                ? `${active_job.experiment_identifier || active_job.operation} · ${active_job.status}`
+                : 'No active jobs'}
+          </button>
         </div>
         {disconnected && (
           <div className="connection_banner">
@@ -118,6 +154,8 @@ export function Application() {
               onClick={() => {
                 void health.refetch();
                 void capabilities.refetch();
+                void state.jobs.refetch();
+                void state.workspace.refetch();
               }}
             >
               Reconnect
@@ -133,11 +171,13 @@ export function Application() {
             tabIndex={0}
             hidden={active_tab !== tab}
           >
-            {tab === 'config' ? (
+            {tab === 'train' ? (
+              <TrainingPanel state={state} />
+            ) : tab === 'config' ? (
               <ConfigurationPanel />
-            ) : (
-              <UnavailablePanel tab={tab} />
-            )}
+            ) : active_tab === tab ? (
+              <InferencePanel mode={tab} capabilities={capabilities.data} />
+            ) : null}
           </section>
         ))}
         <section className="resource_strip" aria-label="Workspace resources">
@@ -168,23 +208,21 @@ export function Application() {
             <div>
               <span className="resource_label">PAYLOAD CAPACITY</span>
               <strong>
-                {connected
+                {connected && capabilities.data.maximum_payload_bytes > 0
                   ? `${capabilities.data.maximum_payload_bytes} bytes available`
-                  : 'Not confirmed'}
+                  : 'Not available'}
               </strong>
             </div>
           </div>
           <span className="resource_note">
-            {connected
-              ? 'Ready for the next step.'
-              : 'Waiting for the backend.'}
+            Private workspace. Measured results.
           </span>
         </section>
       </main>
       <footer>
         <span>
           StegoLab <span className="footer_dot">/</span>{' '}
-          {health.data?.application_version ?? 'Foundation'}
+          {health.data?.application_version ?? 'Local workspace'}
         </span>
         <span>Built for a closer look.</span>
       </footer>

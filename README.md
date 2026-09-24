@@ -27,6 +27,7 @@ priority; run `unset STEGOLAB_PORT` if you want to use the saved file value.
 Build and start the containers, then wait for both to become healthy:
 
 ```sh
+sh infrastructure/setup_local_workspace.sh
 docker compose -f infrastructure/compose.yaml up --build --wait
 ```
 
@@ -76,8 +77,8 @@ development commands, browser tests, and troubleshooting.
 
 ## Current features and limits
 
-- The application has four accessible tabs, a working Config screen, strict
-  backend contracts, persistent settings, and CPU containers. Config changes
+- The application has four accessible tabs, a Train workspace, a working Config
+  screen, strict backend contracts, persistent settings, and CPU containers. Config changes
   survive restarts; Reset restores a five-minute checkpoint interval.
 - Sprint 2 provides encrypted message framing, error correction, test payload
   maps, and pixel-safe image preparation through reusable services and CLI tools.
@@ -91,20 +92,23 @@ development commands, browser tests, and troubleshooting.
   instance-time accounting. Local checks spend zero GPU hours. Start with the
   [pilot guide](docs/pilot_training.md) and [Sprint 5 evidence](plan/sprint_05.md).
 
-The GUI and HTTP API still provide no encoding, decoding, or training operations.
-Dataset downloads remain unavailable. Public payload capacity remains zero, and
+The GUI connects local dataset preparation, experimental CPU training, checkpoint
+review, evaluation, and exports through background jobs. Read the
+[GUI training guide](docs/gui_training.md) for mounted folders, compatibility,
+and the shared experiment budget. Encoding, decoding, and dataset downloads
+remain unavailable. Public payload capacity remains zero, and
 no model is approved for application use or release. GPU readiness and model
-quality gates remain open; the existing tools do not establish recovery quality,
+quality gates remain open; the existing tools do not establish release-level recovery quality,
 pilot readiness, or SOTA results.
 
 ## System architecture
 
-The map covers the full planned system. **Solid lines** show implemented paths;
-**dashed lines** show planned work. The target keeps two containers: frontend
-and backend. Future model and data workers run as processes inside the backend.
-The existing map shows those application workers as planned. Sprint 4's separate
-experimental CLI engine does not complete worker, API, or browser integration.
-The backend stores configuration and job metadata in SQLite.
+The map covers the planned system before the training GUI integration. **Solid
+lines** show its original implemented paths; **dashed lines** show its roadmap.
+The current application keeps two containers and runs local training/data jobs
+as supervised processes inside the backend. The [GUI guide](docs/gui_training.md)
+describes this newer integration. Configuration, job metadata, events, and
+artifact references are stored in SQLite.
 
 [![StegoLab architecture: browser and CLI, frontend and backend, message, image, and local dataset services, planned workers, persistent state, checkpoints, and independent model packages](docs/architecture.svg)](Architecture.md)
 

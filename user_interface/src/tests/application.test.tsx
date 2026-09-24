@@ -30,8 +30,12 @@ describe('workspace', () => {
     mock_backend();
     const user = render_application();
     expect(await screen.findByText('Backend connected')).toBeVisible();
+    expect(screen.getByRole('tab', { name: 'Train' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
     expect(
-      screen.getByText('Image encoding is not available yet.'),
+      screen.getByRole('button', { name: /New training run/ }),
     ).toBeVisible();
     await user.click(screen.getByRole('tab', { name: 'Encode' }));
     await user.keyboard('{ArrowRight}');
@@ -42,7 +46,24 @@ describe('workspace', () => {
     await user.keyboard('{End}');
     expect(screen.getByRole('tab', { name: /Config/ })).toHaveFocus();
     await user.keyboard('{Home}');
-    expect(screen.getByRole('tab', { name: 'Encode' })).toHaveFocus();
+    expect(screen.getByRole('tab', { name: 'Train' })).toHaveFocus();
+  });
+  it('counts multilingual message bytes and clears message input when leaving Encode', async () => {
+    mock_backend();
+    const user = render_application();
+    await user.click(screen.getByRole('tab', { name: 'Encode' }));
+    await user.type(screen.getByLabelText('Message'), 'é🙂');
+    expect(screen.getByText(/6 UTF-8 bytes/)).toBeVisible();
+    expect(screen.getByLabelText('Password')).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Encode and verify' }),
+    ).toBeDisabled();
+    await user.click(screen.getByRole('tab', { name: 'Decode' }));
+    expect(
+      screen.getByRole('button', { name: 'Authenticate and decode' }),
+    ).toBeDisabled();
+    await user.click(screen.getByRole('tab', { name: 'Encode' }));
+    expect(screen.getByLabelText('Message')).toHaveValue('');
   });
   it('confirms only successful saves and keeps edits when switching tabs', async () => {
     let complete_save: (response: Response) => void = () => {};

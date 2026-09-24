@@ -1,0 +1,447 @@
+{
+  "$defs": {
+    "WorkspaceBudget": {
+      "additionalProperties": false,
+      "description": "Read the existing shared CPU ledger without changing its accounting.",
+      "properties": {
+        "blocked_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Blocked Reason"
+        },
+        "remaining_experiments": {
+          "maximum": 2,
+          "minimum": 0,
+          "title": "Remaining Experiments",
+          "type": "integer"
+        },
+        "remaining_seconds": {
+          "minimum": 0,
+          "title": "Remaining Seconds",
+          "type": "number"
+        }
+      },
+      "required": [
+        "remaining_seconds",
+        "remaining_experiments",
+        "blocked_reason"
+      ],
+      "title": "WorkspaceBudget",
+      "type": "object"
+    },
+    "WorkspaceCheckpoint": {
+      "additionalProperties": false,
+      "description": "Explain exact-continuation blockers without advertising inference models.",
+      "properties": {
+        "cpu_threads": {
+          "anyOf": [
+            {
+              "maximum": 16,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cpu Threads"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "dataset_revision": {
+          "title": "Dataset Revision",
+          "type": "string"
+        },
+        "experiment_identifier": {
+          "title": "Experiment Identifier",
+          "type": "string"
+        },
+        "global_step": {
+          "minimum": 0,
+          "title": "Global Step",
+          "type": "integer"
+        },
+        "identifier": {
+          "title": "Identifier",
+          "type": "string"
+        },
+        "latest": {
+          "title": "Latest",
+          "type": "boolean"
+        },
+        "metrics": {
+          "$ref": "#/$defs/WorkspaceMetrics"
+        },
+        "pinned": {
+          "title": "Pinned",
+          "type": "boolean"
+        },
+        "resume_blockers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Resume Blockers",
+          "type": "array"
+        }
+      },
+      "required": [
+        "identifier",
+        "experiment_identifier",
+        "dataset_revision",
+        "cpu_threads",
+        "global_step",
+        "created_at",
+        "latest",
+        "pinned",
+        "metrics",
+        "resume_blockers"
+      ],
+      "title": "WorkspaceCheckpoint",
+      "type": "object"
+    },
+    "WorkspaceDataset": {
+      "additionalProperties": false,
+      "description": "Describe a prepared revision without exposing its filesystem path.",
+      "properties": {
+        "blockers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Blockers",
+          "type": "array"
+        },
+        "compatible": {
+          "title": "Compatible",
+          "type": "boolean"
+        },
+        "identifier": {
+          "title": "Identifier",
+          "type": "string"
+        },
+        "image_count": {
+          "minimum": 0,
+          "title": "Image Count",
+          "type": "integer"
+        },
+        "integrity": {
+          "default": "not_checked",
+          "enum": [
+            "not_checked",
+            "verified"
+          ],
+          "title": "Integrity",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "prepared_bytes": {
+          "minimum": 0,
+          "title": "Prepared Bytes",
+          "type": "integer"
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "string"
+        },
+        "training_images": {
+          "minimum": 0,
+          "title": "Training Images",
+          "type": "integer"
+        },
+        "tuning_images": {
+          "minimum": 0,
+          "title": "Tuning Images",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "identifier",
+        "name",
+        "revision",
+        "image_count",
+        "prepared_bytes",
+        "training_images",
+        "tuning_images",
+        "compatible",
+        "blockers",
+        "integrity"
+      ],
+      "title": "WorkspaceDataset",
+      "type": "object"
+    },
+    "WorkspaceExport": {
+      "additionalProperties": false,
+      "description": "Provide a download reference for an independent experimental package.",
+      "properties": {
+        "artifact_identifier": {
+          "title": "Artifact Identifier",
+          "type": "string"
+        },
+        "experimental": {
+          "const": true,
+          "default": true,
+          "title": "Experimental",
+          "type": "boolean"
+        },
+        "identifier": {
+          "title": "Identifier",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "encoder",
+            "decoder"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "identifier",
+        "name",
+        "kind",
+        "experimental",
+        "artifact_identifier"
+      ],
+      "title": "WorkspaceExport",
+      "type": "object"
+    },
+    "WorkspaceMetrics": {
+      "additionalProperties": false,
+      "description": "Keep image quality separate from authenticated message recovery.",
+      "properties": {
+        "exact_recovery_rate": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exact Recovery Rate"
+        },
+        "psnr": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Psnr"
+        },
+        "psnr_sample_count": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Psnr Sample Count"
+        },
+        "ssim": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": -1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ssim"
+        },
+        "ssim_sample_count": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ssim Sample Count"
+        },
+        "trial_count": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Trial Count"
+        }
+      },
+      "required": [
+        "exact_recovery_rate",
+        "trial_count",
+        "psnr",
+        "psnr_sample_count",
+        "ssim",
+        "ssim_sample_count"
+      ],
+      "title": "WorkspaceMetrics",
+      "type": "object"
+    },
+    "WorkspaceRun": {
+      "additionalProperties": false,
+      "description": "Associate measured results with one immutable training invocation.",
+      "properties": {
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "dataset_revision": {
+          "title": "Dataset Revision",
+          "type": "string"
+        },
+        "experiment_identifier": {
+          "title": "Experiment Identifier",
+          "type": "string"
+        },
+        "global_step": {
+          "minimum": 0,
+          "title": "Global Step",
+          "type": "integer"
+        },
+        "identifier": {
+          "title": "Identifier",
+          "type": "string"
+        },
+        "metrics": {
+          "$ref": "#/$defs/WorkspaceMetrics"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "identifier",
+        "experiment_identifier",
+        "status",
+        "global_step",
+        "dataset_revision",
+        "created_at",
+        "metrics"
+      ],
+      "title": "WorkspaceRun",
+      "type": "object"
+    },
+    "WorkspaceSource": {
+      "additionalProperties": false,
+      "description": "Name a server-approved source root without returning its private path.",
+      "properties": {
+        "identifier": {
+          "title": "Identifier",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "identifier",
+        "label"
+      ],
+      "title": "WorkspaceSource",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Return discovered local research work and current capability limits.",
+  "properties": {
+    "budget": {
+      "$ref": "#/$defs/WorkspaceBudget"
+    },
+    "checkpoints": {
+      "items": {
+        "$ref": "#/$defs/WorkspaceCheckpoint"
+      },
+      "title": "Checkpoints",
+      "type": "array"
+    },
+    "datasets": {
+      "items": {
+        "$ref": "#/$defs/WorkspaceDataset"
+      },
+      "title": "Datasets",
+      "type": "array"
+    },
+    "exports": {
+      "items": {
+        "$ref": "#/$defs/WorkspaceExport"
+      },
+      "title": "Exports",
+      "type": "array"
+    },
+    "runs": {
+      "items": {
+        "$ref": "#/$defs/WorkspaceRun"
+      },
+      "title": "Runs",
+      "type": "array"
+    },
+    "sources": {
+      "items": {
+        "$ref": "#/$defs/WorkspaceSource"
+      },
+      "title": "Sources",
+      "type": "array"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "datasets",
+    "runs",
+    "checkpoints",
+    "exports",
+    "sources",
+    "budget",
+    "warnings"
+  ],
+  "title": "Workspace",
+  "type": "object"
+}

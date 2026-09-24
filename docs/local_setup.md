@@ -5,8 +5,9 @@ checks and image preparation through the command line. Sprint 3 adds local
 dataset preparation and offline integrity checks; see [datasets](datasets.md).
 Sprint 4 adds experimental CPU training, checkpoint inspection, evaluation, and
 independent model exports through the [command-line workflow](model_training.md).
-Browser training, encoding/decoding, dataset downloads, and model installation
-remain unavailable. Public model capacity is still zero.
+The browser now connects the local CPU workflow through durable jobs; see the
+[GUI training guide](gui_training.md). Encoding/decoding, dataset downloads,
+and model installation remain unavailable. Public model capacity is still zero.
 
 ## Start with Docker
 
@@ -27,6 +28,7 @@ STEGOLAB_PORT=8081
 - Run these commands from the repository root:
 
 ```sh
+sh infrastructure/setup_local_workspace.sh
 docker compose -f infrastructure/compose.yaml up --build --wait
 docker compose -f infrastructure/compose.yaml ps
 ```
@@ -41,6 +43,8 @@ start command again, and use that port in the browser address. The port always
 binds to localhost. Without a local override, open
 [StegoLab on the default port](http://127.0.0.1:8080).
 
+The fixed CPU training profile saves every five minutes. Config stores a separate
+default for future configurable profiles; it does not change that fixed profile.
 The Config tab starts with a five-minute checkpoint frequency. Save another
 positive whole-minute value, restart the backend, then reload the page:
 
@@ -49,7 +53,7 @@ docker compose -f infrastructure/compose.yaml restart backend_service
 ```
 
 The saved value must remain. Reset restores and saves five minutes. CPU and
-model availability are read-only in this sprint.
+qualified model availability are read-only.
 
 ## Storage and stopping
 
@@ -57,6 +61,10 @@ model availability are read-only in this sprint.
   under `/data/state`, plus run logs under `/data/logs`.
 - A new volume inherits the backend's non-root ownership during first startup.
   Do not replace it with a root-owned host directory.
+- Training data, checkpoints, exported models, and the original experiment ledger
+  stay in the repository's mounted folders. The setup helper creates these folders
+  and configures write access for fresh Linux installations; see the
+  [GUI training guide](gui_training.md) for existing installations.
 - Docker output is limited to three 10 MiB files per service. Request access
   logs are disabled so request values do not enter proxy logs.
 - Stop containers while keeping saved data:
@@ -118,7 +126,7 @@ For native application development, start the backend in one terminal and the
 frontend in another. The development server proxies API requests to port 8000.
 
 ```sh
-uv run uvicorn backend_service.application:create_application --factory --host 127.0.0.1 --port 8000 --no-access-log
+uv run uvicorn backend_service.application:create_application --factory --host 127.0.0.1 --port 8000 --timeout-graceful-shutdown 15 --no-access-log
 ```
 
 ```sh

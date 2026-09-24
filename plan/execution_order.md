@@ -15,8 +15,8 @@ complete the whole dataset step or replace the planned COCO benchmark.
 model/quantization code, `train`, `evaluate`, `inspect_checkpoint`, and
 `export_models`, full-state checkpoints, and persistent proof time accounting.
 Use [the model guide](../docs/model_training.md) and Sprint 4's acceptance record
-for the actual measured result. CLI delivery does not complete model-quality,
-GPU, worker/API, or GUI gates. Public model operations remain unavailable and
+for the actual measured result. That CLI delivery alone did not complete
+model-quality, GPU, worker/API, or GUI gates. Public inference remains unavailable and
 usable payload capacity remains zero.
 
 [Sprint 5](sprint_05.md) prepares the first GPU readiness test without launching
@@ -24,6 +24,17 @@ EC2: a versioned pilot CLI, lazy full-UHD loading, exact resume, explicit device
 exports, CUDA image preparation, and separate instance-time budget controls.
 CPU checks do not qualify GPU execution. The later readiness drill uses the
 existing two-hour setup allocation. Full pilot data and release gates stay open.
+
+Training-first GUI phase 1 — 2026-09-24: the local CPU portion of Step 5 now
+connects folder preparation, fixed-profile training, stop/resume, recorded result
+review, evaluation, and independent export downloads through durable jobs and
+events. Config supports validated JSON import/export. Existing data and reports
+are discovered without rewriting them, and operations retain the original CPU
+proof allowance. See the [GUI guide](../docs/gui_training.md).
+This does not complete the full frontend or release-integration gates: remote
+transfers, expanded training controls, GPU execution, qualified inference, and
+model-quality acceptance remain open. No new research result is implied by GUI
+delivery, and the 24-hour GPU allocation is unchanged.
 
 ## 1. Deliverables and shared decisions
 

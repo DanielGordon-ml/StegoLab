@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Describe a prepared revision without exposing its filesystem path.",
+  "properties": {
+    "blockers": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Blockers",
+      "type": "array"
+    },
+    "compatible": {
+      "title": "Compatible",
+      "type": "boolean"
+    },
+    "identifier": {
+      "title": "Identifier",
+      "type": "string"
+    },
+    "image_count": {
+      "minimum": 0,
+      "title": "Image Count",
+      "type": "integer"
+    },
+    "integrity": {
+      "default": "not_checked",
+      "enum": [
+        "not_checked",
+        "verified"
+      ],
+      "title": "Integrity",
+      "type": "string"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "prepared_bytes": {
+      "minimum": 0,
+      "title": "Prepared Bytes",
+      "type": "integer"
+    },
+    "revision": {
+      "title": "Revision",
+      "type": "string"
+    },
+    "training_images": {
+      "minimum": 0,
+      "title": "Training Images",
+      "type": "integer"
+    },
+    "tuning_images": {
+      "minimum": 0,
+      "title": "Tuning Images",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "identifier",
+    "name",
+    "revision",
+    "image_count",
+    "prepared_bytes",
+    "training_images",
+    "tuning_images",
+    "compatible",
+    "blockers",
+    "integrity"
+  ],
+  "title": "WorkspaceDataset",
+  "type": "object"
+}

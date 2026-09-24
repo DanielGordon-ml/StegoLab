@@ -1,4 +1,5 @@
 import { vi } from 'vitest';
+import { empty_workspace } from './workflow_fixtures';
 
 export const saved_configuration = {
   schema_version: 1,
@@ -27,6 +28,9 @@ export function mock_backend(
         return Response.json({ status: 'ready', application_version: '0.1.0' });
       if (String(url).endsWith('/capabilities'))
         return Response.json(capabilities);
+      if (String(url).endsWith('/workspace'))
+        return Response.json(empty_workspace);
+      if (String(url).endsWith('/jobs')) return Response.json({ items: [] });
       return Response.json(saved_configuration);
     },
   );

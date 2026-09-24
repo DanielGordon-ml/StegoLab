@@ -12,10 +12,16 @@ test('workspace tabs and saved configuration survive reload and optional backend
   page.on('pageerror', (error) => browser_errors.push(error.message));
   await page.goto('/');
   await expect(page.getByText('Backend connected')).toBeVisible();
-  for (const label of ['Encode', 'Decode', 'Train']) {
+  await expect(
+    page.getByRole('tab', { name: 'Train', exact: true }),
+  ).toHaveAttribute('aria-selected', 'true');
+  await expect(
+    page.getByRole('button', { name: 'New training run' }),
+  ).toBeVisible();
+  for (const label of ['Encode', 'Decode']) {
     await page.getByRole('tab', { name: label, exact: true }).click();
     await expect(page.getByRole('tabpanel', { name: label })).toContainText(
-      'not available yet.',
+      /model/i,
     );
   }
   await page.getByRole('tab', { name: /Config/ }).click();
@@ -78,11 +84,39 @@ test('workspace tabs and saved configuration survive reload and optional backend
   await page.getByRole('tab', { name: /Config/ }).focus();
   await page.keyboard.press('Home');
   await expect(
-    page.getByRole('tab', { name: 'Encode', exact: true }),
+    page.getByRole('tab', { name: 'Train', exact: true }),
   ).toBeFocused();
   await page.keyboard.press('ArrowRight');
   await expect(
-    page.getByRole('tab', { name: 'Decode', exact: true }),
+    page.getByRole('tab', { name: 'Encode', exact: true }),
   ).toBeFocused();
   expect(browser_errors).toEqual([]);
+});
+
+/** Verify every new panel under desktop and narrow keyboard-friendly layouts. */
+test('all workspace panels are accessible and fit a narrow screen', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await expect(page.getByText('Backend connected')).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'New training run' }),
+  ).toBeEnabled();
+  for (const width of [1280, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const label of ['Train', 'Encode', 'Decode', 'Config']) {
+      await page.getByRole('tab', { name: label, exact: true }).click();
+      await expect(page.getByRole('tabpanel', { name: label })).toBeVisible();
+      const accessibility = await new AxeBuilder({ page })
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
+        .analyze();
+      expect(accessibility.violations, `${label} at ${width}px`).toEqual([]);
+      const fits = await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      );
+      expect(fits, `${label} must not overflow the page at ${width}px`).toBe(
+        true,
+      );
+    }
+  }
 });

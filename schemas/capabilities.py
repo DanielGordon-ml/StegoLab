@@ -15,7 +15,7 @@ class HealthStatus(StrictRecord):
 
 
 class Capabilities(StrictRecord):
-    """Describe the CPU-only release without advertising model support."""
+    """Separate experimental training from qualified inference support."""
 
     application_version: Literal["0.1.0"] = "0.1.0"
     available_devices: list[Literal["cpu"]] = Field(
@@ -29,7 +29,7 @@ class Capabilities(StrictRecord):
     )
     encoding_available: Literal[False] = False
     decoding_available: Literal[False] = False
-    training_available: Literal[False] = False
+    training_available: bool = True
     maximum_payload_bytes: Annotated[int, Field(ge=0, le=0)] = 0
 
     @field_validator(
