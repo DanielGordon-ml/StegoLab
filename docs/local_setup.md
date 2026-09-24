@@ -12,26 +12,34 @@ remain unavailable. Public model capacity is still zero.
 
 - Install and start Docker Desktop with Compose. Allocate enough memory for your
   other work; the backend has a 10 GiB upper limit and the frontend has 256 MiB.
+- Use port 8081 for this local setup so another application can keep port 8080.
+  Create or edit `infrastructure/.env` once and add this line:
+
+```dotenv
+STEGOLAB_PORT=8081
+```
+
+- Git ignores this local file. Compose loads it beside `compose.yaml`, so the
+  setting remains after you close the terminal. The shared default stays 8080
+  when no override is set.
+- An exported `STEGOLAB_PORT` in your shell overrides the file. Run
+  `unset STEGOLAB_PORT` to use the saved value.
 - Run these commands from the repository root:
 
 ```sh
-docker compose -f infrastructure/compose.yaml up --build --detach --wait
+docker compose -f infrastructure/compose.yaml up --build --wait
 docker compose -f infrastructure/compose.yaml ps
 ```
 
-Open [StegoLab](http://127.0.0.1:8080). Both containers must report healthy.
+Open [StegoLab](http://127.0.0.1:8081). Both containers must report healthy.
+`--wait` runs the containers in the background and waits for them to be healthy.
 The build uses native CPU images on Apple Silicon and Linux. No GPU or cloud
 account is needed. Only the frontend publishes a port, bound to your computer.
 
-If another application uses port 8080, keep it running and choose another port:
-
-```sh
-export STEGOLAB_PORT=8081
-docker compose -f infrastructure/compose.yaml up --build --detach --wait
-```
-
-Then open [StegoLab on port 8081](http://127.0.0.1:8081). Keep this environment
-variable set for later Compose commands. The port always binds to localhost.
+If port 8081 is also busy, choose a free port in `infrastructure/.env`, run the
+start command again, and use that port in the browser address. The port always
+binds to localhost. Without a local override, open
+[StegoLab on the default port](http://127.0.0.1:8080).
 
 The Config tab starts with a five-minute checkpoint frequency. Save another
 positive whole-minute value, restart the backend, then reload the page:
@@ -60,6 +68,16 @@ docker compose -f infrastructure/compose.yaml down
 Avoid `down --volumes` for your working installation: it deletes saved settings
 and all other data in this volume. CI uses it only for disposable test data.
 
+To start again after `down`, use the start command above. To restart existing
+containers without changing their configuration:
+
+```sh
+docker compose -f infrastructure/compose.yaml restart
+```
+
+After changing the port or application code, use `up --build --wait` again.
+`restart` does not apply those changes.
+
 ## Development checks
 
 Install Python 3.12, uv 0.10.12, and Node.js 24. Dependency versions are locked.
@@ -86,14 +104,15 @@ JSON schema data. To run the browser workflow, start Compose first, then run:
 ```sh
 cd user_interface
 npx playwright install chromium
-STEGOLAB_RESTART_BACKEND=1 npm run test:browser
+STEGOLAB_BASE_URL=http://127.0.0.1:8081 STEGOLAB_RESTART_BACKEND=1 npm run test:browser
 ```
 
 This browser check changes and resets settings on the local test installation
 and restarts its backend. Do not run it against settings you need to preserve.
-Use `STEGOLAB_BASE_URL` to select another local test address.
-For port 8081, run with `STEGOLAB_BASE_URL=http://127.0.0.1:8081` while keeping
-`STEGOLAB_PORT=8081` set.
+The browser test does not read `infrastructure/.env`, so set `STEGOLAB_BASE_URL`
+explicitly as shown. Use your chosen port if it differs from 8081. Without this
+variable, the test uses port 8080. Compose still reads the saved port for its
+backend restart; no shell export of `STEGOLAB_PORT` is needed.
 
 For native application development, start the backend in one terminal and the
 frontend in another. The development server proxies API requests to port 8000.
@@ -140,7 +159,8 @@ Inside a running container, the public demonstration is also available through
 | Problem | Check or action |
 |---|---|
 | Docker cannot connect | Start Docker Desktop, then retry `docker compose ... up`. |
-| Port 8080 is busy | Set `STEGOLAB_PORT=8081` as described above. Leave other applications running. |
+| The selected port is busy | Choose a free port in `infrastructure/.env` and run the start command again. Leave other applications running. |
+| Compose uses the wrong port | Run `unset STEGOLAB_PORT` to clear a shell override, then run the start command again. |
 | The page shows disconnected | Check `docker compose -f infrastructure/compose.yaml ps` and the logs below. |
 | Settings cannot save | Check disk space and volume permissions. The existing saved value is preserved on a failed write. |
 | Startup reports invalid saved settings | Keep the volume for diagnosis; do not delete it or overwrite its database. Restore a known-good backup. |
@@ -148,8 +168,11 @@ Inside a running container, the public demonstration is also available through
 
 ```sh
 docker compose -f infrastructure/compose.yaml logs --tail 100 backend_service user_interface
-curl --fail http://127.0.0.1:8080/api/v1/health
+curl --fail http://127.0.0.1:8081/api/v1/health
 ```
+
+Use your chosen port in the health URL; the shared default without an override
+is 8080.
 
 Base images are pinned to multi-platform digests in each Dockerfile. Updating a
 digest or dependency lock requires running these checks and the restart test.
