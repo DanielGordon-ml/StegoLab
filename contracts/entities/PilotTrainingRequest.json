@@ -1,0 +1,219 @@
+{
+  "$defs": {
+    "PilotTrainingConfiguration": {
+      "additionalProperties": false,
+      "description": "Freeze the numerical profile before the first optimizer update.",
+      "properties": {
+        "architecture": {
+          "const": "dense_pilot_v1",
+          "default": "dense_pilot_v1",
+          "title": "Architecture",
+          "type": "string"
+        },
+        "checkpoint_interval_seconds": {
+          "const": 300,
+          "default": 300,
+          "title": "Checkpoint Interval Seconds",
+          "type": "integer"
+        },
+        "cpu_threads": {
+          "default": 4,
+          "maximum": 16,
+          "minimum": 1,
+          "title": "Cpu Threads",
+          "type": "integer"
+        },
+        "crop_size": {
+          "const": 256,
+          "default": 256,
+          "title": "Crop Size",
+          "type": "integer"
+        },
+        "device": {
+          "default": "cpu",
+          "enum": [
+            "cpu",
+            "cuda"
+          ],
+          "title": "Device",
+          "type": "string"
+        },
+        "effective_batch_size": {
+          "const": 16,
+          "default": 16,
+          "title": "Effective Batch Size",
+          "type": "integer"
+        },
+        "learning_rate": {
+          "default": 0.0001,
+          "maximum": 0.0001,
+          "minimum": 0.0001,
+          "title": "Learning Rate",
+          "type": "number"
+        },
+        "maximum_image_loss_weight": {
+          "default": 100.0,
+          "maximum": 100.0,
+          "minimum": 100.0,
+          "title": "Maximum Image Loss Weight",
+          "type": "number"
+        },
+        "physical_batch_size": {
+          "default": 4,
+          "enum": [
+            4,
+            8
+          ],
+          "title": "Physical Batch Size",
+          "type": "integer"
+        },
+        "planned_optimizer_steps": {
+          "maximum": 100000000,
+          "minimum": 1,
+          "title": "Planned Optimizer Steps",
+          "type": "integer"
+        },
+        "precision": {
+          "const": "float32",
+          "default": "float32",
+          "title": "Precision",
+          "type": "string"
+        },
+        "seed": {
+          "default": 0,
+          "maximum": 9223372036854775807,
+          "minimum": 0,
+          "title": "Seed",
+          "type": "integer"
+        },
+        "validation_interval_steps": {
+          "default": 100,
+          "maximum": 100000,
+          "minimum": 1,
+          "title": "Validation Interval Steps",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "architecture",
+        "device",
+        "precision",
+        "seed",
+        "crop_size",
+        "physical_batch_size",
+        "effective_batch_size",
+        "learning_rate",
+        "planned_optimizer_steps",
+        "maximum_image_loss_weight",
+        "checkpoint_interval_seconds",
+        "validation_interval_steps",
+        "cpu_threads"
+      ],
+      "title": "PilotTrainingConfiguration",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Start or exactly resume a frozen profile without extending smoke limits.",
+  "properties": {
+    "configuration": {
+      "$ref": "#/$defs/PilotTrainingConfiguration"
+    },
+    "cpu_smoke_timeout_seconds": {
+      "default": 120.0,
+      "maximum": 120.0,
+      "minimum": 1.0,
+      "title": "Cpu Smoke Timeout Seconds",
+      "type": "number"
+    },
+    "dataset_directory": {
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Dataset Directory",
+      "type": "string"
+    },
+    "execution_mode": {
+      "default": "cpu_smoke",
+      "enum": [
+        "cpu_smoke",
+        "gpu_pilot"
+      ],
+      "title": "Execution Mode",
+      "type": "string"
+    },
+    "experiment_identifier": {
+      "pattern": "^[a-z][a-z0-9_]{0,63}$",
+      "title": "Experiment Identifier",
+      "type": "string"
+    },
+    "output_root": {
+      "default": ".",
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Output Root",
+      "type": "string"
+    },
+    "resume_checkpoint": {
+      "anyOf": [
+        {
+          "maxLength": 4096,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Resume Checkpoint"
+    },
+    "schema_version": {
+      "const": 2,
+      "default": 2,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "session_identifier": {
+      "anyOf": [
+        {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Session Identifier"
+    },
+    "stop_after_step": {
+      "anyOf": [
+        {
+          "maximum": 100000000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Stop After Step"
+    }
+  },
+  "required": [
+    "schema_version",
+    "experiment_identifier",
+    "output_root",
+    "execution_mode",
+    "session_identifier",
+    "cpu_smoke_timeout_seconds",
+    "dataset_directory",
+    "configuration",
+    "resume_checkpoint",
+    "stop_after_step"
+  ],
+  "title": "PilotTrainingRequest",
+  "type": "object"
+}

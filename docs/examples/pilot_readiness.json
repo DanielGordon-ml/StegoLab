@@ -1,0 +1,6 @@
+{
+  "schema_version": 2,
+  "dataset_directory": "datasets/uhd_iqa/75bef6dab2b3de136d1c5c359d6753a25e4a750d5387fe75921e394482f0776c",
+  "output_root": ".",
+  "experiment_identifier": "sprint5_readiness_check"
+}

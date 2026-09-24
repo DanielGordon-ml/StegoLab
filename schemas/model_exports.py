@@ -2,7 +2,7 @@
 
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, field_validator, model_validator
 
 from schemas.base import StrictRecord
 
@@ -24,7 +24,7 @@ class ExportFile(StrictRecord):
 class ModelExportManifest(ExportMetadata):
     """Freeze the tensor interface, protocol, and independent dependencies."""
 
-    format_version: Literal[1] = 1
+    format_version: Literal[1, 2] = 1
     role: Literal["encoder", "decoder"]
     architecture_identifier: Literal["dense_residual_v1"] = "dense_residual_v1"
     status: Literal["experimental"] = "experimental"
@@ -44,8 +44,34 @@ class ModelExportManifest(ExportMetadata):
     )
     python_version: Literal["3.12"] = "3.12"
     dependencies: dict[str, str] = Field(min_length=1, max_length=32)
+    runtime_dependencies: dict[str, dict[str, str]] = Field(default_factory=dict)
     producer_environment: dict[str, str] = Field(min_length=1, max_length=8)
     files: dict[str, ExportFile] = Field(min_length=1, max_length=64)
+
+    @field_validator("format_version", mode="before")
+    @classmethod
+    def require_integer_format(cls, value: object) -> object:
+        """Reject booleans and decimal lookalikes at the package format boundary."""
+        if type(value) is not int:
+            raise ValueError("The package format version requires a whole number.")
+        return value
+
+    @model_validator(mode="after")
+    def validate_runtime_dependencies(self) -> "ModelExportManifest":
+        """Require explicit tested CPU pins and separately recorded CUDA pins."""
+        if self.format_version == 1:
+            if self.runtime_dependencies:
+                raise ValueError("Version one packages support only CPU dependencies.")
+        elif (
+            set(self.runtime_dependencies) != {"cpu", "cuda"}
+            or self.runtime_dependencies["cpu"] != self.dependencies
+            or any(
+                not 1 <= len(pins) <= 128 for pins in self.runtime_dependencies.values()
+            )
+            or self.runtime_dependencies["cuda"].get("torch") != "2.14.0+cu126"
+        ):
+            raise ValueError("Version two packages require CPU and CUDA runtime pins.")
+        return self
 
 
 class ModelExportSummary(ExportMetadata):
@@ -66,3 +92,4 @@ class ExportVerification(StrictRecord):
     relative_tolerance: float = Field(default=0.00001, ge=0.00001, le=0.00001)
     absolute_tolerance: float = Field(default=0.00001, ge=0.00001, le=0.00001)
     status: Literal["passed"] = "passed"
+    device: Literal["cpu", "cuda"] = "cpu"

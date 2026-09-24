@@ -1,0 +1,297 @@
+{
+  "$defs": {
+    "PngEvaluationTrial": {
+      "additionalProperties": false,
+      "description": "Describe one attempted saved-image recovery without its secret contents.",
+      "properties": {
+        "clipped_fraction": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Clipped Fraction"
+        },
+        "elapsed_seconds": {
+          "minimum": 0.0,
+          "title": "Elapsed Seconds",
+          "type": "number"
+        },
+        "error_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error Code"
+        },
+        "fixture_kind": {
+          "enum": [
+            "empty",
+            "unicode",
+            "maximum"
+          ],
+          "title": "Fixture Kind",
+          "type": "string"
+        },
+        "height": {
+          "maximum": 1024,
+          "minimum": 512,
+          "title": "Height",
+          "type": "integer"
+        },
+        "identical_pixels": {
+          "default": false,
+          "title": "Identical Pixels",
+          "type": "boolean"
+        },
+        "peak_signal_to_noise_ratio": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Peak Signal To Noise Ratio"
+        },
+        "raw_bit_error_rate": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Raw Bit Error Rate"
+        },
+        "recovered": {
+          "title": "Recovered",
+          "type": "boolean"
+        },
+        "source_identity": {
+          "minLength": 1,
+          "title": "Source Identity",
+          "type": "string"
+        },
+        "structural_similarity": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": -1.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Structural Similarity"
+        },
+        "width": {
+          "maximum": 1024,
+          "minimum": 512,
+          "title": "Width",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "source_identity",
+        "width",
+        "height",
+        "fixture_kind",
+        "recovered",
+        "raw_bit_error_rate",
+        "peak_signal_to_noise_ratio",
+        "structural_similarity",
+        "identical_pixels",
+        "clipped_fraction",
+        "elapsed_seconds",
+        "error_code"
+      ],
+      "title": "PngEvaluationTrial",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Retain every attempted case without claiming final benchmark acceptance.",
+  "properties": {
+    "compatibility_identifier": {
+      "title": "Compatibility Identifier",
+      "type": "string"
+    },
+    "completed": {
+      "title": "Completed",
+      "type": "boolean"
+    },
+    "dataset_revision": {
+      "title": "Dataset Revision",
+      "type": "string"
+    },
+    "elapsed_seconds": {
+      "minimum": 0,
+      "title": "Elapsed Seconds",
+      "type": "number"
+    },
+    "exact_recovery_count": {
+      "maximum": 32,
+      "minimum": 0,
+      "title": "Exact Recovery Count",
+      "type": "integer"
+    },
+    "exact_recovery_rate": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Exact Recovery Rate"
+    },
+    "expected_png_trials": {
+      "maximum": 32,
+      "minimum": 1,
+      "title": "Expected Png Trials",
+      "type": "integer"
+    },
+    "kind": {
+      "enum": [
+        "cpu_smoke",
+        "tuning"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "mean_clipped_fraction": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Mean Clipped Fraction"
+    },
+    "median_peak_signal_to_noise_ratio": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Median Peak Signal To Noise Ratio"
+    },
+    "median_structural_similarity": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": -1,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Median Structural Similarity"
+    },
+    "peak_device_memory_bytes": {
+      "minimum": 0,
+      "title": "Peak Device Memory Bytes",
+      "type": "integer"
+    },
+    "peak_process_memory_bytes": {
+      "minimum": 0,
+      "title": "Peak Process Memory Bytes",
+      "type": "integer"
+    },
+    "png_trials": {
+      "items": {
+        "$ref": "#/$defs/PngEvaluationTrial"
+      },
+      "title": "Png Trials",
+      "type": "array"
+    },
+    "quality_measured": {
+      "title": "Quality Measured",
+      "type": "boolean"
+    },
+    "release_qualified": {
+      "const": false,
+      "default": false,
+      "title": "Release Qualified",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": 2,
+      "default": 2,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "selection_identifier": {
+      "title": "Selection Identifier",
+      "type": "string"
+    },
+    "stopped_reason": {
+      "enum": [
+        "complete",
+        "deadline",
+        "failed"
+      ],
+      "title": "Stopped Reason",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "kind",
+    "compatibility_identifier",
+    "dataset_revision",
+    "selection_identifier",
+    "completed",
+    "expected_png_trials",
+    "png_trials",
+    "exact_recovery_count",
+    "exact_recovery_rate",
+    "median_peak_signal_to_noise_ratio",
+    "median_structural_similarity",
+    "mean_clipped_fraction",
+    "elapsed_seconds",
+    "peak_process_memory_bytes",
+    "peak_device_memory_bytes",
+    "quality_measured",
+    "release_qualified",
+    "stopped_reason"
+  ],
+  "title": "PilotEvaluationReport",
+  "type": "object"
+}

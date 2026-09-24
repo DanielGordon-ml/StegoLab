@@ -1,0 +1,200 @@
+{
+  "$defs": {
+    "PilotCover": {
+      "additionalProperties": false,
+      "description": "Identify a selected tuning cover without storing an absolute path.",
+      "properties": {
+        "height": {
+          "maximum": 8192,
+          "minimum": 256,
+          "title": "Height",
+          "type": "integer"
+        },
+        "prepared_checksum": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Prepared Checksum",
+          "type": "string"
+        },
+        "source_identity": {
+          "maxLength": 4096,
+          "minLength": 1,
+          "title": "Source Identity",
+          "type": "string"
+        },
+        "width": {
+          "maximum": 8192,
+          "minimum": 256,
+          "title": "Width",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "source_identity",
+        "prepared_checksum",
+        "width",
+        "height"
+      ],
+      "title": "PilotCover",
+      "type": "object"
+    },
+    "PilotExcludedCover": {
+      "additionalProperties": false,
+      "description": "Explain why a tuning cover cannot supply the native evaluation crop.",
+      "properties": {
+        "height": {
+          "maximum": 8192,
+          "minimum": 256,
+          "title": "Height",
+          "type": "integer"
+        },
+        "prepared_checksum": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Prepared Checksum",
+          "type": "string"
+        },
+        "reason": {
+          "const": "smaller_than_1024",
+          "default": "smaller_than_1024",
+          "title": "Reason",
+          "type": "string"
+        },
+        "source_identity": {
+          "maxLength": 4096,
+          "minLength": 1,
+          "title": "Source Identity",
+          "type": "string"
+        },
+        "width": {
+          "maximum": 8192,
+          "minimum": 256,
+          "title": "Width",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "source_identity",
+        "prepared_checksum",
+        "width",
+        "height",
+        "reason"
+      ],
+      "title": "PilotExcludedCover",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Keep complete split counts and deterministic development-only choices.",
+  "properties": {
+    "dataset_revision": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Dataset Revision",
+      "type": "string"
+    },
+    "gpu_profile_eligible": {
+      "title": "Gpu Profile Eligible",
+      "type": "boolean"
+    },
+    "gpu_profile_reasons": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 8,
+      "title": "Gpu Profile Reasons",
+      "type": "array"
+    },
+    "pilot_ready": {
+      "const": false,
+      "default": false,
+      "title": "Pilot Ready",
+      "type": "boolean"
+    },
+    "policy_version": {
+      "const": "pilot_data_v1",
+      "default": "pilot_data_v1",
+      "title": "Policy Version",
+      "type": "string"
+    },
+    "records_checksum": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Records Checksum",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "selection_checksum": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Selection Checksum",
+      "type": "string"
+    },
+    "split_counts": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Split Counts",
+      "type": "object"
+    },
+    "training_checksum": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Training Checksum",
+      "type": "string"
+    },
+    "training_count": {
+      "maximum": 200000,
+      "minimum": 1,
+      "title": "Training Count",
+      "type": "integer"
+    },
+    "tuning_checksum": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Tuning Checksum",
+      "type": "string"
+    },
+    "tuning_eligible_count": {
+      "maximum": 200000,
+      "minimum": 1,
+      "title": "Tuning Eligible Count",
+      "type": "integer"
+    },
+    "tuning_excluded": {
+      "items": {
+        "$ref": "#/$defs/PilotExcludedCover"
+      },
+      "maxItems": 200000,
+      "title": "Tuning Excluded",
+      "type": "array"
+    },
+    "tuning_selected": {
+      "items": {
+        "$ref": "#/$defs/PilotCover"
+      },
+      "maxItems": 32,
+      "minItems": 1,
+      "title": "Tuning Selected",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "policy_version",
+    "dataset_revision",
+    "records_checksum",
+    "split_counts",
+    "training_count",
+    "tuning_eligible_count",
+    "tuning_selected",
+    "tuning_excluded",
+    "training_checksum",
+    "tuning_checksum",
+    "selection_checksum",
+    "gpu_profile_eligible",
+    "gpu_profile_reasons",
+    "pilot_ready"
+  ],
+  "title": "PilotSelection",
+  "type": "object"
+}

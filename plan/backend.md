@@ -12,6 +12,11 @@ profile, resume rules, and shared CPU proof budget. GUI/HTTP model operations,
 worker scheduling, remote dataset adapters, and GPU deployment remain planned.
 Capabilities still advertise no installed usable model and zero payload capacity.
 
+[Sprint 5](sprint_05.md) adds a separate version-two pilot path with lazy UHD-IQA
+loading, synchronous reproducible batches, CUDA-aware execution, tuning reports,
+and independent packages with explicit CPU/CUDA runtime pins. This is local
+preparation: real GPU behavior and model qualification remain unmeasured.
+
 ## 1. Agreed baseline
 
 - Deliver training from scratch, fine-tuning, evaluation, text encoding, text decoding, and separate encoder/decoder packages.

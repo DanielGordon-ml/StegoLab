@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Report completed updates without implying model quality or GPU acceptance.",
+  "properties": {
+    "checkpoint": {
+      "title": "Checkpoint",
+      "type": "string"
+    },
+    "compatibility_identifier": {
+      "title": "Compatibility Identifier",
+      "type": "string"
+    },
+    "dataset_revision": {
+      "title": "Dataset Revision",
+      "type": "string"
+    },
+    "elapsed_seconds": {
+      "minimum": 0,
+      "title": "Elapsed Seconds",
+      "type": "number"
+    },
+    "execution_mode": {
+      "enum": [
+        "cpu_smoke",
+        "gpu_pilot"
+      ],
+      "title": "Execution Mode",
+      "type": "string"
+    },
+    "experiment_identifier": {
+      "title": "Experiment Identifier",
+      "type": "string"
+    },
+    "global_step": {
+      "minimum": 0,
+      "title": "Global Step",
+      "type": "integer"
+    },
+    "learning_gate": {
+      "const": "not_measured",
+      "default": "not_measured",
+      "title": "Learning Gate",
+      "type": "string"
+    },
+    "quality_selection_performed": {
+      "default": false,
+      "title": "Quality Selection Performed",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": 2,
+      "default": 2,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "status": {
+      "enum": [
+        "completed",
+        "stopped",
+        "budget_exhausted"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "stop_signal": {
+      "anyOf": [
+        {
+          "enum": [
+            2,
+            15
+          ],
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Stop Signal"
+    }
+  },
+  "required": [
+    "schema_version",
+    "experiment_identifier",
+    "execution_mode",
+    "status",
+    "global_step",
+    "checkpoint",
+    "dataset_revision",
+    "compatibility_identifier",
+    "elapsed_seconds",
+    "quality_selection_performed",
+    "learning_gate",
+    "stop_signal"
+  ],
+  "title": "PilotTrainingRun",
+  "type": "object"
+}

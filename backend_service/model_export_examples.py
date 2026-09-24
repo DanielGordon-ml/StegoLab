@@ -31,11 +31,17 @@ def example_output(model: nn.Module, role: Literal["encoder", "decoder"]) -> byt
 
 
 def verify_example(
-    graph: nn.Module, role: Literal["encoder", "decoder"], expected: torch.Tensor
+    graph: nn.Module,
+    role: Literal["encoder", "decoder"],
+    expected: torch.Tensor,
+    *,
+    device: Literal["cpu", "cuda"] = "cpu",
 ) -> None:
     """Require bounded floating-point agreement with the package reference."""
     with torch.inference_mode():
-        actual = cast(torch.Tensor, graph(*example_inputs(role)))
+        actual = cast(
+            torch.Tensor, graph(*(value.to(device) for value in example_inputs(role)))
+        ).cpu()
     if actual.shape != expected.shape or not torch.allclose(
         expected, actual, rtol=1e-5, atol=1e-5
     ):

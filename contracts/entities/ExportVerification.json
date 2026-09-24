@@ -20,6 +20,15 @@
       "title": "Compatibility Identifier",
       "type": "string"
     },
+    "device": {
+      "default": "cpu",
+      "enum": [
+        "cpu",
+        "cuda"
+      ],
+      "title": "Device",
+      "type": "string"
+    },
     "maximum_absolute_difference": {
       "minimum": 0,
       "title": "Maximum Absolute Difference",
@@ -45,7 +54,8 @@
     "maximum_absolute_difference",
     "relative_tolerance",
     "absolute_tolerance",
-    "status"
+    "status",
+    "device"
   ],
   "title": "ExportVerification",
   "type": "object"

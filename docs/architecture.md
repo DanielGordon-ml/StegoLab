@@ -8,6 +8,11 @@ GitHub displays the [static SVG](architecture.svg); it does not run this HTML vi
 
 ## Scope and evidence
 
+The diagram captures the application paths through Sprint 3. Sprint 4's CPU
+proof and Sprint 5's separate pilot preparation CLI are described in the
+[model guide](model_training.md) and [pilot guide](pilot_training.md). They do
+not yet connect to the diagram's planned API workers or browser model flows.
+
 - Solid paths show implemented settings, protocol, image tools, and local
   UHD-IQA dataset preparation with frozen manifests.
   Dashed paths and components labelled **planned** show the target system.

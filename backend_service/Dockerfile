@@ -17,6 +17,7 @@ RUN uv sync --frozen --no-default-groups --no-install-project \
     && chown -R 10001:10001 /data
 COPY backend_service/ ./backend_service/
 COPY schemas/ ./schemas/
+COPY infrastructure/cuda/runtime_dependencies.json ./infrastructure/cuda/runtime_dependencies.json
 USER 10001:10001
 EXPOSE 8000
 CMD ["uvicorn", "backend_service.application:create_application", "--factory", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--no-access-log"]

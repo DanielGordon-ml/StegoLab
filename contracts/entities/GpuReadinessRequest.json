@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Identify an existing host session and optional frozen learned checkpoint.",
+  "properties": {
+    "dataset_directory": {
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Dataset Directory",
+      "type": "string"
+    },
+    "experiment_identifier": {
+      "pattern": "^[a-z][a-z0-9_]{0,63}$",
+      "title": "Experiment Identifier",
+      "type": "string"
+    },
+    "learned_checkpoint": {
+      "anyOf": [
+        {
+          "maxLength": 4096,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Learned Checkpoint"
+    },
+    "learned_experiment_identifier": {
+      "anyOf": [
+        {
+          "pattern": "^[a-z][a-z0-9_]{0,63}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Learned Experiment Identifier"
+    },
+    "output_root": {
+      "default": ".",
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Output Root",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 2,
+      "default": 2,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "session_identifier": {
+      "anyOf": [
+        {
+          "pattern": "^[a-z][a-z0-9_]{0,63}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Session Identifier"
+    }
+  },
+  "required": [
+    "schema_version",
+    "dataset_directory",
+    "output_root",
+    "experiment_identifier",
+    "session_identifier",
+    "learned_checkpoint",
+    "learned_experiment_identifier"
+  ],
+  "title": "GpuReadinessRequest",
+  "type": "object"
+}

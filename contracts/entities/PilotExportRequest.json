@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Publish independent packages from a verified pilot checkpoint.",
+  "properties": {
+    "checkpoint": {
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Checkpoint",
+      "type": "string"
+    },
+    "cpu_smoke_timeout_seconds": {
+      "default": 120.0,
+      "maximum": 120.0,
+      "minimum": 1.0,
+      "title": "Cpu Smoke Timeout Seconds",
+      "type": "number"
+    },
+    "device": {
+      "default": "cpu",
+      "enum": [
+        "cpu",
+        "cuda"
+      ],
+      "title": "Device",
+      "type": "string"
+    },
+    "execution_mode": {
+      "default": "cpu_smoke",
+      "enum": [
+        "cpu_smoke",
+        "gpu_pilot"
+      ],
+      "title": "Execution Mode",
+      "type": "string"
+    },
+    "experiment_identifier": {
+      "pattern": "^[a-z][a-z0-9_]{0,63}$",
+      "title": "Experiment Identifier",
+      "type": "string"
+    },
+    "export_name": {
+      "default": "002V",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$",
+      "title": "Export Name",
+      "type": "string"
+    },
+    "output_root": {
+      "default": ".",
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Output Root",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 2,
+      "default": 2,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "session_identifier": {
+      "anyOf": [
+        {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Session Identifier"
+    }
+  },
+  "required": [
+    "schema_version",
+    "experiment_identifier",
+    "output_root",
+    "execution_mode",
+    "session_identifier",
+    "cpu_smoke_timeout_seconds",
+    "checkpoint",
+    "export_name",
+    "device"
+  ],
+  "title": "PilotExportRequest",
+  "type": "object"
+}

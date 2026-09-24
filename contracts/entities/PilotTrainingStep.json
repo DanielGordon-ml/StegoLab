@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Keep finite scalar training diagnostics separate from recovery acceptance.",
+  "properties": {
+    "bit_loss": {
+      "minimum": 0,
+      "title": "Bit Loss",
+      "type": "number"
+    },
+    "elapsed_seconds": {
+      "minimum": 0,
+      "title": "Elapsed Seconds",
+      "type": "number"
+    },
+    "global_step": {
+      "minimum": 1,
+      "title": "Global Step",
+      "type": "integer"
+    },
+    "image_loss": {
+      "minimum": 0,
+      "title": "Image Loss",
+      "type": "number"
+    },
+    "image_loss_weight": {
+      "maximum": 100,
+      "minimum": 0,
+      "title": "Image Loss Weight",
+      "type": "number"
+    }
+  },
+  "required": [
+    "global_step",
+    "bit_loss",
+    "image_loss",
+    "image_loss_weight",
+    "elapsed_seconds"
+  ],
+  "title": "PilotTrainingStep",
+  "type": "object"
+}

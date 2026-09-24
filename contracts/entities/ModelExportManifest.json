@@ -70,8 +70,11 @@
       "type": "object"
     },
     "format_version": {
-      "const": 1,
       "default": 1,
+      "enum": [
+        1,
+        2
+      ],
       "title": "Format Version",
       "type": "integer"
     },
@@ -134,6 +137,16 @@
       "title": "Role",
       "type": "string"
     },
+    "runtime_dependencies": {
+      "additionalProperties": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "type": "object"
+      },
+      "title": "Runtime Dependencies",
+      "type": "object"
+    },
     "source_identifier": {
       "maxLength": 256,
       "minLength": 1,
@@ -178,6 +191,7 @@
     "capacity_rule",
     "python_version",
     "dependencies",
+    "runtime_dependencies",
     "producer_environment",
     "files"
   ],
