@@ -2,6 +2,16 @@ name: Native CUDA image preparation
 
 on:
   workflow_dispatch:
+  push:
+    branches: ["codex/**"]
+    paths:
+      - "infrastructure/cuda/**"
+      - "infrastructure/compose.gpu.yaml"
+      - "backend_service/**"
+      - "schemas/**"
+      - "scripts/pilot_budget_dependencies.py"
+      - "scripts/verify_cuda_image.py"
+      - ".github/workflows/cuda_preparation.yaml"
   pull_request:
     paths:
       - "infrastructure/cuda/**"
