@@ -1,6 +1,6 @@
 # Sprint 5 — Prepare the First GPU Run
 
-Status: implementation and acceptance checks in progress.
+Status: preparation implemented; local acceptance and native CUDA-image checks pass.
 Date: 2026-09-24. Planned duration: ten working days. Team: owner + Codex.
 Branch: `codex/sprint-05-gpu-preparation`. Source baseline: `0bcc16a`.
 
@@ -49,9 +49,62 @@ Branch: `codex/sprint-05-gpu-preparation`. Source baseline: `0bcc16a`.
 
 ## Acceptance
 
-Final test counts, container/browser checks and CI outcomes will be recorded here
-after integration. Actual GPU training, CUDA resume/recovery/parity and physical
-shutdown remain `not_run`, regardless of passing simulated or CPU tests.
+### Passed locally
+
+- All 411 backend tests pass, including legacy CPU-proof behavior. One existing
+  Starlette/httpx deprecation warning remains.
+- All ten frontend tests, lint, type checks and production build pass.
+- Ruff lint/format, strict Python types, generated contracts and four protocol
+  fixtures pass. All 193 checked source files contain fewer than 300 lines.
+- Real dense CPU runs match uninterrupted execution after resume for each fixed
+  physical batch (four and eight): weights, BatchNorm, Adam, next random values,
+  consumed sample positions, image order and crops. Each update uses sixteen images.
+- Failure tests cover damaged data/checkpoints, incompatible state, missing CUDA,
+  disk and interrupted writes, deadlines, retained exports, concurrent operations,
+  clock regression, restart accounting, and failed shutdown commands.
+- Independent CPU exports match eager execution, including existing protocol and
+  odd-size cases. Requested CUDA publication is tested with simulated device
+  verification; actual CUDA parity is still pending.
+- CPU containers build and become healthy. The isolated Chromium test passes
+  after reload and backend restart (one test, 2.1 seconds). Its temporary project
+  and volumes were removed; the existing application on port 8081 was preserved.
+- The documented full-revision CPU command completed two unranked optimizer
+  updates in 7.760 seconds. Evidence:
+  `.runtime/pilot_smoke/logs/2026-09-24_05-27-38_pilot_cpu_smoke_auen4b3a/training_run.json`.
+  This is an engineering smoke test, not a new model-quality result.
+- Readiness check-only passes metadata validation and records all five GPU checks
+  as `not_run`. Explicit execution rejects non-setup budget sessions before any
+  CUDA call, keeping the later drill within the existing two-hour setup allocation.
+
+### Passed on native Linux amd64 CPU CI
+
+- The locked PyTorch `2.14.0+cu126` image builds and runs without a GPU.
+- Runtime dependency checks, CLI startup, real CPU forward/backward, saved-state
+  continuation, graph save/reload, and unavailable-CUDA rejection pass.
+- [Native build and smoke evidence](https://github.com/DanielGordon-ml/StegoLab/actions/runs/35960252970)
+  covers implementation commit `407751b`. The image is 6,826,719,106 bytes;
+  80 GiB of runner storage remains after the check.
+- The full application CI also runs backend/frontend, CPU containers and browser
+  restart checks. Its latest result is visible in
+  [PR #7](https://github.com/DanielGordon-ml/StegoLab/pull/7/checks).
+
+### Failed
+
+- No remaining local acceptance failures or native CUDA-image smoke failures.
+- Real GPU behavior is unmeasured; an unrun check is never counted as a pass.
+
+### GPU and cloud checks not run
+
+- CUDA hardware execution, device memory/throughput, batch selection and planned
+  baseline step count; actual CUDA continuation, independent package parity and
+  all-32 learned-message recovery.
+- EC2 launch, physical host stop, external AWS stop backstop, persistent-volume
+  restore and SSH access on a real cloud host. Local simulations and reviewed
+  runbooks do not establish these results.
+- GPU time used: **zero hours**. No GPU budget session was opened; the separate
+  24-hour allowance and Sprint 4 proof ledger remain unchanged.
+
+Review: [draft PR #7](https://github.com/DanielGordon-ml/StegoLab/pull/7).
 
 ## Remaining gates
 
