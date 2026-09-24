@@ -13,7 +13,13 @@ from pydantic import ValidationError
 
 from backend_service import pilot_readiness
 from backend_service.failures import ApplicationFailure
-from backend_service.pilot_budget import PilotDeadline
+from backend_service.pilot_budget import (
+    PilotDeadline,
+    PilotOperation,
+    read_session,
+    start_session,
+)
+from backend_service.pilot_budget_storage import initialize_pilot_budget
 from backend_service.pilot_data import load_pilot_data
 from backend_service.pilot_readiness_training import _equal
 from schemas.pilot_readiness import GpuReadinessRequest
@@ -31,6 +37,16 @@ def _request(root: Path, monkeypatch: pytest.MonkeyPatch) -> GpuReadinessRequest
         experiment_identifier="readiness_test",
         session_identifier="existing_session",
     )
+
+
+def _host_session(
+    request: GpuReadinessRequest, stage: Literal["setup", "baseline"] = "setup"
+) -> Path:
+    """Create only a temporary accounting fixture with no instance or GPU calls."""
+    directory = Path(request.output_root) / "state" / "gpu_pilot"
+    initialize_pilot_budget(directory)
+    start_session(directory, "existing_session", "i-12345678", stage, time.time() - 1)
+    return directory
 
 
 def test_default_report_never_calls_gpu_or_ledger(
@@ -82,6 +98,7 @@ def test_explicit_run_holds_one_lease_and_checks_each_profile_once(
 ) -> None:
     """Mock hardware while preserving required order and incomplete-check rules."""
     request = _request(tmp_path, monkeypatch)
+    _host_session(request)
     if learned:
         request = request.model_copy(
             update={
@@ -150,6 +167,7 @@ def test_failed_device_probe_leaves_dependent_checks_unattempted(
 ) -> None:
     """A CUDA failure must not become a CPU fallback or a successful readiness run."""
     request = _request(tmp_path, monkeypatch)
+    _host_session(request)
 
     @contextmanager
     def operation(directory: Path, identifier: str) -> Iterator[PilotDeadline]:
@@ -167,6 +185,29 @@ def test_failed_device_probe_leaves_dependent_checks_unattempted(
     assert report.checks[1].status == "failed"
     assert report.checks[1].error_code == "pilot_cuda_unavailable"
     assert all(check.status == "not_run" for check in report.checks[2:])
+
+
+def test_readiness_rejects_baseline_session_before_any_cuda_call(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A valid non-setup lease must not spend the baseline allocation on readiness."""
+    request = _request(tmp_path, monkeypatch)
+    directory = _host_session(request, "baseline")
+
+    def forbidden(*arguments: object, **keywords: object) -> None:
+        """Reject hardware access before checking the held session's stage."""
+        raise AssertionError("A baseline session cannot run readiness CUDA checks.")
+
+    monkeypatch.setattr(pilot_readiness, "probe_cuda_device", forbidden)
+    monkeypatch.setattr(torch.cuda, "is_available", forbidden)
+    monkeypatch.setattr(torch.cuda, "is_initialized", forbidden)
+    with pytest.raises(ApplicationFailure) as caught:
+        pilot_readiness.verify_gpu_readiness(request, run=True)
+    assert caught.value.code == "pilot_readiness_stage"
+    session = read_session(directory, "existing_session")
+    assert session.stage == "baseline" and session.stopped_at is None
+    with PilotOperation(directory, "existing_session"):
+        pass
 
 
 def test_strict_request_and_nested_state_comparison() -> None:

@@ -5,7 +5,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 from backend_service.failures import ApplicationFailure
-from backend_service.pilot_budget import PilotOperation
+from backend_service.pilot_budget import PilotOperation, read_session
 from backend_service.pilot_data import load_pilot_data
 from backend_service.pilot_readiness_models import (
     verify_learned_cuda_exports,
@@ -123,6 +123,14 @@ def verify_gpu_readiness(
     with PilotOperation(
         root / "state" / "gpu_pilot", request.session_identifier
     ) as budget:
+        session = read_session(root / "state" / "gpu_pilot", request.session_identifier)
+        if session.stage != "setup":
+            raise ApplicationFailure(
+                "pilot_readiness_stage",
+                "GPU readiness requires an existing setup session within its "
+                "two-hour allocation. Preserve the current session's accounting.",
+                422,
+            )
         deadline = budget.checkpoint_monotonic_deadline
 
         def device_probe() -> list[str]:
