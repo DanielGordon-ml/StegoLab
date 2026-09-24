@@ -51,6 +51,10 @@ for explicit operator setup and the independent deadline guard.
 
 ## Resume, evaluation and export
 
+The report's `checkpoint` path is relative to `output_root`. For input requests,
+join those two paths (or use an absolute path). For example, the smoke checkpoint
+is `.runtime/pilot_smoke/checkpoints/pilot_cpu_smoke/<checkpoint identifier>`.
+
 Copy the original training JSON, add `resume_checkpoint` pointing to the returned
 checkpoint directory, and increase `stop_after_step` only within the original
 `planned_optimizer_steps`. Preserve the experiment identifier and configuration.

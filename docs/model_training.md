@@ -45,7 +45,8 @@ inside the fixed training configuration; other baseline choices are frozen.
   useful for a controlled stop; it does not change the loss schedule.
 - Ctrl-C or SIGTERM requests a save after the current complete optimizer step.
   The command returns 130 or 143 after a successful signal-triggered save.
-- Copy the returned checkpoint path into `resume_checkpoint`, keep the same
+- Resolve the returned checkpoint path relative to `output_root`, then put that
+  full path into `resume_checkpoint`. Keep the same
   experiment, dataset, output root, settings, and numerical environment, and
   increase `stop_after_step` to continue. No training restarts automatically.
 - If startup fails before any checkpoint exists, the corrected request can
