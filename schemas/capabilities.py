@@ -1,10 +1,13 @@
-"""Available application features for this local foundation release."""
+"""Available application features, derived from explicitly installed models."""
 
-from typing import Annotated, Literal
+from typing import Final, Literal, Self
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 
 from schemas.base import StrictRecord
+from schemas.models import InstalledModel, ModelIdentifier
+
+MAXIMUM_UPLOAD_BYTES: Final = 16_777_216
 
 
 class HealthStatus(StrictRecord):
@@ -15,22 +18,24 @@ class HealthStatus(StrictRecord):
 
 
 class Capabilities(StrictRecord):
-    """Separate experimental training from qualified inference support."""
+    """Advertise installed experimental models separately from release quality."""
 
     application_version: Literal["0.1.0"] = "0.1.0"
     available_devices: list[Literal["cpu"]] = Field(
         default=["cpu"], min_length=1, max_length=1
     )
-    available_models: Annotated[list[str], Field(max_length=0)] = Field(
-        default_factory=list
+    available_models: list[ModelIdentifier] = Field(default_factory=list, max_length=8)
+    available_profiles: list[Literal["test_only_v1"]] = Field(
+        default_factory=list, max_length=1
     )
-    available_profiles: Annotated[list[str], Field(max_length=0)] = Field(
-        default_factory=list
-    )
-    encoding_available: Literal[False] = False
-    decoding_available: Literal[False] = False
+    encoding_available: bool = False
+    decoding_available: bool = False
     training_available: bool = True
-    maximum_payload_bytes: Annotated[int, Field(ge=0, le=0)] = 0
+    experimental_models_only: Literal[True] = True
+    maximum_payload_bytes: int = Field(default=0, ge=0, le=1024)
+    minimum_image_side: int = Field(default=0, ge=0, le=4096)
+    maximum_image_side: int = Field(default=0, ge=0, le=4096)
+    maximum_upload_bytes: Literal[16_777_216] = 16_777_216
 
     @field_validator(
         "encoding_available", "decoding_available", "training_available", mode="before"
@@ -42,8 +47,24 @@ class Capabilities(StrictRecord):
             raise ValueError("Feature availability must be a boolean.")
         return value
 
+    @model_validator(mode="after")
+    def consistent_with_installed_models(self) -> Self:
+        """Reject availability claims that disagree with the installed-model list."""
+        installed = bool(self.available_models)
+        if (
+            self.encoding_available != installed
+            or self.decoding_available != installed
+            or bool(self.available_profiles) != installed
+            or (self.maximum_payload_bytes > 0) != installed
+            or (self.minimum_image_side > 0) != installed
+            or (self.maximum_image_side > 0) != installed
+            or (installed and self.minimum_image_side > self.maximum_image_side)
+        ):
+            raise ValueError("Capabilities must match the installed model list.")
+        return self
+
 
 class ModelList(StrictRecord):
-    """Return an empty installed-model list until model support is available."""
+    """List explicitly installed experimental models."""
 
-    items: Annotated[list[str], Field(max_length=0)] = Field(default_factory=list)
+    items: list[InstalledModel] = Field(default_factory=list, max_length=8)

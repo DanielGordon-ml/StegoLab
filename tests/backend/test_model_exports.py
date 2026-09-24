@@ -16,6 +16,10 @@ from backend_service.model_export_io import verify_package
 from backend_service.model_export_runtime import load_export
 from backend_service.model_export_verification import run_export_process
 from backend_service.model_exports import _package, export_models
+from backend_service.model_fixture_channel import (
+    IntegerChannelDecoder,
+    IntegerChannelEncoder,
+)
 from backend_service.model_networks import (
     DenseDecoder,
     DenseEncoder,
@@ -233,26 +237,9 @@ def test_export_keeps_disk_reserve(
     assert not list(tmp_path.glob(".stegolab-export-*"))
 
 
-class _IntegerEncoder(nn.Module):
-    """Use a public integer channel to test wrappers, never learned quality."""
-
-    def forward(self, image: torch.Tensor, payload: torch.Tensor) -> torch.Tensor:
-        """Place each bit in the first channel's integer parity."""
-        first = (torch.floor(image[:, :1] * 255 / 2) * 2 + payload) / 255
-        return torch.cat((first, image[:, 1:]), dim=1)
-
-
-class _IntegerDecoder(nn.Module):
-    """Recover the public wrapper fixture's integer parity as signed logits."""
-
-    def forward(self, image: torch.Tensor) -> torch.Tensor:
-        """Extract the fixture channel without any encoder dependency."""
-        return (torch.remainder(torch.round(image[:, :1] * 255), 2) - 0.5) * 20
-
-
 def test_standalone_text_wrappers_preserve_authenticated_utf8(tmp_path: Path) -> None:
     """Check real protocol and saved PNG through separate public fixture graphs."""
-    encoder, decoder = _IntegerEncoder(), _IntegerDecoder()
+    encoder, decoder = IntegerChannelEncoder(), IntegerChannelDecoder()
     metadata = ExportMetadata(
         compatibility_identifier=model_pair_identifier(encoder, decoder),
         source_identifier="public_integer_wrapper_fixture_not_a_neural_model",

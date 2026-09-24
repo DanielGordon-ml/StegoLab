@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Describe one installed encoder/decoder pair without exposing its path.",
+  "properties": {
+    "compatibility_identifier": {
+      "pattern": "^dense_v1_[0-9a-f]{64}$",
+      "title": "Compatibility Identifier",
+      "type": "string"
+    },
+    "export_reference": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Export Reference",
+      "type": "string"
+    },
+    "format_version": {
+      "enum": [
+        1,
+        2
+      ],
+      "title": "Format Version",
+      "type": "integer"
+    },
+    "installed_at": {
+      "format": "date-time",
+      "title": "Installed At",
+      "type": "string"
+    },
+    "maximum_payload_bytes": {
+      "const": 1024,
+      "default": 1024,
+      "title": "Maximum Payload Bytes",
+      "type": "integer"
+    },
+    "maximum_side": {
+      "const": 1024,
+      "default": 1024,
+      "title": "Maximum Side",
+      "type": "integer"
+    },
+    "minimum_side": {
+      "const": 512,
+      "default": 512,
+      "title": "Minimum Side",
+      "type": "integer"
+    },
+    "model_identifier": {
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$",
+      "title": "Model Identifier",
+      "type": "string"
+    },
+    "profile_identifier": {
+      "const": "test_only_v1",
+      "default": "test_only_v1",
+      "title": "Profile Identifier",
+      "type": "string"
+    },
+    "source_identifier": {
+      "maxLength": 256,
+      "minLength": 1,
+      "title": "Source Identifier",
+      "type": "string"
+    },
+    "status": {
+      "const": "experimental",
+      "default": "experimental",
+      "title": "Status",
+      "type": "string"
+    }
+  },
+  "required": [
+    "model_identifier",
+    "compatibility_identifier",
+    "source_identifier",
+    "profile_identifier",
+    "status",
+    "format_version",
+    "minimum_side",
+    "maximum_side",
+    "maximum_payload_bytes",
+    "installed_at",
+    "export_reference"
+  ],
+  "title": "InstalledModel",
+  "type": "object"
+}

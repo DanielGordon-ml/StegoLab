@@ -3,7 +3,7 @@ name: CPU application checks
 on:
   pull_request:
   push:
-    branches: [main, "codex/**"]
+    branches: [main]
 
 permissions:
   contents: read
@@ -36,7 +36,7 @@ jobs:
         run: |
           uv run ruff check .
           uv run ruff format --check .
-          uv run mypy backend_service schemas
+          uv run mypy
           uv run pytest tests/backend
           uv run stegolab verify_protocol
           uv run python -m backend_service.export_contracts --check
@@ -50,9 +50,20 @@ jobs:
         run: |
           sh infrastructure/setup_local_workspace.sh
           docker compose -f infrastructure/compose.yaml up --build --detach --wait --wait-timeout 120
+      - name: Restore the cached test browser
+        id: browser_cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('user_interface/package-lock.json') }}
       - name: Install the test browser
         working-directory: user_interface
-        run: npx playwright install --with-deps chromium
+        run: |
+          if [ "${{ steps.browser_cache.outputs.cache-hit }}" = "true" ]; then
+            npx playwright install-deps chromium
+          else
+            npx playwright install --with-deps chromium
+          fi
       - name: Check browser settings and restart recovery
         env:
           STEGOLAB_BASE_URL: http://127.0.0.1:8080

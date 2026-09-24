@@ -29,7 +29,7 @@ describe('backend JSON Schemas', () => {
       validate_capabilities({ ...capabilities, training_available: 'false' }),
     ).toBe(false);
     expect(
-      validate_capabilities({ ...capabilities, maximum_payload_bytes: 12 }),
+      validate_capabilities({ ...capabilities, maximum_payload_bytes: 4096 }),
     ).toBe(false);
     expect(
       validate_health({ status: 'ready', application_version: '0.1.0' }),

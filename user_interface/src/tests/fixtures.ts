@@ -13,7 +13,11 @@ export const capabilities = {
   encoding_available: false,
   decoding_available: false,
   training_available: false,
+  experimental_models_only: true,
   maximum_payload_bytes: 0,
+  minimum_image_side: 0,
+  maximum_image_side: 0,
+  maximum_upload_bytes: 16777216,
 };
 
 /** Serve real contract-shaped reads, delegating mutation behavior to each test. */

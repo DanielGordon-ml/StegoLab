@@ -51,6 +51,12 @@ def create_application(
                 application.state.workspace_catalog = WorkspaceCatalog(
                     selected_workspace, selected_data_directory
                 )
+                from backend_service.model_installation import InstalledModelStore
+
+                application.state.installed_models = InstalledModelStore(
+                    selected_data_directory,
+                    application.state.workspace_catalog.registry.roots,
+                )
                 application.state.workspace_jobs = WorkspaceJobService(
                     application.state.workspace_catalog, selected_data_directory
                 )
@@ -81,9 +87,11 @@ def create_application(
         ),
     )
     application.include_router(router)
+    from backend_service.model_routes import model_router
     from backend_service.workflow_routes import job_router
     from backend_service.workspace_routes import workspace_router
 
+    application.include_router(model_router)
     application.include_router(workspace_router)
     application.include_router(job_router)
     install_error_handlers(application)
