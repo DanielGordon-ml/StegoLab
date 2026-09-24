@@ -36,6 +36,13 @@ transfers, expanded training controls, GPU execution, qualified inference, and
 model-quality acceptance remain open. No new research result is implied by GUI
 delivery, and the 24-hour GPU allocation is unchanged.
 
+Sprint 6 — planned 2026-09-25: experimental Encode and Decode in the browser with
+the Sprint 4 export installed by explicit promotion, secret-safe inference jobs,
+and the critic/fork code built but not run. No paid GPU session; the readiness
+drill and the 14-hour baseline move to Sprint 7 with recorded decisions. See the
+[Sprint 6 draft](sprints/sprint6.md). This does not change model quality, release
+gates, or the 24-hour GPU allocation.
+
 ## 1. Deliverables and shared decisions
 
 - The initial planning deliverable was four Markdown files: backend.md, frontend.md, infrastructure.md, and execution_order.md under plan/. Sprint plans and acceptance records extend those plans as delivery progresses.
