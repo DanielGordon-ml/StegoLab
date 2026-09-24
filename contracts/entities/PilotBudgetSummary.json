@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Expose read-only spending information without starting an instance session.",
+  "properties": {
+    "active_session_identifier": {
+      "anyOf": [
+        {
+          "pattern": "^[a-z][a-z0-9_]{0,63}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Active Session Identifier"
+    },
+    "consumed_seconds": {
+      "minimum": 0,
+      "title": "Consumed Seconds",
+      "type": "number"
+    },
+    "initialized": {
+      "title": "Initialized",
+      "type": "boolean"
+    },
+    "remaining_seconds": {
+      "minimum": 0,
+      "title": "Remaining Seconds",
+      "type": "number"
+    },
+    "total_seconds": {
+      "const": 86400,
+      "default": 86400,
+      "title": "Total Seconds",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "initialized",
+    "total_seconds",
+    "consumed_seconds",
+    "remaining_seconds",
+    "active_session_identifier"
+  ],
+  "title": "PilotBudgetSummary",
+  "type": "object"
+}

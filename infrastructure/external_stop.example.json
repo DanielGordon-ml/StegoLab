@@ -1,0 +1,13 @@
+{
+  "Name": "REQUIRED-ONE-TIME-SESSION-NAME",
+  "ScheduleExpression": "at(REQUIRED-UTC-YYYY-MM-DDTHH:MM:SS)",
+  "ScheduleExpressionTimezone": "UTC",
+  "FlexibleTimeWindow": {"Mode": "OFF"},
+  "ActionAfterCompletion": "DELETE",
+  "Target": {
+    "Arn": "arn:aws:scheduler:::aws-sdk:ec2:stopInstances",
+    "RoleArn": "REQUIRED_INSTANCE_SCOPED_OPERATOR_ROLE_ARN",
+    "Input": "{\"InstanceIds\":[\"REQUIRED_INSTANCE_IDENTIFIER\"]}",
+    "RetryPolicy": {"MaximumEventAgeInSeconds": 300, "MaximumRetryAttempts": 2}
+  }
+}

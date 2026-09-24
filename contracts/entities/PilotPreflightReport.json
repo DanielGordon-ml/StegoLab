@@ -1,0 +1,167 @@
+{
+  "$defs": {
+    "PilotReadinessCheck": {
+      "additionalProperties": false,
+      "description": "Keep local results separate from checks requiring real GPU execution.",
+      "properties": {
+        "detail": {
+          "title": "Detail",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "passed_locally",
+            "failed",
+            "not_run"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "status",
+        "detail"
+      ],
+      "title": "PilotReadinessCheck",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Describe preparation only; never promote data or release capabilities.",
+  "properties": {
+    "checks": {
+      "items": {
+        "$ref": "#/$defs/PilotReadinessCheck"
+      },
+      "title": "Checks",
+      "type": "array"
+    },
+    "dataset_revision": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Dataset Revision"
+    },
+    "disk_free_bytes": {
+      "minimum": 0,
+      "title": "Disk Free Bytes",
+      "type": "integer"
+    },
+    "environment": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Environment",
+      "type": "object"
+    },
+    "excluded_tuning_images": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Excluded Tuning Images",
+      "type": "integer"
+    },
+    "gpu_checks_run": {
+      "const": false,
+      "default": false,
+      "title": "Gpu Checks Run",
+      "type": "boolean"
+    },
+    "pilot_ready": {
+      "const": false,
+      "default": false,
+      "title": "Pilot Ready",
+      "type": "boolean"
+    },
+    "preparation_passed": {
+      "title": "Preparation Passed",
+      "type": "boolean"
+    },
+    "remaining_gpu_seconds": {
+      "anyOf": [
+        {
+          "maximum": 86400,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Remaining Gpu Seconds"
+    },
+    "required_free_reserve_bytes": {
+      "minimum": 0,
+      "title": "Required Free Reserve Bytes",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": 2,
+      "default": 2,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "selection_checksum": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Selection Checksum"
+    },
+    "split_counts": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Split Counts",
+      "type": "object"
+    },
+    "training_images": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Training Images",
+      "type": "integer"
+    },
+    "tuning_images": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Tuning Images",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "preparation_passed",
+    "pilot_ready",
+    "gpu_checks_run",
+    "dataset_revision",
+    "selection_checksum",
+    "split_counts",
+    "training_images",
+    "tuning_images",
+    "excluded_tuning_images",
+    "disk_free_bytes",
+    "required_free_reserve_bytes",
+    "remaining_gpu_seconds",
+    "environment",
+    "checks"
+  ],
+  "title": "PilotPreflightReport",
+  "type": "object"
+}

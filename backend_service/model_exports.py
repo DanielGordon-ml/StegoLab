@@ -1,7 +1,6 @@
 """Publish separate, checksummed experimental encoder and decoder packages."""
 
 import hashlib
-import importlib.metadata
 import os
 import platform
 import shutil
@@ -21,6 +20,8 @@ from backend_service.dataset_storage_ops import (
     publish_directory,
 )
 from backend_service.failures import ApplicationFailure
+from backend_service.model_export_dependencies import cpu_dependencies
+from backend_service.model_export_documentation import requirement_bytes, usage_bytes
 from backend_service.model_export_examples import example_output
 from backend_service.model_export_io import (
     MAXIMUM_EXPORT_BYTES,
@@ -51,6 +52,7 @@ RUNTIME_MODULES = (
     "message_frame",
     "message_protocol",
     "model_export_examples",
+    "model_export_devices",
     "model_export_io",
     "payload_capacity",
     "payload_map",
@@ -63,27 +65,6 @@ RUNTIME_SCHEMAS = (
     "images",
     "model_exports",
     "protocol",
-)
-DEPENDENCIES = (
-    "torch",
-    "numpy",
-    "Pillow",
-    "PyNaCl",
-    "reedsolo",
-    "pydantic",
-    "cffi",
-    "pycparser",
-    "pydantic_core",
-    "typing_extensions",
-    "typing-inspection",
-    "annotated-types",
-    "filelock",
-    "sympy",
-    "mpmath",
-    "networkx",
-    "Jinja2",
-    "MarkupSafe",
-    "fsspec",
 )
 
 
@@ -137,13 +118,6 @@ def _runtime_files() -> dict[str, bytes]:
     return result
 
 
-def _dependencies() -> dict[str, str]:
-    """Pin the independent runtime and its shared CPU transitive packages."""
-    versions = {name: importlib.metadata.version(name) for name in DEPENDENCIES}
-    versions["torch"] = versions["torch"].split("+", 1)[0]
-    return versions
-
-
 def _graph_bytes(model: nn.Module, role: Literal["encoder", "decoder"]) -> bytes:
     """Export batch-one CPU inference with shared bounded spatial dimensions."""
     if any(value.device.type != "cpu" for value in model.state_dict().values()):
@@ -171,6 +145,7 @@ def _package(
     role: Literal["encoder", "decoder"],
     metadata: ExportMetadata,
     deadline: float | None,
+    runtime_dependencies: dict[str, dict[str, str]] | None = None,
 ) -> None:
     """Assemble and verify a complete package inside private staging."""
     directory.mkdir()
@@ -181,32 +156,13 @@ def _package(
     files["model.pt2"] = _graph_bytes(model, role)
     files["known_answer.npy"] = example_output(model, role)
     check_export_deadline(deadline)
-    dependencies = _dependencies()
-    files["requirements.txt"] = (
-        "--extra-index-url https://download.pytorch.org/whl/cpu\n"
-        + "\n".join(
-            f"{name}=={version}" for name, version in sorted(dependencies.items())
-        )
-        + "\n"
-    ).encode()
-    files["README.md"] = (
-        f"# Independent experimental {role}\n\n"
-        "Use Python 3.12 and the exact requirements. Run on CPU.\n"
-        "Only locally trusted packages may be loaded; checksums detect damage, "
-        "not a malicious publisher.\n"
-        "The graph uses float32, batch 1, and sides from 512 to 1024 pixels.\n"
-        "Tensor command: python runtime.py tensor --image image.npy "
-        "--output result.npy"
-        + (" --payload payload.npy" if role == "encoder" else "")
-        + "\nText commands: encode --image cover.png --output result.png, or "
-        "decode --image result.png. Pass password and (for encode) message as "
-        "a JSON object on stdin, never as arguments. Decode prints exact text.\n"
-        "Encoder output must be checked with the matching independent decoder "
-        "before the application offers it for download.\n"
-        "Run python runtime.py verify to compare the graph with its public "
-        "known-answer tensor at relative/absolute tolerance 0.00001.\n"
-        "These packages do not establish a release-quality or secrecy claim.\n"
-    ).encode()
+    dependencies = cpu_dependencies()
+    files["requirements.txt"] = requirement_bytes(dependencies, "cpu")
+    if runtime_dependencies is not None:
+        runtime_dependencies = {**runtime_dependencies, "cpu": dependencies}
+        for device, pins in runtime_dependencies.items():
+            files[f"requirements-{device}.txt"] = requirement_bytes(pins, device)
+    files["README.md"] = usage_bytes(role, runtime_dependencies is not None)
     if sum(len(content) for content in files.values()) > MAXIMUM_EXPORT_BYTES:
         raise export_failure()
     records = {
@@ -218,6 +174,8 @@ def _package(
         role=role,
         files=records,
         dependencies=dependencies,
+        format_version=2 if runtime_dependencies is not None else 1,
+        runtime_dependencies=runtime_dependencies or {},
         producer_environment={
             "python": platform.python_version(),
             "torch": str(torch.__version__),
@@ -238,6 +196,8 @@ def export_models(
     metadata: ExportMetadata,
     *,
     deadline: float | None = None,
+    runtime_dependencies: dict[str, dict[str, str]] | None = None,
+    verification_device: Literal["cpu", "cuda"] = "cpu",
 ) -> ModelExportSummary:
     """Publish a verified independent pair atomically without overwriting files."""
     from backend_service.model_export_verification import verify_exports
@@ -259,9 +219,31 @@ def export_models(
         stage = Path(
             tempfile.mkdtemp(prefix=".stegolab-export-", dir=destination.parent)
         )
-        _package(encoder, stage / "encoder", "encoder", metadata, deadline)
-        _package(decoder, stage / "decoder", "decoder", metadata, deadline)
+        _package(
+            encoder,
+            stage / "encoder",
+            "encoder",
+            metadata,
+            deadline,
+            runtime_dependencies,
+        )
+        _package(
+            decoder,
+            stage / "decoder",
+            "decoder",
+            metadata,
+            deadline,
+            runtime_dependencies,
+        )
         verification = verify_exports(encoder, decoder, stage, deadline=deadline)
+        if verification_device == "cuda":
+            _write_file(
+                stage / "verification-cpu.json",
+                verification.model_dump_json(indent=2).encode(),
+            )
+            verification = verify_exports(
+                encoder, decoder, stage, deadline=deadline, device="cuda"
+            )
         _write_file(
             stage / "verification.json", verification.model_dump_json(indent=2).encode()
         )

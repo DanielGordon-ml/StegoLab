@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Locate prepared data and host state without launching or training anything.",
+  "properties": {
+    "dataset_directory": {
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Dataset Directory",
+      "type": "string"
+    },
+    "device": {
+      "default": "cpu",
+      "enum": [
+        "cpu",
+        "cuda"
+      ],
+      "title": "Device",
+      "type": "string"
+    },
+    "output_root": {
+      "default": ".",
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Output Root",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 2,
+      "default": 2,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "session_identifier": {
+      "anyOf": [
+        {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Session Identifier"
+    }
+  },
+  "required": [
+    "schema_version",
+    "dataset_directory",
+    "output_root",
+    "device",
+    "session_identifier"
+  ],
+  "title": "PilotPreflightRequest",
+  "type": "object"
+}

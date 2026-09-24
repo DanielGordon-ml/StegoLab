@@ -1,17 +1,19 @@
 """Verify independent package execution in isolated CPU subprocesses."""
 
+import copy
 import os
 import subprocess
 import sys
 import tempfile
 import time
 from pathlib import Path
-from typing import cast
+from typing import Literal, cast
 
 import torch
 from torch import nn
 
 from backend_service.failures import ApplicationFailure
+from backend_service.model_export_devices import export_device
 from backend_service.model_export_io import (
     export_failure,
     read_tensor,
@@ -86,10 +88,12 @@ def verify_exports(
     directory: Path,
     *,
     deadline: float | None = None,
+    device: Literal["cpu", "cuda"] = "cpu",
 ) -> ExportVerification:
     """Compare both isolated graphs to eager models at boundaries and odd sizes."""
-    encoder_manifest = verify_package(directory / "encoder")
-    decoder_manifest = verify_package(directory / "decoder")
+    selected_device = export_device(device)
+    encoder_manifest = verify_package(directory / "encoder", device=device)
+    decoder_manifest = verify_package(directory / "decoder", device=device)
     if (
         encoder_manifest.role != "encoder"
         or decoder_manifest.role != "decoder"
@@ -98,6 +102,9 @@ def verify_exports(
     ):
         raise export_failure()
     generator = torch.Generator(device="cpu").manual_seed(913)
+    if device == "cuda":
+        encoder = copy.deepcopy(encoder).to(selected_device)
+        decoder = copy.deepcopy(decoder).to(selected_device)
     difference = 0.0
     cases = 0
     training_modes = (encoder.training, decoder.training)
@@ -123,13 +130,17 @@ def verify_exports(
                         str(scratch / "image.npy"),
                         "--output",
                         str(scratch / "output.npy"),
+                        "--device",
+                        device,
                     ]
                     inputs: tuple[torch.Tensor, ...] = (image,)
                     if role == "encoder":
                         arguments += ["--payload", str(scratch / "payload.npy")]
                         inputs = (image, payload)
                     with torch.inference_mode():
-                        expected = cast(torch.Tensor, model(*inputs))
+                        expected = cast(
+                            torch.Tensor, model(*(value.to(device) for value in inputs))
+                        ).cpu()
                     run_export_process(
                         directory / role,
                         arguments,
@@ -151,6 +162,7 @@ def verify_exports(
             compatibility_identifier=encoder_manifest.compatibility_identifier,
             cases_checked=cases,
             maximum_absolute_difference=difference,
+            device=device,
         )
     finally:
         encoder.train(training_modes[0])

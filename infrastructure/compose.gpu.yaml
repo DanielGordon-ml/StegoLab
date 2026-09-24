@@ -1,0 +1,26 @@
+# Future deployment override. Rendering/building this file uses no GPU time.
+# Running it requires an explicitly launched host and its active budget session.
+services:
+  backend_service:
+    platform: linux/amd64
+    build:
+      context: ..
+      dockerfile: infrastructure/cuda/Dockerfile
+      target: cuda_runtime
+    image: stegolab-cuda:prepared
+    restart: "no"
+    volumes:
+      - type: bind
+        source: ${STEGOLAB_PERSISTENT_DIRECTORY:-/srv/stegolab}
+        target: /data
+        bind:
+          create_host_path: false
+    mem_limit: 24g
+    stop_grace_period: 180s
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

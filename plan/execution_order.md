@@ -19,6 +19,12 @@ for the actual measured result. CLI delivery does not complete model-quality,
 GPU, worker/API, or GUI gates. Public model operations remain unavailable and
 usable payload capacity remains zero.
 
+[Sprint 5](sprint_05.md) prepares the first GPU readiness test without launching
+EC2: a versioned pilot CLI, lazy full-UHD loading, exact resume, explicit device
+exports, CUDA image preparation, and separate instance-time budget controls.
+CPU checks do not qualify GPU execution. The later readiness drill uses the
+existing two-hour setup allocation. Full pilot data and release gates stay open.
+
 ## 1. Deliverables and shared decisions
 
 - The initial planning deliverable was four Markdown files: backend.md, frontend.md, infrastructure.md, and execution_order.md under plan/. Sprint plans and acceptance records extend those plans as delivery progresses.

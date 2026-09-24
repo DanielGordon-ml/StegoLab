@@ -1,5 +1,9 @@
 # Experimental CPU model workflow
 
+For Sprint 5's separate version-two pilot commands, larger-data loader, and
+explicit CPU/CUDA packages, use the [pilot preparation guide](pilot_training.md).
+The version-one proof below retains its original settings and budget.
+
 Sprint 4 adds a small command-line learning proof. The browser still has no
 installed model or usable payload capacity. A completed training command means
 the requested steps finished; it does not mean the learning gate passed.

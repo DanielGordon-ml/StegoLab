@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Record loading cost without scoring images or changing model parameters.",
+  "properties": {
+    "consumed_count": {
+      "maximum": 16,
+      "minimum": 0,
+      "title": "Consumed Count",
+      "type": "integer"
+    },
+    "crop_shapes": {
+      "items": {
+        "maxItems": 4,
+        "minItems": 4,
+        "prefixItems": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "integer"
+          }
+        ],
+        "type": "array"
+      },
+      "maxItems": 4,
+      "title": "Crop Shapes",
+      "type": "array"
+    },
+    "dataset_revision": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Dataset Revision"
+    },
+    "deadline_seconds": {
+      "exclusiveMinimum": 0,
+      "maximum": 120,
+      "title": "Deadline Seconds",
+      "type": "number"
+    },
+    "device": {
+      "const": "cpu",
+      "default": "cpu",
+      "title": "Device",
+      "type": "string"
+    },
+    "elapsed_seconds": {
+      "minimum": 0,
+      "title": "Elapsed Seconds",
+      "type": "number"
+    },
+    "error_code": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Error Code"
+    },
+    "immutable_file_metadata_unchanged": {
+      "title": "Immutable File Metadata Unchanged",
+      "type": "boolean"
+    },
+    "operation": {
+      "const": "pilot_loading_probe",
+      "default": "pilot_loading_probe",
+      "title": "Operation",
+      "type": "string"
+    },
+    "peak_process_mebibytes": {
+      "minimum": 0,
+      "title": "Peak Process Mebibytes",
+      "type": "number"
+    },
+    "platform": {
+      "title": "Platform",
+      "type": "string"
+    },
+    "python": {
+      "title": "Python",
+      "type": "string"
+    },
+    "requested_count": {
+      "maximum": 16,
+      "minimum": 1,
+      "title": "Requested Count",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "selection_checksum": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Selection Checksum"
+    },
+    "source_identities": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 16,
+      "title": "Source Identities",
+      "type": "array"
+    },
+    "status": {
+      "enum": [
+        "passed",
+        "failed"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "threads": {
+      "maximum": 4,
+      "minimum": 1,
+      "title": "Threads",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "operation",
+    "status",
+    "error_code",
+    "dataset_revision",
+    "selection_checksum",
+    "device",
+    "threads",
+    "requested_count",
+    "consumed_count",
+    "crop_shapes",
+    "source_identities",
+    "deadline_seconds",
+    "elapsed_seconds",
+    "peak_process_mebibytes",
+    "immutable_file_metadata_unchanged",
+    "platform",
+    "python"
+  ],
+  "title": "PilotLoadingReport",
+  "type": "object"
+}

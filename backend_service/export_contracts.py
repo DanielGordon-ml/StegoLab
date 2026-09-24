@@ -29,6 +29,20 @@ from schemas.model_exports import (
     ModelExportManifest,
     ModelExportSummary,
 )
+from schemas.pilot_budget import PilotBudgetSummary
+from schemas.pilot_data import PilotSelection
+from schemas.pilot_loading import PilotLoadingReport
+from schemas.pilot_preflight import PilotPreflightReport, PilotPreflightRequest
+from schemas.pilot_readiness import GpuReadinessReport, GpuReadinessRequest
+from schemas.pilot_training import (
+    PilotEvaluationReport,
+    PilotEvaluationRequest,
+    PilotExportRequest,
+    PilotTrainingConfiguration,
+    PilotTrainingRequest,
+    PilotTrainingRun,
+    PilotTrainingStep,
+)
 from schemas.protocol import PayloadCapacity, ProtocolContext, ProtocolVerification
 from schemas.training import (
     EvaluationRequest,
@@ -40,6 +54,20 @@ from schemas.training import (
 )
 
 ENTITY_MODELS = (
+    PilotTrainingConfiguration,
+    PilotTrainingRequest,
+    PilotEvaluationRequest,
+    PilotExportRequest,
+    PilotTrainingRun,
+    PilotTrainingStep,
+    PilotEvaluationReport,
+    PilotSelection,
+    PilotLoadingReport,
+    PilotBudgetSummary,
+    PilotPreflightRequest,
+    PilotPreflightReport,
+    GpuReadinessRequest,
+    GpuReadinessReport,
     TrainingConfiguration,
     TrainingRequest,
     EvaluationRequest,

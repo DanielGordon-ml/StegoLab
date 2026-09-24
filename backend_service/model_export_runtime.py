@@ -16,6 +16,7 @@ from backend_service.failures import ApplicationFailure
 from backend_service.image_output import write_png
 from backend_service.image_preparation import _read_pixels, read_prepared_png
 from backend_service.message_protocol import decode_message, encode_message
+from backend_service.model_export_devices import export_device
 from backend_service.model_export_examples import verify_example
 from backend_service.model_export_io import (
     array_tensor,
@@ -31,14 +32,17 @@ from schemas.model_exports import ModelExportManifest
 from schemas.protocol import ProtocolContext
 
 
-def load_export(directory: Path) -> tuple[ModelExportManifest, nn.Module]:
+def load_export(
+    directory: Path, *, device: Literal["cpu", "cuda"] = "cpu"
+) -> tuple[ModelExportManifest, nn.Module]:
     """Load a locally trusted graph after integrity and runtime checks."""
     try:
-        manifest = verify_package(directory)
+        selected_device = export_device(device)
+        manifest = verify_package(directory, device=device)
         program = torch.export.load(
             BytesIO(read_export_file(directory / manifest.graph_filename))
         )
-        return manifest, program.module()
+        return manifest, program.module().to(selected_device)
     except ApplicationFailure:
         raise
     except (OSError, ValueError, RuntimeError, KeyError, ImportError):
@@ -68,9 +72,11 @@ def encode_png(
     output_path: Path,
     message: str,
     password: str,
+    *,
+    device: Literal["cpu", "cuda"] = "cpu",
 ) -> None:
     """Encode to quantized PNG without requiring a decoder package."""
-    manifest, graph = load_export(directory)
+    manifest, graph = load_export(directory, device=device)
     if manifest.role != "encoder":
         raise export_failure()
     prepared = _read_pixels(image_path, recover=False).image
@@ -79,7 +85,10 @@ def encode_png(
     payload = create_payload_map(protected, context).astype(np.float32)[None, ...]
     with torch.inference_mode():
         result = cast(
-            torch.Tensor, graph(_image_tensor(prepared), array_tensor(payload, 1))
+            torch.Tensor,
+            graph(
+                _image_tensor(prepared).to(device), array_tensor(payload, 1).to(device)
+            ),
         )
         pixels = torch.round(result.clamp(0, 1) * 255).to(torch.uint8)
     output = Image.fromarray(pixels[0].permute(1, 2, 0).cpu().numpy())
@@ -88,32 +97,43 @@ def encode_png(
     write_png(output, output_path)
 
 
-def decode_png(directory: Path, image_path: Path, password: str) -> str:
+def decode_png(
+    directory: Path,
+    image_path: Path,
+    password: str,
+    *,
+    device: Literal["cpu", "cuda"] = "cpu",
+) -> str:
     """Recover authenticated exact text using only the decoder package."""
-    manifest, graph = load_export(directory)
+    manifest, graph = load_export(directory, device=device)
     if manifest.role != "decoder":
         raise export_failure()
     image = read_prepared_png(image_path).image
     context = _context(manifest, image)
     with torch.inference_mode():
-        result = cast(torch.Tensor, graph(_image_tensor(image)))
+        result = cast(torch.Tensor, graph(_image_tensor(image).to(device)))
     protected = recover_payload_bytes(tensor_array(result)[0], context)
     return decode_message(protected, password, context)
 
 
 def run_tensor(
-    directory: Path, image_path: Path, output_path: Path, payload_path: Path | None
+    directory: Path,
+    image_path: Path,
+    output_path: Path,
+    payload_path: Path | None,
+    *,
+    device: Literal["cpu", "cuda"] = "cpu",
 ) -> None:
     """Run one package with public NumPy tensors and no training imports."""
-    manifest, graph = load_export(directory)
-    image = read_tensor(image_path, 3)
+    manifest, graph = load_export(directory, device=device)
+    image = read_tensor(image_path, 3).to(device)
     if not torch.all((image >= 0) & (image <= 1)):
         raise export_failure()
     with torch.inference_mode():
         if manifest.role == "encoder":
             if payload_path is None:
                 raise export_failure()
-            payload = read_tensor(payload_path, 1)
+            payload = read_tensor(payload_path, 1).to(device)
             if payload.shape[2:] != image.shape[2:] or not torch.all(
                 (payload == 0) | (payload == 1)
             ):
@@ -159,6 +179,7 @@ def main(command_arguments: list[str] | None = None) -> int:
     parser.add_argument("--image", type=Path)
     parser.add_argument("--output", type=Path)
     parser.add_argument("--payload", type=Path)
+    parser.add_argument("--device", choices=("cpu", "cuda"), default="cpu")
     arguments = parser.parse_args(command_arguments)
     directory = Path(__file__).resolve().parent
     torch.set_num_threads(1)
@@ -171,17 +192,23 @@ def main(command_arguments: list[str] | None = None) -> int:
                 ):
                     raise export_failure()
         if arguments.action == "verify":
-            manifest, graph = load_export(directory)
+            manifest, graph = load_export(directory, device=arguments.device)
             channels = 3 if manifest.role == "encoder" else 1
             expected = read_tensor(directory / "known_answer.npy", channels)
-            verify_example(graph, manifest.role, expected)
+            verify_example(graph, manifest.role, expected, device=arguments.device)
             return 0
         if arguments.image is None:
             raise export_failure()
         if arguments.action == "tensor":
             if arguments.output is None:
                 raise export_failure()
-            run_tensor(directory, arguments.image, arguments.output, arguments.payload)
+            run_tensor(
+                directory,
+                arguments.image,
+                arguments.output,
+                arguments.payload,
+                device=arguments.device,
+            )
         elif arguments.action == "encode":
             if arguments.output is None or arguments.payload is not None:
                 raise export_failure()
@@ -192,13 +219,19 @@ def main(command_arguments: list[str] | None = None) -> int:
                 arguments.output,
                 secrets["message"],
                 secrets["password"],
+                device=arguments.device,
             )
         else:
             if arguments.output is not None or arguments.payload is not None:
                 raise export_failure()
             secrets = _secrets("decode")
             sys.stdout.write(
-                decode_png(directory, arguments.image, secrets["password"])
+                decode_png(
+                    directory,
+                    arguments.image,
+                    secrets["password"],
+                    device=arguments.device,
+                )
             )
         return 0
     except ApplicationFailure as failure:

@@ -65,7 +65,9 @@ def build_parser() -> argparse.ArgumentParser:
     from backend_service.model_commands import MODEL_COMMANDS
 
     for command in MODEL_COMMANDS:
-        experimental = commands.add_parser(command, help="Experimental CPU model tool.")
+        experimental = commands.add_parser(
+            command, help="Experimental model preparation tool."
+        )
         experimental.add_argument("model_input")
     return parser
 

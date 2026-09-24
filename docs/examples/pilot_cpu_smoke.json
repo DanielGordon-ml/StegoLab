@@ -1,0 +1,13 @@
+{
+  "schema_version": 2,
+  "experiment_identifier": "pilot_cpu_smoke",
+  "output_root": ".runtime/pilot_smoke",
+  "execution_mode": "cpu_smoke",
+  "cpu_smoke_timeout_seconds": 120.0,
+  "dataset_directory": "datasets/uhd_iqa/75bef6dab2b3de136d1c5c359d6753a25e4a750d5387fe75921e394482f0776c",
+  "configuration": {
+    "device": "cpu",
+    "physical_batch_size": 4,
+    "planned_optimizer_steps": 2
+  }
+}

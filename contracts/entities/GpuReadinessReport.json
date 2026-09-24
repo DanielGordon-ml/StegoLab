@@ -1,0 +1,155 @@
+{
+  "$defs": {
+    "GpuReadinessCheck": {
+      "additionalProperties": false,
+      "description": "Distinguish unattempted checks from real hardware passes or failures.",
+      "properties": {
+        "artifacts": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Artifacts",
+          "type": "array"
+        },
+        "detail": {
+          "title": "Detail",
+          "type": "string"
+        },
+        "elapsed_seconds": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Elapsed Seconds",
+          "type": "number"
+        },
+        "error_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error Code"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "passed_locally",
+            "passed_on_gpu",
+            "failed",
+            "not_run"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "status",
+        "detail",
+        "elapsed_seconds",
+        "error_code",
+        "artifacts"
+      ],
+      "title": "GpuReadinessCheck",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Keep infrastructure evidence separate from release or dataset promotion.",
+  "properties": {
+    "checks": {
+      "items": {
+        "$ref": "#/$defs/GpuReadinessCheck"
+      },
+      "title": "Checks",
+      "type": "array"
+    },
+    "dataset_revision": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Dataset Revision"
+    },
+    "environment": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Environment",
+      "type": "object"
+    },
+    "execution": {
+      "enum": [
+        "check_only",
+        "explicit_gpu_run"
+      ],
+      "title": "Execution",
+      "type": "string"
+    },
+    "experiment_identifier": {
+      "title": "Experiment Identifier",
+      "type": "string"
+    },
+    "pilot_ready": {
+      "const": false,
+      "default": false,
+      "title": "Pilot Ready",
+      "type": "boolean"
+    },
+    "readiness_passed": {
+      "default": false,
+      "title": "Readiness Passed",
+      "type": "boolean"
+    },
+    "report_directory": {
+      "title": "Report Directory",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 2,
+      "default": 2,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "selection_checksum": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Selection Checksum"
+    }
+  },
+  "required": [
+    "schema_version",
+    "experiment_identifier",
+    "execution",
+    "readiness_passed",
+    "pilot_ready",
+    "dataset_revision",
+    "selection_checksum",
+    "report_directory",
+    "environment",
+    "checks"
+  ],
+  "title": "GpuReadinessReport",
+  "type": "object"
+}

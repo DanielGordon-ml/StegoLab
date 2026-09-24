@@ -7,7 +7,7 @@ import shutil
 import stat
 import sys
 from pathlib import Path
-from typing import cast
+from typing import Literal, cast
 
 import numpy as np
 import torch
@@ -54,7 +54,9 @@ def read_export_file(path: Path, maximum: int = MAXIMUM_EXPORT_FILE) -> bytes:
         return content
 
 
-def verify_package(directory: Path) -> ModelExportManifest:
+def verify_package(
+    directory: Path, *, device: Literal["cpu", "cuda"] = "cpu"
+) -> ModelExportManifest:
     """Check every declared package file before deserializing its graph."""
     if directory.is_symlink() or not directory.is_dir():
         raise export_failure()
@@ -83,9 +85,16 @@ def verify_package(directory: Path) -> ModelExportManifest:
             raise export_failure()
     if sys.version_info[:2] != (3, 12):
         raise export_failure()
-    for package, expected in manifest.dependencies.items():
+    if device == "cuda" and manifest.format_version != 2:
+        raise export_failure()
+    dependencies = (
+        manifest.runtime_dependencies[device]
+        if manifest.format_version == 2
+        else manifest.dependencies
+    )
+    for package, expected in dependencies.items():
         actual = importlib.metadata.version(package)
-        if package == "torch":
+        if package == "torch" and device == "cpu":
             actual = actual.split("+", 1)[0]
         if actual != expected:
             raise export_failure()

@@ -1,6 +1,11 @@
 # StegoLab Infrastructure Plan
 
 Status: researched implementation plan; no AWS resources have been launched.
+
+Sprint 5 implements CUDA build preparation, the instance-time ledger, mocked
+deadline controls, and a manual host runbook. See [GPU preparation](../docs/gpu_preparation.md)
+and [acceptance](sprint_05.md). No EC2 launch, physical stop drill or GPU test is
+implied by these files; those remain later explicit gates.
 Research date: 2026-09-23. Related plans: [Backend](backend.md), [Frontend](frontend.md), [Execution order](execution_order.md).
 
 ## 1. Deployment shape

@@ -14,6 +14,12 @@ The GUI and HTTP API still provide no encoding, decoding, or training operations
 dataset downloads remain unavailable. Public payload capacity remains zero, and
 no model is approved for application use or release.
 
+Sprint 5 adds a separate pilot preparation path: streamed UHD-IQA training,
+deterministic resume, explicit CPU/CUDA packages, a native-amd64 CUDA build,
+and guarded instance-time accounting. Local checks spend zero GPU hours.
+Actual GPU readiness and model-quality gates remain open. Start with the
+[pilot guide](docs/pilot_training.md) and [Sprint 5 evidence](plan/sprint_05.md).
+
 ## System architecture
 
 The map covers the full planned system. **Solid lines** show implemented paths;
@@ -65,6 +71,7 @@ unless you intend to delete that saved state.
 - [Sprint 2 backlog and acceptance results](plan/sprint_02.md)
 - [Sprint 3 plan: local UHD-IQA preparation and manifests](plan/sprint_03.md)
 - [Sprint 4: experimental CPU model engine and acceptance record](plan/sprint_04.md)
+- [Sprint 5: preparation for a later GPU readiness test](plan/sprint_05.md)
 - [Experimental CPU training, evaluation, checkpoints, and exports](docs/model_training.md)
 - [Local datasets, grayscale support, and offline verification](docs/datasets.md)
 - [Message protocol and public demonstration](docs/message_protocol.md)
