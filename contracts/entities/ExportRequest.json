@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Create two independent packages from a verified paired checkpoint.",
+  "properties": {
+    "checkpoint": {
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Checkpoint",
+      "type": "string"
+    },
+    "experiment_identifier": {
+      "pattern": "^[a-z][a-z0-9_]{0,63}$",
+      "title": "Experiment Identifier",
+      "type": "string"
+    },
+    "export_name": {
+      "default": "001V",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$",
+      "title": "Export Name",
+      "type": "string"
+    },
+    "output_root": {
+      "default": ".",
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Output Root",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "experiment_identifier",
+    "output_root",
+    "checkpoint",
+    "export_name"
+  ],
+  "title": "ExportRequest",
+  "type": "object"
+}

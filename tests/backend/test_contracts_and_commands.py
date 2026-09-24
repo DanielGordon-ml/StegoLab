@@ -64,7 +64,7 @@ def test_command_inspection_and_validation(
 
 def test_planned_commands_fail_clearly(capsys: pytest.CaptureFixture[str]) -> None:
     """Return a failure code instead of pretending an unavailable command ran."""
-    assert main(["train"]) == 2
+    assert main(["encode"]) == 2
     assert "not available" in capsys.readouterr().err
 
 

@@ -1,7 +1,16 @@
 # StegoLab Backend Plan
 
-Status: researched implementation plan; no model results have been reproduced yet.
+Status: target implementation plan with delivered local services and an experimental
+CPU model engine. Model-quality acceptance is recorded separately, not implied by
+implemented interfaces.
 Research date: 2026-09-23. Related plans: [Frontend](frontend.md), [Infrastructure](infrastructure.md), [Execution order](execution_order.md).
+
+Current delivery: [Sprint 4](sprint_04.md) adds CPU-only `train`, `evaluate`,
+`inspect_checkpoint`, and `export_models` commands over reusable services.
+See [the model guide](../docs/model_training.md) for their fixed development
+profile, resume rules, and shared CPU proof budget. GUI/HTTP model operations,
+worker scheduling, remote dataset adapters, and GPU deployment remain planned.
+Capabilities still advertise no installed usable model and zero payload capacity.
 
 ## 1. Agreed baseline
 
@@ -31,6 +40,10 @@ The review used web search, arXiv full text, official repositories, and Hugging 
 - Keep research-only comparator dependencies outside the shipped runtime. Record the exact terms of [official implementation packages](https://dde.binghamton.edu/download/stego_algorithms/); public source availability alone is not a license. If an implementation's terms do not cover this project's use, leave that experiment unrun and report the comparison gap; do not replace it with a simulator or imply successful reproduction.
 
 ## 3. Application structure and interfaces
+
+The route table below describes the target application. Sprint 4 exposes its
+experimental model engine through the CLI only; it adds no model HTTP route,
+executing API job, or live event stream.
 
 - Use FastAPI, strict Pydantic models, PyTorch, Pillow, PyNaCl, and a Reed-Solomon codec. Keep code in backend_service/ and structural models in schemas/.
 - Backend modules: configuration, image preparation, message protocol, dataset sources, model adapters, training, evaluation, checkpoints, exports, job supervision, persistence, API, and CLI.
@@ -107,9 +120,19 @@ The review used web search, arXiv full text, official repositories, and Hugging 
 
 ## 6. Training and evaluation
 
+- Delivered CPU development slice: a frozen four-training/four-tuning-image
+  sample, 256-pixel crops, physical batch 1 with effective batch 4, FP32,
+  Adam at `1e-4`, and at most 1,000 optimizer steps. Its two-experiment/four-hour
+  project limit includes evaluation/export, with at most two hours per experiment
+  and twenty minutes reserved for saves/checks. This local proof is separate from
+  the pilot profile below and consumes no GPU pilot allowance.
+- Sprint 4 evaluates saved PNGs and records recovery, bit errors, PSNR, SSIM,
+  clipping, elapsed time, and process memory. LPIPS, halo tiling, 4K qualification,
+  independent detection, and the frozen 10,000-image benchmark remain later gates.
+
 - Tensor-only model interfaces: encoder(cover_rgb, payload_map) → stego_rgb; decoder(stego_rgb) → bit_logits. Protocol wrappers and file I/O are outside the graph.
 - Begin with the published DenseEncoder/DenseDecoder pattern: four 3×3 convolution stages, 32 hidden channels, dense feature concatenation, LeakyReLU and BatchNorm in hidden stages, a three-channel residual encoder output, and one decoder-logit channel. Freeze BatchNorm for inference. Keep the optional critic and channel simulator replaceable. [Encoder source](https://github.com/DAI-Lab/SteganoGAN/blob/master/steganogan/encoders.py), [decoder source](https://github.com/DAI-Lab/SteganoGAN/blob/master/steganogan/decoders.py)
-- Train on random bits using 256-pixel crops, Adam at 1e-4, effective batch 16, and recorded random seeds. Select physical batch 8 or 4 from the setup memory probe and use accumulation.
+- GPU pilot profile: train on random bits using 256-pixel crops, Adam at 1e-4, effective batch 16, and recorded random seeds. Select physical batch 8 or 4 from the setup memory probe and use accumulation.
 - Start in FP32. Test mixed precision as a separate change after exact-PNG parity. Train through clamping and 8-bit rounding with a documented gradient approximation.
 - Initial experimental loss: bit BCE plus image MSE, with image-loss weight increasing linearly from 0 to 100 over the first 20% of planned optimizer steps and then held at 100. Log both terms separately. This is a starting configuration, not an established optimum; any diagnostic change creates a new recorded experiment and uses validation only.
 - Use full-frame inference when memory permits and halo-based tiling for large images. Verify tiled/full-frame agreement, border handling, odd dimensions, and exact recovered bytes. Do not assume arbitrary normalization layers preserve tile equivalence.
@@ -119,6 +142,15 @@ The review used web search, arXiv full text, official repositories, and Hugging 
 - Later independent detection uses separately trained SRNet and Zhu-Net-style detectors with public encoder weights, cover/stego pairs kept together in splits, and matched processing histories. Report AUC, balanced error, TPR at fixed FPR, and cross-source results. Document RGB adaptations and implementation terms. [SRNet](https://ws.binghamton.edu/fridrich/research/SRNet.pdf), [Zhu-Net](https://arxiv.org/abs/1807.11428)
 
 ## 7. Checkpoints and independent exports
+
+- Sprint 4 implements verified atomic CPU checkpoints containing both networks,
+  BatchNorm buffers, Adam state, Python/NumPy/Torch random state, sampler position,
+  optimizer step, and frozen configuration/data/environment identities. Loads use
+  Torch's safe `weights_only` mode; exact resume requires matching identities.
+  The CPU profile uses no scheduler or mixed-precision scaler.
+- Experimental CPU `torch.export` packages cover batch-one RGB tensor inputs
+  with sides from 512 to 1024, including odd dimensions. Their manifests mark
+  them experimental; CPU package checks do not qualify GPU, 4K, or application use.
 
 - Save complete training state: networks, optimizer/scheduler/scaler state, random states, consumed-step/sampler state, dataset manifest, resolved configuration, and environment/source identifiers. Weights alone are insufficient. [PyTorch checkpoint guidance](https://docs.pytorch.org/tutorials/beginner/saving_loading_models.html)
 - Save recovery checkpoints every five minutes by default and best candidates after validation. Pause/stop saves at a completed step boundary. Exact continuation is only promised for the same supported deterministic environment.

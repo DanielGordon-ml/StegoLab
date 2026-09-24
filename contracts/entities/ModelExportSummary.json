@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Return public package locations without training or secret inputs.",
+  "properties": {
+    "compatibility_identifier": {
+      "pattern": "^dense_v1_[0-9a-f]{64}$",
+      "title": "Compatibility Identifier",
+      "type": "string"
+    },
+    "decoder_directory": {
+      "title": "Decoder Directory",
+      "type": "string"
+    },
+    "directory": {
+      "title": "Directory",
+      "type": "string"
+    },
+    "encoder_directory": {
+      "title": "Encoder Directory",
+      "type": "string"
+    },
+    "source_identifier": {
+      "maxLength": 256,
+      "minLength": 1,
+      "title": "Source Identifier",
+      "type": "string"
+    },
+    "status": {
+      "const": "experimental",
+      "default": "experimental",
+      "title": "Status",
+      "type": "string"
+    }
+  },
+  "required": [
+    "compatibility_identifier",
+    "source_identifier",
+    "directory",
+    "encoder_directory",
+    "decoder_directory",
+    "status"
+  ],
+  "title": "ModelExportSummary",
+  "type": "object"
+}

@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Report training work separately from unmeasured learning gates.",
+  "properties": {
+    "checkpoint": {
+      "title": "Checkpoint",
+      "type": "string"
+    },
+    "compatibility_identifier": {
+      "title": "Compatibility Identifier",
+      "type": "string"
+    },
+    "dataset_revision": {
+      "title": "Dataset Revision",
+      "type": "string"
+    },
+    "elapsed_seconds": {
+      "minimum": 0,
+      "title": "Elapsed Seconds",
+      "type": "number"
+    },
+    "experiment_identifier": {
+      "title": "Experiment Identifier",
+      "type": "string"
+    },
+    "global_step": {
+      "maximum": 1000,
+      "minimum": 0,
+      "title": "Global Step",
+      "type": "integer"
+    },
+    "learning_gate": {
+      "const": "not_measured",
+      "default": "not_measured",
+      "title": "Learning Gate",
+      "type": "string"
+    },
+    "remaining_experiment_seconds": {
+      "minimum": 0,
+      "title": "Remaining Experiment Seconds",
+      "type": "number"
+    },
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "selected_training_identities": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Selected Training Identities",
+      "type": "array"
+    },
+    "selected_tuning_identities": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Selected Tuning Identities",
+      "type": "array"
+    },
+    "status": {
+      "enum": [
+        "completed",
+        "stopped",
+        "budget_exhausted"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "stop_signal": {
+      "anyOf": [
+        {
+          "enum": [
+            2,
+            15
+          ],
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Stop Signal"
+    }
+  },
+  "required": [
+    "schema_version",
+    "experiment_identifier",
+    "status",
+    "global_step",
+    "checkpoint",
+    "dataset_revision",
+    "compatibility_identifier",
+    "elapsed_seconds",
+    "remaining_experiment_seconds",
+    "selected_training_identities",
+    "selected_tuning_identities",
+    "learning_gate",
+    "stop_signal"
+  ],
+  "title": "TrainingRun",
+  "type": "object"
+}

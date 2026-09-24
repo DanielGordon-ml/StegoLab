@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "experiment_identifier": "sprint04_baseline",
+  "output_root": ".",
+  "dataset_directory": "datasets/uhd_iqa/c3b9eb1bea77b4172a620814f047e5214d89b24ef53639582980546cfb20d0d2",
+  "configuration": {"cpu_threads": 4},
+  "stop_after_step": 1000
+}

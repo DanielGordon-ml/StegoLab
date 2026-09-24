@@ -3,8 +3,10 @@
 Sprint 1 provides four tabs and saved settings. Sprint 2 adds message-protocol
 checks and image preparation through the command line. Sprint 3 adds local
 dataset preparation and offline integrity checks; see [datasets](datasets.md).
-Training, image-based
-encoding/decoding, dataset downloads, and model installation are not available yet.
+Sprint 4 adds experimental CPU training, checkpoint inspection, evaluation, and
+independent model exports through the [command-line workflow](model_training.md).
+Browser training, encoding/decoding, dataset downloads, and model installation
+remain unavailable. Public model capacity is still zero.
 
 ## Start with Docker
 
@@ -121,8 +123,9 @@ A configuration document contains `schema_version: 1` and
 `checkpoint_interval_seconds: 300`. The interval is a positive integer divisible
 by 60. Validation reads the file without saving it. Native commands use `.runtime/`
 unless `STEGOLAB_DATA_DIRECTORY` selects another location; this is separate from
-the Docker volume. Training and model commands report that they are unavailable
-and return a nonzero exit code.
+the Docker volume. Experimental `train`, `evaluate`, `export_models`, and
+`inspect_checkpoint` commands use the model workflow's explicit requests and
+output directories. Public `encode` and `decode` commands remain unavailable.
 
 The protocol demonstration uses packaged public fixtures and accepts no secret
 inputs. Image commands return safe metadata; preparation refuses existing output
@@ -150,4 +153,5 @@ curl --fail http://127.0.0.1:8080/api/v1/health
 
 Base images are pinned to multi-platform digests in each Dockerfile. Updating a
 digest or dependency lock requires running these checks and the restart test.
-The CI workflow runs the same CPU foundation checks; it does not train models.
+The CI workflow runs the same CPU checks and small synthetic model fixtures.
+Long learning experiments stay outside routine CI.

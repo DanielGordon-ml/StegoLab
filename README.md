@@ -7,15 +7,21 @@ backend contracts, persistent settings, and CPU containers. Sprint 2 adds
 encrypted message framing, error correction, test payload maps, and pixel-safe
 image preparation through reusable services and command-line tools. Sprint 3 adds
 local UHD-IQA preparation, grayscale support, frozen splits, and offline dataset
-integrity checks. Image-based encoding, decoding, training, and dataset downloads
-remain unavailable.
-No trained model or measured image-message recovery quality is included.
+integrity checks. Sprint 4 adds an **experimental CPU command-line engine** for
+training, saved-PNG evaluation, checkpoint inspection/resume, and separate model
+exports. Its measured acceptance record is kept in [Sprint 4](plan/sprint_04.md).
+The GUI and HTTP API still provide no encoding, decoding, or training operations;
+dataset downloads remain unavailable. Public payload capacity remains zero, and
+no model is approved for application use or release.
 
 ## System architecture
 
 The map covers the full planned system. **Solid lines** show implemented paths;
 **dashed lines** show planned work. The target keeps two containers: frontend
 and backend. Future model and data workers run as processes inside the backend.
+The existing map shows those application workers as planned. Sprint 4's separate
+experimental CLI engine is described in the architecture guide; it does not
+complete worker, API, or browser integration.
 
 [![StegoLab architecture: browser and CLI, frontend and backend, message, image, and local dataset services, planned workers, persistent state, checkpoints, and independent model packages](docs/architecture.svg)](Architecture.md)
 
@@ -23,7 +29,8 @@ Read [Architecture.md](Architecture.md) for component responsibilities, message
 and image flows, contracts, storage, security, training, deployment, and roadmap.
 The [Archify guide](docs/architecture.md) links the interactive local map and
 explains how to reproduce both diagrams. Config and the local protocol, image,
-and dataset tools work today; model quality and image-message recovery remain unmeasured.
+and dataset tools work today. The CPU model tools produce experimental evidence;
+their existence does not establish recovery quality, pilot readiness, or SOTA.
 
 ## Start locally
 
@@ -57,6 +64,8 @@ unless you intend to delete that saved state.
 - [Sprint 1 backlog and acceptance results](plan/sprint_01.md)
 - [Sprint 2 backlog and acceptance results](plan/sprint_02.md)
 - [Sprint 3 plan: local UHD-IQA preparation and manifests](plan/sprint_03.md)
+- [Sprint 4: experimental CPU model engine and acceptance record](plan/sprint_04.md)
+- [Experimental CPU training, evaluation, checkpoints, and exports](docs/model_training.md)
 - [Local datasets, grayscale support, and offline verification](docs/datasets.md)
 - [Message protocol and public demonstration](docs/message_protocol.md)
 - [Image inspection and PNG preparation](docs/image_preparation.md)

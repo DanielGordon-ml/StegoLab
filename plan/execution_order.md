@@ -11,6 +11,14 @@ sample and full-corpus measurements, plus offline container validation.
 Remote adapters and full pilot data readiness remain open; Sprint 3 does not
 complete the whole dataset step or replace the planned COCO benchmark.
 
+[Sprint 4](sprint_04.md) implements the experimental CPU slice of Step 4:
+model/quantization code, `train`, `evaluate`, `inspect_checkpoint`, and
+`export_models`, full-state checkpoints, and persistent proof time accounting.
+Use [the model guide](../docs/model_training.md) and Sprint 4's acceptance record
+for the actual measured result. CLI delivery does not complete model-quality,
+GPU, worker/API, or GUI gates. Public model operations remain unavailable and
+usable payload capacity remains zero.
+
 ## 1. Deliverables and shared decisions
 
 - The initial planning deliverable was four Markdown files: backend.md, frontend.md, infrastructure.md, and execution_order.md under plan/. Sprint plans and acceptance records extend those plans as delivery progresses.
@@ -38,6 +46,12 @@ complete the whole dataset step or replace the planned COCO benchmark.
 
 - Parallel work after Step 1: protocol, dataset adapters, frontend shell, and infrastructure setup can proceed independently against the frozen contracts.
 - Model training depends on protocol and data validation. Full GUI integration depends on real exports; a mocked page is not model acceptance evidence.
+- Sprint 4 can use the completed local dataset interface while remote adapters
+  remain open. Its bounded CPU proof uses a small frozen development sample and
+  a separate two-experiment/four-hour ledger, with at most two hours per experiment
+  including evaluation/export. It does not replace pilot data readiness or spend
+  the 24-hour GPU allocation. Twenty minutes per remaining experiment allowance
+  are reserved for saves and checks.
 - Do not spend GPU-instance time waiting for UI work or manual reviews. Finish CPU/export/setup checks first.
 - Step 6's GPU readiness and stop drill consume the two-hour setup allocation below. Step 8's final GPU integration checks consume the four-hour evaluation allocation; remaining CPU/browser checks can finish after shutdown. If readiness or integration needs more time, reduce training/ablation time within the same 24-hour ledger rather than add unbudgeted sessions.
 
