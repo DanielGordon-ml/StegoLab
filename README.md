@@ -2,23 +2,100 @@
 
 A local workspace for building a text-in-image steganography system.
 
-The application provides four accessible tabs, a working Config screen, strict
-backend contracts, persistent settings, and CPU containers. Sprint 2 adds
-encrypted message framing, error correction, test payload maps, and pixel-safe
-image preparation through reusable services and command-line tools. Sprint 3 adds
-local UHD-IQA preparation, grayscale support, frozen splits, and offline dataset
-integrity checks. Sprint 4 adds an **experimental CPU command-line engine** for
-training, saved-PNG evaluation, checkpoint inspection/resume, and separate model
-exports. Its measured acceptance record is kept in [Sprint 4](plan/sprint_04.md).
-The GUI and HTTP API still provide no encoding, decoding, or training operations;
-dataset downloads remain unavailable. Public payload capacity remains zero, and
-no model is approved for application use or release.
+## Run locally with Docker
 
-Sprint 5 adds a separate pilot preparation path: streamed UHD-IQA training,
-deterministic resume, explicit CPU/CUDA packages, a native-amd64 CUDA build,
-and guarded instance-time accounting. Local checks spend zero GPU hours.
-Actual GPU readiness and model-quality gates remain open. Start with the
-[pilot guide](docs/pilot_training.md) and [Sprint 5 evidence](plan/sprint_05.md).
+- Install and start Docker Desktop with Docker Compose.
+- Run all Docker commands below from the repository root, `StegoLab/`.
+- The local setup uses CPU containers. No cloud account or GPU is needed.
+
+### Choose the local port
+
+The default port is `8080`. If another application uses it, keep that application
+running and save port `8081` for StegoLab. Create or edit `infrastructure/.env` and
+add or update this line, keeping any other settings:
+
+```dotenv
+STEGOLAB_PORT=8081
+```
+
+Git ignores this local file. Compose loads it automatically with the commands
+below, including in new terminals. An exported `STEGOLAB_PORT` in your shell takes
+priority; run `unset STEGOLAB_PORT` if you want to use the saved file value.
+
+### Start or apply changes
+
+Build and start the containers, then wait for both to become healthy:
+
+```sh
+docker compose -f infrastructure/compose.yaml up --build --wait
+```
+
+The containers run in the background. Check their status:
+
+```sh
+docker compose -f infrastructure/compose.yaml ps
+```
+
+- With the saved setting above, open [StegoLab on port 8081](http://127.0.0.1:8081).
+- With the default setting, open [StegoLab on port 8080](http://127.0.0.1:8080).
+- Only the frontend publishes a host port, bound to `127.0.0.1`. The backend is
+  reached through the frontend proxy.
+
+### Stop
+
+Stop StegoLab and remove its containers and network:
+
+```sh
+docker compose -f infrastructure/compose.yaml down
+```
+
+Saved settings and job data remain in the `stegolab_application_data` volume.
+Do not add `--volumes` for a normal shutdown: it deletes that saved data.
+Use the start command above to bring StegoLab back after stopping.
+
+### Restart
+
+Restart existing containers with their current configuration:
+
+```sh
+docker compose -f infrastructure/compose.yaml restart
+```
+
+To restart only the backend, add `backend_service` to that command. Use
+`up --build --wait` after changing the port, Compose settings, application code,
+or images; `restart` does not apply those changes.
+
+### View logs
+
+```sh
+docker compose -f infrastructure/compose.yaml logs --tail 100 backend_service user_interface
+```
+
+See [local setup](docs/local_setup.md) for health checks, saved-setting checks,
+development commands, browser tests, and troubleshooting.
+
+## Current features and limits
+
+- The application has four accessible tabs, a working Config screen, strict
+  backend contracts, persistent settings, and CPU containers. Config changes
+  survive restarts; Reset restores a five-minute checkpoint interval.
+- Sprint 2 provides encrypted message framing, error correction, test payload
+  maps, and pixel-safe image preparation through reusable services and CLI tools.
+- Sprint 3 provides local UHD-IQA preparation, grayscale support, frozen splits,
+  and offline dataset integrity checks.
+- Sprint 4 provides an **experimental CPU command-line engine** for training,
+  saved-PNG evaluation, checkpoint inspection/resume, and separate model exports.
+  See the measured [Sprint 4 acceptance record](plan/sprint_04.md).
+- Sprint 5 adds pilot preparation: streamed UHD-IQA training, deterministic
+  resume, explicit CPU/CUDA packages, a native-amd64 CUDA build, and guarded
+  instance-time accounting. Local checks spend zero GPU hours. Start with the
+  [pilot guide](docs/pilot_training.md) and [Sprint 5 evidence](plan/sprint_05.md).
+
+The GUI and HTTP API still provide no encoding, decoding, or training operations.
+Dataset downloads remain unavailable. Public payload capacity remains zero, and
+no model is approved for application use or release. GPU readiness and model
+quality gates remain open; the existing tools do not establish recovery quality,
+pilot readiness, or SOTA results.
 
 ## System architecture
 
@@ -26,42 +103,15 @@ The map covers the full planned system. **Solid lines** show implemented paths;
 **dashed lines** show planned work. The target keeps two containers: frontend
 and backend. Future model and data workers run as processes inside the backend.
 The existing map shows those application workers as planned. Sprint 4's separate
-experimental CLI engine is described in the architecture guide; it does not
-complete worker, API, or browser integration.
+experimental CLI engine does not complete worker, API, or browser integration.
+The backend stores configuration and job metadata in SQLite.
 
 [![StegoLab architecture: browser and CLI, frontend and backend, message, image, and local dataset services, planned workers, persistent state, checkpoints, and independent model packages](docs/architecture.svg)](Architecture.md)
 
 Read [Architecture.md](Architecture.md) for component responsibilities, message
 and image flows, contracts, storage, security, training, deployment, and roadmap.
 The [Archify guide](docs/architecture.md) links the interactive local map and
-explains how to reproduce both diagrams. Config and the local protocol, image,
-and dataset tools work today. The CPU model tools produce experimental evidence;
-their existence does not establish recovery quality, pilot readiness, or SOTA.
-
-## Start locally
-
-Install Docker with Compose, then run from the repository root:
-
-```sh
-docker compose -f infrastructure/compose.yaml up --build --wait
-```
-
-Open [StegoLab](http://127.0.0.1:8080). In Config, change the checkpoint frequency,
-save, restart the backend, and reload the page. The saved value remains available.
-Reset restores five minutes.
-
-If port 8080 is already in use, start with
-`STEGOLAB_PORT=8081 docker compose -f infrastructure/compose.yaml up --build --wait`
-and open [StegoLab on port 8081](http://127.0.0.1:8081). Use the same environment
-variable for later Compose commands.
-
-```sh
-docker compose -f infrastructure/compose.yaml restart backend_service
-docker compose -f infrastructure/compose.yaml down
-```
-
-Stopping containers preserves settings in the named volume. Do not add `--volumes`
-unless you intend to delete that saved state.
+explains how to reproduce both diagrams.
 
 ## Project guides
 
@@ -81,6 +131,3 @@ unless you intend to delete that saved state.
 - [Backend plan](plan/backend.md), [frontend plan](plan/frontend.md),
   [infrastructure plan](plan/infrastructure.md), and
   [execution order](plan/execution_order.md)
-
-The frontend is the only published service, bound to localhost. The backend stores
-configuration and job metadata in SQLite. No cloud account or GPU is needed.
