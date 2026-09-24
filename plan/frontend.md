@@ -3,6 +3,20 @@
 Status: researched implementation plan. Research date: 2026-09-23.
 Related plans: [Backend](backend.md), [Infrastructure](infrastructure.md), [Execution order](execution_order.md). Backend contracts and model limits are authoritative.
 
+Delivery update — 2026-09-24: the first GUI phase now opens on Train and connects
+local folder preparation, the fixed CPU proof profile, safe stop/resume,
+checkpoint review, evaluation, and independent export downloads to durable jobs.
+It includes live events and reconnect recovery, recorded metric charts/tables,
+and validated Config JSON import/export. See the [GUI guide](../docs/gui_training.md).
+The [binding proof](../docs/client_binding_proof.md) is complete; reuse the chosen
+small adapters and JSON Schema validation rather than repeating that proof.
+
+This is a training-first slice of the target below. Encode and Decode remain
+unavailable, and usable capacity remains zero. GPU/fine-tuning controls,
+browser/remote dataset transfers, pause, checkpoint pinning, linked image
+previews, and qualified inference remain later work. Existing reports remain
+experimental; this GUI delivery does not establish model quality or SOTA.
+
 ## 1. Product and technical choices
 
 - Build Encode, Decode, Train, and Config for a non-technical, single user. Support the complete first-release workflow, including local and remote dataset preparation.

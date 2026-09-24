@@ -35,7 +35,7 @@ def test_initial_capabilities_and_empty_lists(client: TestClient) -> None:
         "available_profiles": [],
         "encoding_available": False,
         "decoding_available": False,
-        "training_available": False,
+        "training_available": True,
         "maximum_payload_bytes": 0,
     }
     for collection in ("models", "jobs"):

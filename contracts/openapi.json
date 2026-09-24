@@ -31,7 +31,7 @@
       },
       "Capabilities": {
         "additionalProperties": false,
-        "description": "Describe the CPU-only release without advertising model support.",
+        "description": "Separate experimental training from qualified inference support.",
         "properties": {
           "application_version": {
             "const": "0.1.0",
@@ -88,8 +88,7 @@
             "type": "integer"
           },
           "training_available": {
-            "const": false,
-            "default": false,
+            "default": true,
             "title": "Training Available",
             "type": "boolean"
           }
@@ -275,6 +274,20 @@
             "title": "Created At",
             "type": "string"
           },
+          "error": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
           "estimated_seconds_remaining": {
             "anyOf": [
               {
@@ -287,11 +300,63 @@
             ],
             "title": "Estimated Seconds Remaining"
           },
+          "experiment_identifier": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Experiment Identifier"
+          },
+          "frozen_settings": {
+            "additionalProperties": true,
+            "title": "Frozen Settings",
+            "type": "object"
+          },
           "job_identifier": {
             "maxLength": 128,
             "minLength": 1,
             "title": "Job Identifier",
             "type": "string"
+          },
+          "latest_event_identifier": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Event Identifier"
+          },
+          "metrics": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Metrics",
+            "type": "object"
+          },
+          "operation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operation"
           },
           "phase": {
             "maxLength": 128,
@@ -311,6 +376,36 @@
               }
             ],
             "title": "Progress"
+          },
+          "requested_action": {
+            "anyOf": [
+              {
+                "enum": [
+                  "pause",
+                  "resume",
+                  "stop",
+                  "cancel",
+                  "supply_missing_inputs"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested Action"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result"
           },
           "status": {
             "enum": [
@@ -342,7 +437,15 @@
           "created_at",
           "updated_at",
           "progress",
-          "estimated_seconds_remaining"
+          "estimated_seconds_remaining",
+          "operation",
+          "experiment_identifier",
+          "frozen_settings",
+          "result",
+          "error",
+          "metrics",
+          "requested_action",
+          "latest_event_identifier"
         ],
         "title": "JobSnapshot",
         "type": "object"
@@ -365,19 +468,701 @@
         ],
         "title": "ModelList",
         "type": "object"
+      },
+      "TrainingPreflight": {
+        "additionalProperties": false,
+        "description": "Explain eligibility without creating files or reserving experiment time.",
+        "properties": {
+          "allowed": {
+            "title": "Allowed",
+            "type": "boolean"
+          },
+          "blockers": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Blockers",
+            "type": "array"
+          },
+          "remaining_budget_seconds": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Remaining Budget Seconds",
+            "type": "number"
+          },
+          "remaining_experiment_slots": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Remaining Experiment Slots",
+            "type": "integer"
+          },
+          "resolved_settings": {
+            "additionalProperties": true,
+            "title": "Resolved Settings",
+            "type": "object"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "allowed",
+          "blockers",
+          "warnings",
+          "resolved_settings",
+          "remaining_budget_seconds",
+          "remaining_experiment_slots"
+        ],
+        "title": "TrainingPreflight",
+        "type": "object"
+      },
+      "WorkflowActionRequest": {
+        "additionalProperties": false,
+        "description": "Make retries of supported actions safe across browser reloads.",
+        "properties": {
+          "action": {
+            "enum": [
+              "stop",
+              "cancel",
+              "pause",
+              "resume"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "client_request_identifier": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+            "title": "Client Request Identifier",
+            "type": "string"
+          }
+        },
+        "required": [
+          "client_request_identifier",
+          "action"
+        ],
+        "title": "WorkflowActionRequest",
+        "type": "object"
+      },
+      "WorkflowRequest": {
+        "additionalProperties": false,
+        "description": "Resolve a bounded local operation on the server's original workspace.",
+        "properties": {
+          "checkpoint_identifier": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checkpoint Identifier"
+          },
+          "client_request_identifier": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+            "title": "Client Request Identifier",
+            "type": "string"
+          },
+          "cpu_threads": {
+            "default": 4,
+            "maximum": 16.0,
+            "minimum": 1.0,
+            "title": "Cpu Threads",
+            "type": "integer"
+          },
+          "dataset_identifier": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dataset Identifier"
+          },
+          "dataset_name": {
+            "default": "local_images",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "title": "Dataset Name",
+            "type": "string"
+          },
+          "experiment_identifier": {
+            "default": "cpu_experiment",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "title": "Experiment Identifier",
+            "type": "string"
+          },
+          "export_name": {
+            "default": "001V",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$",
+            "title": "Export Name",
+            "type": "string"
+          },
+          "lightweight": {
+            "default": false,
+            "title": "Lightweight",
+            "type": "boolean"
+          },
+          "operation": {
+            "enum": [
+              "train",
+              "evaluate",
+              "export",
+              "prepare_dataset"
+            ],
+            "title": "Operation",
+            "type": "string"
+          },
+          "source_identifier": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Identifier"
+          },
+          "source_subdirectory": {
+            "default": "",
+            "maxLength": 4096,
+            "title": "Source Subdirectory",
+            "type": "string"
+          },
+          "stop_after_step": {
+            "default": 1000,
+            "maximum": 1000.0,
+            "minimum": 1.0,
+            "title": "Stop After Step",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "client_request_identifier",
+          "operation"
+        ],
+        "title": "WorkflowRequest",
+        "type": "object"
+      },
+      "Workspace": {
+        "additionalProperties": false,
+        "description": "Return discovered local research work and current capability limits.",
+        "properties": {
+          "budget": {
+            "$ref": "#/components/schemas/WorkspaceBudget"
+          },
+          "checkpoints": {
+            "items": {
+              "$ref": "#/components/schemas/WorkspaceCheckpoint"
+            },
+            "title": "Checkpoints",
+            "type": "array"
+          },
+          "datasets": {
+            "items": {
+              "$ref": "#/components/schemas/WorkspaceDataset"
+            },
+            "title": "Datasets",
+            "type": "array"
+          },
+          "exports": {
+            "items": {
+              "$ref": "#/components/schemas/WorkspaceExport"
+            },
+            "title": "Exports",
+            "type": "array"
+          },
+          "runs": {
+            "items": {
+              "$ref": "#/components/schemas/WorkspaceRun"
+            },
+            "title": "Runs",
+            "type": "array"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/WorkspaceSource"
+            },
+            "title": "Sources",
+            "type": "array"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "datasets",
+          "runs",
+          "checkpoints",
+          "exports",
+          "sources",
+          "budget",
+          "warnings"
+        ],
+        "title": "Workspace",
+        "type": "object"
+      },
+      "WorkspaceBudget": {
+        "additionalProperties": false,
+        "description": "Read the existing shared CPU ledger without changing its accounting.",
+        "properties": {
+          "blocked_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blocked Reason"
+          },
+          "remaining_experiments": {
+            "maximum": 2.0,
+            "minimum": 0.0,
+            "title": "Remaining Experiments",
+            "type": "integer"
+          },
+          "remaining_seconds": {
+            "minimum": 0.0,
+            "title": "Remaining Seconds",
+            "type": "number"
+          }
+        },
+        "required": [
+          "remaining_seconds",
+          "remaining_experiments",
+          "blocked_reason"
+        ],
+        "title": "WorkspaceBudget",
+        "type": "object"
+      },
+      "WorkspaceCheckpoint": {
+        "additionalProperties": false,
+        "description": "Explain exact-continuation blockers without advertising inference models.",
+        "properties": {
+          "cpu_threads": {
+            "anyOf": [
+              {
+                "maximum": 16.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cpu Threads"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "dataset_revision": {
+            "title": "Dataset Revision",
+            "type": "string"
+          },
+          "experiment_identifier": {
+            "title": "Experiment Identifier",
+            "type": "string"
+          },
+          "global_step": {
+            "minimum": 0.0,
+            "title": "Global Step",
+            "type": "integer"
+          },
+          "identifier": {
+            "title": "Identifier",
+            "type": "string"
+          },
+          "latest": {
+            "title": "Latest",
+            "type": "boolean"
+          },
+          "metrics": {
+            "$ref": "#/components/schemas/WorkspaceMetrics"
+          },
+          "pinned": {
+            "title": "Pinned",
+            "type": "boolean"
+          },
+          "resume_blockers": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Resume Blockers",
+            "type": "array"
+          }
+        },
+        "required": [
+          "identifier",
+          "experiment_identifier",
+          "dataset_revision",
+          "cpu_threads",
+          "global_step",
+          "created_at",
+          "latest",
+          "pinned",
+          "metrics",
+          "resume_blockers"
+        ],
+        "title": "WorkspaceCheckpoint",
+        "type": "object"
+      },
+      "WorkspaceDataset": {
+        "additionalProperties": false,
+        "description": "Describe a prepared revision without exposing its filesystem path.",
+        "properties": {
+          "blockers": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Blockers",
+            "type": "array"
+          },
+          "compatible": {
+            "title": "Compatible",
+            "type": "boolean"
+          },
+          "identifier": {
+            "title": "Identifier",
+            "type": "string"
+          },
+          "image_count": {
+            "minimum": 0.0,
+            "title": "Image Count",
+            "type": "integer"
+          },
+          "integrity": {
+            "default": "not_checked",
+            "enum": [
+              "not_checked",
+              "verified"
+            ],
+            "title": "Integrity",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "prepared_bytes": {
+            "minimum": 0.0,
+            "title": "Prepared Bytes",
+            "type": "integer"
+          },
+          "revision": {
+            "title": "Revision",
+            "type": "string"
+          },
+          "training_images": {
+            "minimum": 0.0,
+            "title": "Training Images",
+            "type": "integer"
+          },
+          "tuning_images": {
+            "minimum": 0.0,
+            "title": "Tuning Images",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "identifier",
+          "name",
+          "revision",
+          "image_count",
+          "prepared_bytes",
+          "training_images",
+          "tuning_images",
+          "compatible",
+          "blockers",
+          "integrity"
+        ],
+        "title": "WorkspaceDataset",
+        "type": "object"
+      },
+      "WorkspaceExport": {
+        "additionalProperties": false,
+        "description": "Provide a download reference for an independent experimental package.",
+        "properties": {
+          "artifact_identifier": {
+            "title": "Artifact Identifier",
+            "type": "string"
+          },
+          "experimental": {
+            "const": true,
+            "default": true,
+            "title": "Experimental",
+            "type": "boolean"
+          },
+          "identifier": {
+            "title": "Identifier",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "encoder",
+              "decoder"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "identifier",
+          "name",
+          "kind",
+          "experimental",
+          "artifact_identifier"
+        ],
+        "title": "WorkspaceExport",
+        "type": "object"
+      },
+      "WorkspaceMetrics": {
+        "additionalProperties": false,
+        "description": "Keep image quality separate from authenticated message recovery.",
+        "properties": {
+          "exact_recovery_rate": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exact Recovery Rate"
+          },
+          "psnr": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Psnr"
+          },
+          "psnr_sample_count": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Psnr Sample Count"
+          },
+          "ssim": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": -1.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ssim"
+          },
+          "ssim_sample_count": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ssim Sample Count"
+          },
+          "trial_count": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Trial Count"
+          }
+        },
+        "required": [
+          "exact_recovery_rate",
+          "trial_count",
+          "psnr",
+          "psnr_sample_count",
+          "ssim",
+          "ssim_sample_count"
+        ],
+        "title": "WorkspaceMetrics",
+        "type": "object"
+      },
+      "WorkspaceRun": {
+        "additionalProperties": false,
+        "description": "Associate measured results with one immutable training invocation.",
+        "properties": {
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "dataset_revision": {
+            "title": "Dataset Revision",
+            "type": "string"
+          },
+          "experiment_identifier": {
+            "title": "Experiment Identifier",
+            "type": "string"
+          },
+          "global_step": {
+            "minimum": 0.0,
+            "title": "Global Step",
+            "type": "integer"
+          },
+          "identifier": {
+            "title": "Identifier",
+            "type": "string"
+          },
+          "metrics": {
+            "$ref": "#/components/schemas/WorkspaceMetrics"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "identifier",
+          "experiment_identifier",
+          "status",
+          "global_step",
+          "dataset_revision",
+          "created_at",
+          "metrics"
+        ],
+        "title": "WorkspaceRun",
+        "type": "object"
+      },
+      "WorkspaceSource": {
+        "additionalProperties": false,
+        "description": "Name a server-approved source root without returning its private path.",
+        "properties": {
+          "identifier": {
+            "title": "Identifier",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "identifier",
+          "label"
+        ],
+        "title": "WorkspaceSource",
+        "type": "object"
       }
     }
   },
   "info": {
-    "description": "Local CPU foundation. Model features are not available yet.",
+    "description": "Local experimental training and review. Inference requires a qualified model.",
     "title": "StegoLab",
     "version": "0.1.0"
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/artifacts/{artifact_identifier}": {
+      "get": {
+        "description": "Return exact verified package members as one browser-downloadable archive.",
+        "operationId": "download_workspace_artifact",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "artifact_identifier",
+            "required": true,
+            "schema": {
+              "title": "Artifact Identifier",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Download Artifact"
+      }
+    },
     "/api/v1/capabilities": {
       "get": {
-        "description": "Report the features actually supported by this foundation release.",
+        "description": "Advertise local training separately from qualified image inference.",
         "operationId": "read_capabilities",
         "responses": {
           "200": {
@@ -669,6 +1454,310 @@
         "summary": "Reset Configuration"
       }
     },
+    "/api/v1/dataset_jobs": {
+      "post": {
+        "description": "Prepare a registered local folder using the immutable dataset service.",
+        "operationId": "dataset_api_v1_dataset_jobs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkflowRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobSnapshot"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Dataset"
+      }
+    },
+    "/api/v1/evaluation_jobs": {
+      "post": {
+        "description": "Queue measured checks for a registered checkpoint and dataset.",
+        "operationId": "evaluation_api_v1_evaluation_jobs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkflowRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobSnapshot"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Evaluation"
+      }
+    },
+    "/api/v1/events": {
+      "get": {
+        "description": "Keep one same-origin event stream with replay and no intermediary buffering.",
+        "operationId": "events_api_v1_events_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Events"
+      }
+    },
+    "/api/v1/export_jobs": {
+      "post": {
+        "description": "Queue independent experimental packages without enabling public inference.",
+        "operationId": "export_api_v1_export_jobs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkflowRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobSnapshot"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Export"
+      }
+    },
     "/api/v1/health": {
       "get": {
         "description": "Report that application startup and saved-state validation succeeded.",
@@ -740,7 +1829,7 @@
     },
     "/api/v1/jobs": {
       "get": {
-        "description": "Return validated saved metadata without running a worker.",
+        "description": "Merge original saved records with durable workflow jobs.",
         "operationId": "list_jobs",
         "responses": {
           "200": {
@@ -887,6 +1976,96 @@
         "summary": "Read Job"
       }
     },
+    "/api/v1/jobs/{job_identifier}/actions": {
+      "post": {
+        "description": "Persist a supported action once even when acknowledgement is lost.",
+        "operationId": "action_api_v1_jobs__job_identifier__actions_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_identifier",
+            "required": true,
+            "schema": {
+              "title": "Job Identifier",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkflowActionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobSnapshot"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Action"
+      }
+    },
     "/api/v1/models": {
       "get": {
         "description": "Report no installed model packages in this release.",
@@ -954,6 +2133,213 @@
           }
         },
         "summary": "List Models"
+      }
+    },
+    "/api/v1/training_jobs": {
+      "post": {
+        "description": "Queue one fixed CPU training attempt or compatible checkpoint continuation.",
+        "operationId": "training_api_v1_training_jobs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkflowRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobSnapshot"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Training"
+      }
+    },
+    "/api/v1/training_preflight": {
+      "post": {
+        "description": "Inspect a request without writing experiment state or spending time.",
+        "operationId": "preflight_api_v1_training_preflight_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkflowRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingPreflight"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Preflight"
+      }
+    },
+    "/api/v1/workspace": {
+      "get": {
+        "description": "Inspect existing local datasets, runs, checkpoints, exports, and budgets.",
+        "operationId": "read_workspace",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Workspace"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Read Workspace"
       }
     }
   }

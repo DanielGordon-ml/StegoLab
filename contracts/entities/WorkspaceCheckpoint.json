@@ -1,0 +1,171 @@
+{
+  "$defs": {
+    "WorkspaceMetrics": {
+      "additionalProperties": false,
+      "description": "Keep image quality separate from authenticated message recovery.",
+      "properties": {
+        "exact_recovery_rate": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exact Recovery Rate"
+        },
+        "psnr": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Psnr"
+        },
+        "psnr_sample_count": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Psnr Sample Count"
+        },
+        "ssim": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": -1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ssim"
+        },
+        "ssim_sample_count": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ssim Sample Count"
+        },
+        "trial_count": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Trial Count"
+        }
+      },
+      "required": [
+        "exact_recovery_rate",
+        "trial_count",
+        "psnr",
+        "psnr_sample_count",
+        "ssim",
+        "ssim_sample_count"
+      ],
+      "title": "WorkspaceMetrics",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Explain exact-continuation blockers without advertising inference models.",
+  "properties": {
+    "cpu_threads": {
+      "anyOf": [
+        {
+          "maximum": 16,
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cpu Threads"
+    },
+    "created_at": {
+      "title": "Created At",
+      "type": "string"
+    },
+    "dataset_revision": {
+      "title": "Dataset Revision",
+      "type": "string"
+    },
+    "experiment_identifier": {
+      "title": "Experiment Identifier",
+      "type": "string"
+    },
+    "global_step": {
+      "minimum": 0,
+      "title": "Global Step",
+      "type": "integer"
+    },
+    "identifier": {
+      "title": "Identifier",
+      "type": "string"
+    },
+    "latest": {
+      "title": "Latest",
+      "type": "boolean"
+    },
+    "metrics": {
+      "$ref": "#/$defs/WorkspaceMetrics"
+    },
+    "pinned": {
+      "title": "Pinned",
+      "type": "boolean"
+    },
+    "resume_blockers": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Resume Blockers",
+      "type": "array"
+    }
+  },
+  "required": [
+    "identifier",
+    "experiment_identifier",
+    "dataset_revision",
+    "cpu_threads",
+    "global_step",
+    "created_at",
+    "latest",
+    "pinned",
+    "metrics",
+    "resume_blockers"
+  ],
+  "title": "WorkspaceCheckpoint",
+  "type": "object"
+}

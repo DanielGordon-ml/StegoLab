@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Read the existing shared CPU ledger without changing its accounting.",
+  "properties": {
+    "blocked_reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Blocked Reason"
+    },
+    "remaining_experiments": {
+      "maximum": 2,
+      "minimum": 0,
+      "title": "Remaining Experiments",
+      "type": "integer"
+    },
+    "remaining_seconds": {
+      "minimum": 0,
+      "title": "Remaining Seconds",
+      "type": "number"
+    }
+  },
+  "required": [
+    "remaining_seconds",
+    "remaining_experiments",
+    "blocked_reason"
+  ],
+  "title": "WorkspaceBudget",
+  "type": "object"
+}

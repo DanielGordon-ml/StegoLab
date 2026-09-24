@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Keep image quality separate from authenticated message recovery.",
+  "properties": {
+    "exact_recovery_rate": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Exact Recovery Rate"
+    },
+    "psnr": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Psnr"
+    },
+    "psnr_sample_count": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Psnr Sample Count"
+    },
+    "ssim": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": -1,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Ssim"
+    },
+    "ssim_sample_count": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Ssim Sample Count"
+    },
+    "trial_count": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Trial Count"
+    }
+  },
+  "required": [
+    "exact_recovery_rate",
+    "trial_count",
+    "psnr",
+    "psnr_sample_count",
+    "ssim",
+    "ssim_sample_count"
+  ],
+  "title": "WorkspaceMetrics",
+  "type": "object"
+}

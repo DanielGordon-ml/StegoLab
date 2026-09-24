@@ -8,14 +8,23 @@ Research date: 2026-09-23. Related plans: [Frontend](frontend.md), [Infrastructu
 Current delivery: [Sprint 4](sprint_04.md) adds CPU-only `train`, `evaluate`,
 `inspect_checkpoint`, and `export_models` commands over reusable services.
 See [the model guide](../docs/model_training.md) for their fixed development
-profile, resume rules, and shared CPU proof budget. GUI/HTTP model operations,
-worker scheduling, remote dataset adapters, and GPU deployment remain planned.
+profile, resume rules, and shared CPU proof budget. That sprint's delivery was
+CLI-only; the GUI integration below extends those same services.
 Capabilities still advertise no installed usable model and zero payload capacity.
 
 [Sprint 5](sprint_05.md) adds a separate version-two pilot path with lazy UHD-IQA
 loading, synchronous reproducible batches, CUDA-aware execution, tuning reports,
 and independent packages with explicit CPU/CUDA runtime pins. This is local
 preparation: real GPU behavior and model qualification remain unmeasured.
+
+GUI phase 1 — 2026-09-24: a supervised local CPU queue now runs preparation,
+training, evaluation, and exports through the existing command services.
+Snapshots, ordered events, and retry identifiers persist in separate application
+storage. The read-only workspace catalog uses opaque references; experiments
+retain their original output root and CPU ledger. Training availability is
+separate from qualified inference. Remote adapters, GPU jobs through the GUI,
+fine-tuning, and encoding/decoding HTTP operations remain planned. See the
+[GUI guide](../docs/gui_training.md) for current limits and recovery behavior.
 
 ## 1. Agreed baseline
 
@@ -46,9 +55,11 @@ The review used web search, arXiv full text, official repositories, and Hugging 
 
 ## 3. Application structure and interfaces
 
-The route table below describes the target application. Sprint 4 exposes its
-experimental model engine through the CLI only; it adds no model HTTP route,
-executing API job, or live event stream.
+The route table below describes the target application. The delivered CPU subset
+uses `/workspace`, `/training_preflight`, dataset/training/evaluation/export job
+endpoints, job actions/events, and registered artifact downloads under `/api/v1`.
+The generated OpenAPI contract records the actual routes; planned image,
+capacity, remote-dataset, and inference interfaces below are not yet enabled.
 
 - Use FastAPI, strict Pydantic models, PyTorch, Pillow, PyNaCl, and a Reed-Solomon codec. Keep code in backend_service/ and structural models in schemas/.
 - Backend modules: configuration, image preparation, message protocol, dataset sources, model adapters, training, evaluation, checkpoints, exports, job supervision, persistence, API, and CLI.

@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Resolve a bounded local operation on the server's original workspace.",
+  "properties": {
+    "checkpoint_identifier": {
+      "anyOf": [
+        {
+          "maxLength": 128,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Checkpoint Identifier"
+    },
+    "client_request_identifier": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+      "title": "Client Request Identifier",
+      "type": "string"
+    },
+    "cpu_threads": {
+      "default": 4,
+      "maximum": 16,
+      "minimum": 1,
+      "title": "Cpu Threads",
+      "type": "integer"
+    },
+    "dataset_identifier": {
+      "anyOf": [
+        {
+          "maxLength": 128,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Dataset Identifier"
+    },
+    "dataset_name": {
+      "default": "local_images",
+      "pattern": "^[a-z][a-z0-9_]{0,63}$",
+      "title": "Dataset Name",
+      "type": "string"
+    },
+    "experiment_identifier": {
+      "default": "cpu_experiment",
+      "pattern": "^[a-z][a-z0-9_]{0,63}$",
+      "title": "Experiment Identifier",
+      "type": "string"
+    },
+    "export_name": {
+      "default": "001V",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$",
+      "title": "Export Name",
+      "type": "string"
+    },
+    "lightweight": {
+      "default": false,
+      "title": "Lightweight",
+      "type": "boolean"
+    },
+    "operation": {
+      "enum": [
+        "train",
+        "evaluate",
+        "export",
+        "prepare_dataset"
+      ],
+      "title": "Operation",
+      "type": "string"
+    },
+    "source_identifier": {
+      "anyOf": [
+        {
+          "maxLength": 128,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Identifier"
+    },
+    "source_subdirectory": {
+      "default": "",
+      "maxLength": 4096,
+      "title": "Source Subdirectory",
+      "type": "string"
+    },
+    "stop_after_step": {
+      "default": 1000,
+      "maximum": 1000,
+      "minimum": 1,
+      "title": "Stop After Step",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "client_request_identifier",
+    "operation",
+    "experiment_identifier",
+    "dataset_identifier",
+    "checkpoint_identifier",
+    "cpu_threads",
+    "stop_after_step",
+    "source_identifier",
+    "source_subdirectory",
+    "dataset_name",
+    "export_name",
+    "lightweight"
+  ],
+  "title": "WorkflowRequest",
+  "type": "object"
+}

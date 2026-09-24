@@ -1,0 +1,194 @@
+.table_scroll {
+  overflow-x: auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 12px;
+}
+caption {
+  text-align: left;
+  color: #657484;
+  padding: 12px 22px;
+  font-size: 11px;
+}
+th {
+  font-size: 10px;
+  color: #5c7181;
+  font-weight: 600;
+}
+th,
+td {
+  padding: 15px 22px;
+  border-top: 1px solid #e6ebee;
+  vertical-align: middle;
+}
+thead {
+  background: #f8fafb;
+}
+td strong {
+  font-weight: 500;
+}
+tr[aria-selected='true'] td {
+  background: #f5faf9;
+}
+.cell_note {
+  display: block;
+  font-size: 10px;
+  color: #56687b;
+  margin-top: 5px;
+}
+.text_button {
+  padding: 9px 0;
+  border: 0;
+  background: none;
+  color: #126a65;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.dataset_list,
+.asset_list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.dataset_list li,
+.asset_list li {
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 19px 26px;
+  border-top: 1px solid #e5ebef;
+}
+.dataset_list strong,
+.asset_list strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+.dataset_list p,
+.asset_list span {
+  font-size: 11px;
+  color: #637687;
+  margin: 5px 0 0;
+}
+.dataset_list .dataset_blocker {
+  color: #895236;
+}
+.dataset_list .status_pill {
+  flex-shrink: 0;
+}
+.asset_list span {
+  display: block;
+}
+.asset_list .button {
+  white-space: nowrap;
+  font-size: 11px;
+  padding: 9px 12px;
+}
+.preview_unavailable {
+  display: flex;
+  gap: 15px;
+  margin: 22px;
+  border: 1px dashed #cbd7df;
+  border-radius: 8px;
+  padding: 20px;
+  color: #586e7e;
+}
+.preview_unavailable > span {
+  font-size: 30px;
+}
+.preview_unavailable strong {
+  font-size: 12px;
+  font-weight: 500;
+}
+.preview_unavailable p {
+  font-size: 11px;
+  margin: 5px 0 0;
+}
+.visually_hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+@media (max-width: 900px) {
+  .header_resources {
+    display: none;
+  }
+  .header_resources + .connection_status {
+    margin-left: auto;
+  }
+  .overview_grid > div {
+    padding: 0 17px;
+  }
+  .overview_grid .eyebrow {
+    font-size: 8px;
+  }
+  .active_job_indicator {
+    max-width: 230px;
+  }
+}
+@media (max-width: 720px) {
+  .navigation_row,
+  .heading_with_action {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .navigation_row {
+    gap: 14px;
+  }
+  .active_job_indicator {
+    min-height: 25px;
+    max-width: 100%;
+    padding-left: 4px;
+  }
+  .heading_with_action {
+    gap: 17px;
+  }
+  .heading_with_action .button {
+    align-self: flex-start;
+  }
+  .overview_grid {
+    grid-template-columns: 1fr 1fr;
+    row-gap: 25px;
+  }
+  .overview_grid > div:nth-child(2) {
+    border-right: 0;
+  }
+  .overview_grid strong {
+    font-size: 26px;
+  }
+  .overview_grid .eyebrow {
+    font-size: 9px;
+  }
+  .quality_grid {
+    grid-template-columns: 1fr;
+  }
+  .subsection_heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .dataset_list li,
+  .asset_list li {
+    flex-wrap: wrap;
+  }
+  .release_badge {
+    display: none;
+  }
+  .card_title_row {
+    padding: 22px;
+  }
+  th,
+  td {
+    padding: 13px 17px;
+    white-space: nowrap;
+  }
+}

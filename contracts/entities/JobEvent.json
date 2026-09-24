@@ -1,4 +1,241 @@
 {
+  "$defs": {
+    "ConfigurationProfile": {
+      "additionalProperties": false,
+      "description": "Store the checkpoint frequency as a whole number of minutes in seconds.",
+      "properties": {
+        "checkpoint_interval_seconds": {
+          "default": 300,
+          "exclusiveMinimum": 0,
+          "multipleOf": 60,
+          "title": "Checkpoint Interval Seconds",
+          "type": "integer"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schema_version",
+        "checkpoint_interval_seconds"
+      ],
+      "title": "ConfigurationProfile",
+      "type": "object"
+    },
+    "JobSnapshot": {
+      "additionalProperties": false,
+      "description": "Describe a saved job without executing it or exposing secret data.",
+      "properties": {
+        "available_actions": {
+          "items": {
+            "enum": [
+              "pause",
+              "resume",
+              "stop",
+              "cancel",
+              "supply_missing_inputs"
+            ],
+            "type": "string"
+          },
+          "title": "Available Actions",
+          "type": "array"
+        },
+        "configuration": {
+          "$ref": "#/$defs/ConfigurationProfile"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error"
+        },
+        "estimated_seconds_remaining": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Estimated Seconds Remaining"
+        },
+        "experiment_identifier": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Experiment Identifier"
+        },
+        "frozen_settings": {
+          "additionalProperties": true,
+          "title": "Frozen Settings",
+          "type": "object"
+        },
+        "job_identifier": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Job Identifier",
+          "type": "string"
+        },
+        "latest_event_identifier": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Latest Event Identifier"
+        },
+        "metrics": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "title": "Metrics",
+          "type": "object"
+        },
+        "operation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Operation"
+        },
+        "phase": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Phase",
+          "type": "string"
+        },
+        "progress": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Progress"
+        },
+        "requested_action": {
+          "anyOf": [
+            {
+              "enum": [
+                "pause",
+                "resume",
+                "stop",
+                "cancel",
+                "supply_missing_inputs"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Requested Action"
+        },
+        "result": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Result"
+        },
+        "status": {
+          "enum": [
+            "queued",
+            "running",
+            "paused",
+            "stopped",
+            "completed",
+            "cancelled",
+            "failed",
+            "interrupted",
+            "needs_input"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "job_identifier",
+        "status",
+        "phase",
+        "configuration",
+        "available_actions",
+        "created_at",
+        "updated_at",
+        "progress",
+        "estimated_seconds_remaining",
+        "operation",
+        "experiment_identifier",
+        "frozen_settings",
+        "result",
+        "error",
+        "metrics",
+        "requested_action",
+        "latest_event_identifier"
+      ],
+      "title": "JobSnapshot",
+      "type": "object"
+    }
+  },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "description": "Define future ordered state notifications with metadata fields only.",
@@ -25,6 +262,17 @@
       "title": "Phase",
       "type": "string"
     },
+    "snapshot": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/JobSnapshot"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
     "status": {
       "enum": [
         "queued",
@@ -46,7 +294,8 @@
     "job_identifier",
     "status",
     "phase",
-    "created_at"
+    "created_at",
+    "snapshot"
   ],
   "title": "JobEvent",
   "type": "object"

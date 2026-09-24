@@ -11,6 +11,8 @@ import {
   reset_configuration,
   save_configuration,
 } from '../contracts/service';
+import { ConfigurationTransfer } from './configuration_transfer';
+import { FixedProfile } from './fixed_profile';
 import { ErrorNotice } from './error_notice';
 
 type Change =
@@ -144,7 +146,8 @@ function ConfigurationForm({
             <p id="checkpoint_help">
               How often a future training run should save its progress.
               <br />
-              Training is not available in this release.
+              The fixed CPU profile always saves every 5 minutes and does not
+              use this default.
             </p>
           </div>
           <div className="number_field">
@@ -211,6 +214,25 @@ function ConfigurationForm({
           </button>
         </div>
       )}
+      <ConfigurationTransfer
+        configuration={initial_configuration}
+        locked={locked}
+        on_import={(configuration) => {
+          set_minutes(String(configuration.checkpoint_interval_seconds / 60));
+          set_confirmation('Imported settings. Review and save to apply.');
+          mutation.reset();
+        }}
+      />
+      <section className="lab_card configuration_profile">
+        <span className="eyebrow">SUPPORTED TRAINING PROFILE</span>
+        <h2>Local CPU proof</h2>
+        <p className="help_text">
+          Device: CPU. This experimental profile is available for training.
+          Encode and Decode require an approved compatible model pair. GPU
+          selection and custom profiles are not enabled.
+        </p>
+        <FixedProfile />
+      </section>
       <p className="configuration_note">
         Changes are saved on this computer. The default frequency is 5 minutes.
       </p>

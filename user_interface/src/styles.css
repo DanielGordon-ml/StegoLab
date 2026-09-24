@@ -1,5 +1,9 @@
 @import './workspace.css';
 @import './controls.css';
+@import './training.css';
+@import './forms.css';
+@import './tables.css';
+@import './inference.css';
 
 :root {
   font-family: 'Avenir Next', Avenir, 'Segoe UI', sans-serif;
@@ -44,7 +48,7 @@ input {
   flex-direction: column;
 }
 .topbar {
-  height: 88px;
+  height: 76px;
   padding: 0 5.5%;
   display: flex;
   align-items: center;
@@ -105,14 +109,14 @@ input {
 }
 main {
   width: min(1120px, 89%);
-  margin: 38px auto 0;
+  margin: 24px auto 0;
   flex: 1;
 }
 .workspace_intro {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 30px;
+  margin-bottom: 18px;
 }
 .eyebrow {
   color: #56687b;
@@ -183,7 +187,7 @@ main {
   border-radius: 50%;
 }
 .workspace_content {
-  margin-top: 39px;
+  margin-top: 28px;
 }
 .section_heading {
   margin-bottom: 28px;

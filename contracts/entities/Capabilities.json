@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
-  "description": "Describe the CPU-only release without advertising model support.",
+  "description": "Separate experimental training from qualified inference support.",
   "properties": {
     "application_version": {
       "const": "0.1.0",
@@ -58,8 +58,7 @@
       "type": "integer"
     },
     "training_available": {
-      "const": false,
-      "default": false,
+      "default": true,
       "title": "Training Available",
       "type": "boolean"
     }

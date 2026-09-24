@@ -5,11 +5,20 @@ services:
     build:
       context: ..
       dockerfile: backend_service/Dockerfile
+      args:
+        STEGOLAB_USER_ID: ${STEGOLAB_USER_ID:-10001}
+        STEGOLAB_GROUP_ID: ${STEGOLAB_GROUP_ID:-10001}
     environment:
       STEGOLAB_DATA_DIRECTORY: /data/state
       STEGOLAB_LOG_DIRECTORY: /data/logs
+      STEGOLAB_WORKSPACE_ROOT: /workspace
     volumes:
       - application_data:/data
+      - ../datasets:/workspace/datasets
+      - ../checkpoints:/workspace/checkpoints
+      - ../models:/workspace/models
+      - ../state:/workspace/state
+      - ../logs:/workspace/logs
     expose:
       - "8000"
     init: true
@@ -22,7 +31,7 @@ services:
     security_opt:
       - no-new-privileges:true
     mem_limit: 10g
-    stop_grace_period: 30s
+    stop_grace_period: 2m
     healthcheck:
       test:
         - CMD

@@ -15,7 +15,9 @@ from backend_service.storage import StateStore
 
 
 def create_application(
-    data_directory: Path | None = None, log_directory: Path | None = None
+    data_directory: Path | None = None,
+    log_directory: Path | None = None,
+    workspace_root: Path | None = None,
 ) -> FastAPI:
     """Build the API without touching disk until its lifespan starts."""
     selected_data_directory = data_directory or Path(
@@ -23,6 +25,11 @@ def create_application(
     )
     selected_log_directory = log_directory or Path(
         os.environ.get("STEGOLAB_LOG_DIRECTORY", "logs")
+    )
+    selected_workspace = workspace_root or (
+        selected_data_directory.parent / "workspace"
+        if data_directory is not None
+        else Path(os.environ.get("STEGOLAB_WORKSPACE_ROOT", "."))
     )
 
     @asynccontextmanager
@@ -38,6 +45,17 @@ def create_application(
         try:
             try:
                 application.state.store = StateStore(selected_data_directory)
+                from backend_service.workspace_catalog import WorkspaceCatalog
+                from backend_service.workspace_jobs import WorkspaceJobService
+
+                application.state.workspace_catalog = WorkspaceCatalog(
+                    selected_workspace, selected_data_directory
+                )
+                application.state.workspace_jobs = WorkspaceJobService(
+                    application.state.workspace_catalog, selected_data_directory
+                )
+                application.state.workspace_jobs.logger = logger
+                application.state.workspace_jobs.start()
             except ApplicationFailure:
                 logger.error("application_startup_failed")
                 raise RuntimeError(
@@ -48,6 +66,8 @@ def create_application(
             logger.info("application_startup_completed")
             yield
         finally:
+            if hasattr(application.state, "workspace_jobs"):
+                application.state.workspace_jobs.close()
             logger.info("application_shutdown_completed")
             close_run_logger(logger)
 
@@ -55,8 +75,16 @@ def create_application(
         title="StegoLab",
         version="0.1.0",
         lifespan=lifespan,
-        description="Local CPU foundation. Model features are not available yet.",
+        description=(
+            "Local experimental training and review. "
+            "Inference requires a qualified model."
+        ),
     )
     application.include_router(router)
+    from backend_service.workflow_routes import job_router
+    from backend_service.workspace_routes import workspace_router
+
+    application.include_router(workspace_router)
+    application.include_router(job_router)
     install_error_handlers(application)
     return application

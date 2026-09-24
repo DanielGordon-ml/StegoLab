@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Provide a download reference for an independent experimental package.",
+  "properties": {
+    "artifact_identifier": {
+      "title": "Artifact Identifier",
+      "type": "string"
+    },
+    "experimental": {
+      "const": true,
+      "default": true,
+      "title": "Experimental",
+      "type": "boolean"
+    },
+    "identifier": {
+      "title": "Identifier",
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "encoder",
+        "decoder"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    }
+  },
+  "required": [
+    "identifier",
+    "name",
+    "kind",
+    "experimental",
+    "artifact_identifier"
+  ],
+  "title": "WorkspaceExport",
+  "type": "object"
+}

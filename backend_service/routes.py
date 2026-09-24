@@ -4,7 +4,9 @@ from typing import cast
 
 from fastapi import APIRouter, Request
 
+from backend_service.failures import ApplicationFailure
 from backend_service.storage import StateStore
+from backend_service.workspace_jobs import WorkspaceJobService
 from schemas.capabilities import Capabilities, HealthStatus, ModelList
 from schemas.configuration import (
     ConfigurationProfile,
@@ -31,6 +33,11 @@ def state_store(request: Request) -> StateStore:
     return cast(StateStore, request.app.state.store)
 
 
+def job_service(request: Request) -> WorkspaceJobService:
+    """Read the persistent experimental workflow supervisor."""
+    return cast(WorkspaceJobService, request.app.state.workspace_jobs)
+
+
 @router.get("/health", response_model=HealthStatus, operation_id="read_health")
 def read_health() -> HealthStatus:
     """Report that application startup and saved-state validation succeeded."""
@@ -41,7 +48,7 @@ def read_health() -> HealthStatus:
     "/capabilities", response_model=Capabilities, operation_id="read_capabilities"
 )
 def read_capabilities() -> Capabilities:
-    """Report the features actually supported by this foundation release."""
+    """Advertise local training separately from qualified image inference."""
     return Capabilities()
 
 
@@ -95,8 +102,12 @@ def list_models() -> ModelList:
 
 @router.get("/jobs", response_model=JobList, operation_id="list_jobs")
 def list_jobs(request: Request) -> JobList:
-    """Return validated saved metadata without running a worker."""
-    return JobList(items=state_store(request).list_jobs())
+    """Merge original saved records with durable workflow jobs."""
+    snapshots = {item.job_identifier: item for item in state_store(request).list_jobs()}
+    snapshots.update(
+        {item.job_identifier: item for item in job_service(request).list_jobs()}
+    )
+    return JobList(items=sorted(snapshots.values(), key=lambda item: item.created_at))
 
 
 @router.get(
@@ -104,4 +115,9 @@ def list_jobs(request: Request) -> JobList:
 )
 def read_job(job_identifier: str, request: Request) -> JobSnapshot:
     """Return one saved job or a safe not-found error."""
+    try:
+        return job_service(request).get_job(job_identifier)
+    except ApplicationFailure as failure:
+        if failure.code != "job_not_found":
+            raise
     return state_store(request).get_job(job_identifier)

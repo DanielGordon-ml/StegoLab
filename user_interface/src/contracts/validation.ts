@@ -20,7 +20,13 @@ export function create_validator<Result>(
   schema: object,
 ): ValidateFunction<Result> {
   const validator = new Validator(schema as Schema, '2020-12');
-  return (value: unknown): value is Result => validator.validate(value).valid;
+  return (value: unknown): value is Result => {
+    try {
+      return validator.validate(value).valid;
+    } catch {
+      return false;
+    }
+  };
 }
 
 export const validate_configuration = create_validator<ConfigurationProfile>(
