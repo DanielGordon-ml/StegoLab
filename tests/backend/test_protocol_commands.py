@@ -51,7 +51,7 @@ def test_broken_fixture_is_a_safe_failure(monkeypatch: pytest.MonkeyPatch) -> No
     assert "PRIVATE_SENTINEL" not in str(caught.value)
 
 
-@pytest.mark.parametrize("command", ["encode", "decode", "train"])
+@pytest.mark.parametrize("command", ["encode", "decode"])
 def test_model_commands_stay_unavailable(
     command: str, capsys: pytest.CaptureFixture[str]
 ) -> None:

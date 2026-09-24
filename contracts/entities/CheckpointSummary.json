@@ -1,0 +1,127 @@
+{
+  "$defs": {
+    "CheckpointMetrics": {
+      "additionalProperties": false,
+      "description": "Rank measured candidates by exact recovery, image error, then structure.",
+      "properties": {
+        "exact_message_recovery": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Exact Message Recovery",
+          "type": "number"
+        },
+        "median_psnr": {
+          "title": "Median Psnr",
+          "type": "number"
+        },
+        "median_ssim": {
+          "maximum": 1,
+          "minimum": -1,
+          "title": "Median Ssim",
+          "type": "number"
+        }
+      },
+      "required": [
+        "exact_message_recovery",
+        "median_psnr",
+        "median_ssim"
+      ],
+      "title": "CheckpointMetrics",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Describe a verified immutable state file without exposing its contents.",
+  "properties": {
+    "checkpoint_identifier": {
+      "pattern": "^checkpoint_[0-9]+_[a-f0-9]{32}$",
+      "title": "Checkpoint Identifier",
+      "type": "string"
+    },
+    "configuration": {
+      "additionalProperties": true,
+      "title": "Configuration",
+      "type": "object"
+    },
+    "configuration_checksum": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Configuration Checksum",
+      "type": "string"
+    },
+    "created_at": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Created At",
+      "type": "string"
+    },
+    "global_step": {
+      "minimum": 0,
+      "title": "Global Step",
+      "type": "integer"
+    },
+    "identities": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "minProperties": 1,
+      "title": "Identities",
+      "type": "object"
+    },
+    "metrics": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CheckpointMetrics"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "pinned": {
+      "default": false,
+      "title": "Pinned",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "state_bytes": {
+      "exclusiveMinimum": 0,
+      "maximum": 1073741824,
+      "title": "State Bytes",
+      "type": "integer"
+    },
+    "state_checksum": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "State Checksum",
+      "type": "string"
+    },
+    "state_filename": {
+      "const": "state.pt",
+      "default": "state.pt",
+      "title": "State Filename",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "checkpoint_identifier",
+    "global_step",
+    "created_at",
+    "configuration_checksum",
+    "state_checksum",
+    "state_bytes",
+    "state_filename",
+    "configuration",
+    "identities",
+    "metrics",
+    "pinned"
+  ],
+  "title": "CheckpointSummary",
+  "type": "object"
+}

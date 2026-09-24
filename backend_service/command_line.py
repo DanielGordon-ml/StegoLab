@@ -15,12 +15,8 @@ from schemas.base import StrictRecord
 from schemas.configuration import ConfigurationProfile
 
 PLANNED_COMMANDS = (
-    "train",
-    "evaluate",
     "encode",
     "decode",
-    "export_models",
-    "inspect_checkpoint",
 )
 
 
@@ -66,6 +62,11 @@ def build_parser() -> argparse.ArgumentParser:
         dataset.add_argument("dataset_input")
     for command in PLANNED_COMMANDS:
         commands.add_parser(command, help="Planned; unavailable in this release.")
+    from backend_service.model_commands import MODEL_COMMANDS
+
+    for command in MODEL_COMMANDS:
+        experimental = commands.add_parser(command, help="Experimental CPU model tool.")
+        experimental.add_argument("model_input")
     return parser
 
 
@@ -98,6 +99,10 @@ def main(arguments: list[str] | None = None) -> int:
 
     if selected.command in DATASET_COMMANDS:
         return execute_dataset_command(selected.command, selected.dataset_input)
+    from backend_service.model_commands import MODEL_COMMANDS, execute_model_command
+
+    if selected.command in MODEL_COMMANDS:
+        return execute_model_command(selected.command, selected.model_input)
     if selected.command in PLANNED_COMMANDS:
         print(
             "This command is planned and is not available in this release.",

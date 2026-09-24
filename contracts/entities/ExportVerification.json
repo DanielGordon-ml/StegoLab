@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Record clean-process tensor agreement for an independent pair.",
+  "properties": {
+    "absolute_tolerance": {
+      "default": 1e-05,
+      "maximum": 1e-05,
+      "minimum": 1e-05,
+      "title": "Absolute Tolerance",
+      "type": "number"
+    },
+    "cases_checked": {
+      "minimum": 1,
+      "title": "Cases Checked",
+      "type": "integer"
+    },
+    "compatibility_identifier": {
+      "pattern": "^dense_v1_[0-9a-f]{64}$",
+      "title": "Compatibility Identifier",
+      "type": "string"
+    },
+    "maximum_absolute_difference": {
+      "minimum": 0,
+      "title": "Maximum Absolute Difference",
+      "type": "number"
+    },
+    "relative_tolerance": {
+      "default": 1e-05,
+      "maximum": 1e-05,
+      "minimum": 1e-05,
+      "title": "Relative Tolerance",
+      "type": "number"
+    },
+    "status": {
+      "const": "passed",
+      "default": "passed",
+      "title": "Status",
+      "type": "string"
+    }
+  },
+  "required": [
+    "compatibility_identifier",
+    "cases_checked",
+    "maximum_absolute_difference",
+    "relative_tolerance",
+    "absolute_tolerance",
+    "status"
+  ],
+  "title": "ExportVerification",
+  "type": "object"
+}

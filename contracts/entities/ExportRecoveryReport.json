@@ -1,0 +1,196 @@
+{
+  "$defs": {
+    "ExportRecoveryTrial": {
+      "additionalProperties": false,
+      "description": "Describe one package round trip without messages, passwords, or file paths.",
+      "properties": {
+        "elapsed_seconds": {
+          "minimum": 0.0,
+          "title": "Elapsed Seconds",
+          "type": "number"
+        },
+        "error_code": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_]{0,127}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error Code"
+        },
+        "fixture_kind": {
+          "enum": [
+            "empty",
+            "unicode",
+            "maximum"
+          ],
+          "title": "Fixture Kind",
+          "type": "string"
+        },
+        "height": {
+          "maximum": 1024,
+          "minimum": 512,
+          "title": "Height",
+          "type": "integer"
+        },
+        "recovered": {
+          "title": "Recovered",
+          "type": "boolean"
+        },
+        "source_identity": {
+          "minLength": 1,
+          "title": "Source Identity",
+          "type": "string"
+        },
+        "width": {
+          "maximum": 1024,
+          "minimum": 512,
+          "title": "Width",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "source_identity",
+        "width",
+        "height",
+        "fixture_kind",
+        "recovered",
+        "elapsed_seconds",
+        "error_code"
+      ],
+      "title": "ExportRecoveryTrial",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Distinguish 36 exact package recoveries from incomplete or failed checks.",
+  "properties": {
+    "compatibility_identifier": {
+      "anyOf": [
+        {
+          "pattern": "^dense_v1_[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Compatibility Identifier"
+    },
+    "completed": {
+      "title": "Completed",
+      "type": "boolean"
+    },
+    "dataset_revision": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Dataset Revision",
+      "type": "string"
+    },
+    "elapsed_seconds": {
+      "minimum": 0.0,
+      "title": "Elapsed Seconds",
+      "type": "number"
+    },
+    "error_code": {
+      "anyOf": [
+        {
+          "pattern": "^[a-z][a-z0-9_]{0,127}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Error Code"
+    },
+    "exact_recovery_count": {
+      "maximum": 36,
+      "minimum": 0,
+      "title": "Exact Recovery Count",
+      "type": "integer"
+    },
+    "exact_recovery_rate": {
+      "anyOf": [
+        {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Exact Recovery Rate"
+    },
+    "expected_trials": {
+      "const": 36,
+      "default": 36,
+      "title": "Expected Trials",
+      "type": "integer"
+    },
+    "recovery_gate_passed": {
+      "title": "Recovery Gate Passed",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "source_identifier": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Identifier"
+    },
+    "stopped_reason": {
+      "enum": [
+        "complete",
+        "deadline",
+        "failed"
+      ],
+      "title": "Stopped Reason",
+      "type": "string"
+    },
+    "trials": {
+      "items": {
+        "$ref": "#/$defs/ExportRecoveryTrial"
+      },
+      "maxItems": 36,
+      "title": "Trials",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "compatibility_identifier",
+    "source_identifier",
+    "dataset_revision",
+    "expected_trials",
+    "trials",
+    "completed",
+    "exact_recovery_count",
+    "exact_recovery_rate",
+    "recovery_gate_passed",
+    "stopped_reason",
+    "elapsed_seconds",
+    "error_code"
+  ],
+  "title": "ExportRecoveryReport",
+  "type": "object"
+}

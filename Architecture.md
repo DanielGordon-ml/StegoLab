@@ -9,18 +9,24 @@ the original image. Training and deployment packages are separate concerns.
 settings, package and recover authenticated messages through a test channel,
 and prepare images without changing the prepared pixels during PNG storage.
 Local UHD-IQA preparation adds grayscale support, source splits, exact duplicate
-groups, immutable manifests, safe storage, and offline validation. It cannot yet
-hide text in images. Models, remote dataset downloads, training workers, GPU
-runtime, and cloud deployment remain unimplemented.
+groups, immutable manifests, safe storage, and offline validation. Sprint 4 adds
+an experimental CPU CLI model engine for training, saved-PNG evaluation,
+checkpoint inspection/resume, and independent exports. Measured acceptance is
+recorded in [Sprint 4](plan/sprint_04.md); code availability is not a quality pass.
+The GUI and HTTP API still cannot encode, decode, or train. Remote dataset
+downloads, application workers, GPU runtime, and cloud deployment remain planned.
 
 See the [system diagram in the README](README.md#system-architecture) and the
 [interactive Archify map and delivery record](docs/architecture.md).
 The sections below distinguish **implemented** components from the **planned**
 first release and later research.
+The existing diagram retains its application-worker boundaries: its planned
+model workers are not the experimental CLI engine. Sprint 4 does not change the
+diagram artifacts or imply that worker/API/browser integration has been delivered.
 
 ## 1. Evidence and decision order
 
-This document reviews the code and all nine Markdown files in `plan/`.
+This document reviews the code and the project plans in `plan/`.
 Existing source and tests define current behavior. The approved backend,
 frontend, infrastructure, and execution plans define the target. Sprint records
 describe delivered scope; original briefs and the context document explain its
@@ -33,6 +39,7 @@ history. A plan entry is not evidence that a feature exists.
 | [Infrastructure plan](plan/infrastructure.md) | Two-container target, private GPU host, persistence, recovery, and budget |
 | [Execution order](plan/execution_order.md) | Dependencies, pilot allocations, and release sequence |
 | [Sprint 1](plan/sprint_01.md), [Sprint 2](plan/sprint_02.md) | Implementation decisions and historical acceptance evidence |
+| [Sprint 3](plan/sprint_03.md), [Sprint 4](plan/sprint_04.md) | Local dataset delivery and experimental CPU model acceptance |
 | Local notes: `plan/sprints/sprint1.md`, `plan/sprints/sprint 2.md` | Earlier scope proposals; the completed sprint records take priority |
 | Local note: `plan/CONTEXT.md` | Product intent and early ideas; later plans refine its promises |
 
@@ -58,14 +65,14 @@ Kubernetes, a distributed scheduler, or a multi-user account service.
 |---|---|---|
 | Browser | React/TypeScript shell, Encode/Decode/Train/Config tabs, working Config, connection state | Image transfer, jobs, training charts, model selection, temporary text results |
 | Frontend container | Nginx serves bundled Vite assets and proxies `/api/v1` on the same origin | Upload handling and long-lived event streaming within coordinated limits |
-| Backend container | One Uvicorn/FastAPI process; CLI and reusable CPU services | Supervisor, scheduler, spawned GPU/download workers, model services |
-| Shared contracts | Strict Pydantic records, dataset requests/manifests, exported schemas, browser validation | Artifact, model, checkpoint, and evaluation records |
-| Persistent volume | SQLite configuration/retry/job metadata; structured run logs; prepared dataset revisions | Download cache, checkpoints, exports, artifacts, durable job events |
-| Independent packages | None yet | Separate encoder and decoder exports with their own runtime wrappers |
+| Backend container | One Uvicorn/FastAPI process; CLI and reusable CPU services, including experimental model services | Supervisor, scheduler, spawned GPU/download workers, application model integration |
+| Shared contracts | Strict Pydantic records, dataset/training/checkpoint/evaluation/export records, exported schemas, browser validation | Registered application artifacts and model-promotion records |
+| Persistent storage | SQLite configuration/retry/job metadata; structured run logs; prepared datasets; CLI checkpoints/exports and CPU proof ledger | Shared download cache, registered artifacts, durable job events |
+| Independent packages | Experimental separate CPU encoder/decoder export tooling and runtime wrappers | Qualified CPU/GPU deployment packages and application registration |
 | External sources | Read-only local image folders and UHD-IQA metadata | Browser uploads, Hugging Face, and controlled HTTPS downloads |
 
 Current request flow is browser → frontend/proxy → API → state store.
-Protocol, image, and local dataset services are reached through Python or the CLI;
+Protocol, image, local dataset, and experimental model services are reached through Python or the CLI;
 there is no HTTP connection from the browser to those services yet.
 
 ### Repository map
@@ -81,7 +88,7 @@ there is no HTTP connection from the browser to those services yet.
 | [`schemas/`](schemas/), [`contracts/`](contracts/) | Structural source records and deterministic exported contracts |
 | [`infrastructure/`](infrastructure/), [`backend_service/Dockerfile`](backend_service/Dockerfile), [`user_interface/Dockerfile`](user_interface/Dockerfile) | Compose runtime and separate locked CPU image builds |
 | [`tests/backend/`](tests/backend/), [`user_interface/browser_tests/`](user_interface/browser_tests/), [`scripts/`](scripts/) | Service/contract/browser checks, independent fixtures, resource measurements |
-| `datasets/`, `models/` | Prepared immutable dataset revisions; deployment models remain future work |
+| `datasets/`, `checkpoints/`, `models/` | Prepared immutable datasets; experimental training checkpoints and separate CPU exports; qualified deployment remains future work |
 | [`plan/`](plan/), [`docs/`](docs/) | Product/delivery plans and user/developer guides |
 
 ## 3. Frontend, API, and contract flow
@@ -215,14 +222,15 @@ paid training must never restart automatically.
 | Configuration, job snapshots, request retry results | SQLite now; future durable events remain metadata only |
 | `ProtocolContext`, `PayloadCapacity`, `ProtocolVerification`, `ImageSummary` | Implemented strict service records; no message/password fields |
 | Dataset manifests | Implemented strict records, software/source provenance, checksums, fixed splits, and coverage |
-| Model manifests, checkpoint summaries, evaluation reports, artifacts | Planned strict records with compatibility, provenance, and checksums |
+| Model export manifests, checkpoint summaries, evaluation reports | Implemented experimental CPU records with compatibility, provenance, and checksums; registered application artifacts remain planned |
 | Prepared datasets/cache | Implemented `datasets/<name>/<revision>/`; download cache remains planned |
-| Models/checkpoints | Planned separate deployment and training directories; checkpoint pruning never deletes deployment packages |
+| Models/checkpoints | Separate experimental CLI export and checkpoint directories; pruning retains latest recovery, three best, and pinned states and never deletes exports |
+| CPU proof ledger | Persistent exclusive accounting across train/resume/evaluate/export; two experiments, four hours total, two hours each; crash reservations are charged conservatively |
 | Uploads/previews/PNG results | Planned registered files, expiring after 24 hours or explicit deletion; never arbitrary path downloads |
 | Plaintext/passwords/keys | Temporary memory only; decoded text planned for five minutes or explicit Clear, with `Cache-Control: no-store` |
-| Logs | Current bounded `events.jsonl` files in unique date-labelled run directories; future run metrics add approved metadata only |
+| Logs | Bounded `events.jsonl` files and experimental scalar training/evaluation reports in unique date-labelled run directories; no secret payload contents |
 
-## 7. Local datasets and planned training, evaluation, and exports
+## 7. Local datasets and experimental model services
 
 The implemented local pipeline scans bounded sources, reads UHD-IQA metadata,
 preserves official splits, prepares grayscale/RGB/RGBA images, groups duplicate
@@ -247,34 +255,44 @@ attacks are a separate later profile. COCO supplies the main planned benchmark;
 native DIV2K/high-resolution tests are reported separately. Dataset mirrors,
 splits, licenses, and revisions are not interchangeable.
 
-The baseline is a modern PyTorch dense/residual encoder and decoder: four 3×3
+The implemented experimental baseline is a modern PyTorch dense/residual encoder and decoder: four 3×3
 convolution stages, 32 hidden channels, dense concatenation, hidden LeakyReLU and
 BatchNorm, three-channel encoder residual, and one decoder-logit channel.
 BatchNorm freezes for inference. The optional critic and channel simulator are
 replaceable training components, absent from independent deployment packages.
-The first experiment uses random bits, 256-pixel crops, FP32, Adam at `1e-4`,
-effective batch 16, recorded seeds, bit loss plus scheduled image loss, and a
-documented gradient approximation through eight-bit rounding.
+Sprint 4's fixed CPU profile uses four training and four tuning source images,
+random bits, 256-pixel crops, FP32, Adam at `1e-4`, physical batch 1 and effective
+batch 4, and at most 1,000 optimizer steps. It records seeds, bit loss plus
+scheduled image loss, and uses a gradient approximation through eight-bit rounding.
+The later GPU pilot retains its planned effective batch 16 profile. The CLI
+commands are `train`, `evaluate`, `inspect_checkpoint`, and `export_models`;
+see [the model guide](docs/model_training.md) for request files and resume use.
 
-Evaluation uses saved/reopened integer PNGs. It records exact-message recovery,
-raw bit error rate, PSNR, SSIM, LPIPS, clipping, latency, memory, and failures.
-Full-frame and halo-tiled inference must agree at borders and odd dimensions.
+Experimental evaluation uses saved/reopened integer PNGs. It records exact-message
+recovery, raw bit error rate, PSNR, SSIM, clipping, elapsed time, process memory,
+and failures. LPIPS, halo tiling, 4K resource checks, and GPU execution remain
+planned. Full-frame and halo-tiled inference must eventually agree at borders
+and odd dimensions.
 The release target is at least 99.9% observed exact recovery across 10,000 frozen
 1024 × 1024 trials, each with 1,024 user bytes, median PSNR ≥40 dB, and median
 SSIM ≥0.98. These are unproven targets. Results before the download verification
 filter, retries/refusals, and uncertainty must be reported.
 
-Full checkpoints include networks, optimizer/scheduler/scaler, random and sampler
-state, consumed steps, manifests, frozen configuration, and environment/source
-identifiers. Save at safe step boundaries, verify before publication, then prune;
-keep latest recovery, three best, and pinned checkpoints. Exact continuation is
-limited to the same supported deterministic environment.
+CPU checkpoints include both networks and BatchNorm buffers, Adam state, random
+and sampler state, consumed steps, frozen configuration, and dataset/environment/
+source identities. They are saved at complete optimizer-step boundaries, verified
+before publication, and loaded with `weights_only=True`. Retention keeps latest
+recovery, three best, and pinned checkpoints. Exact continuation requires the same
+supported deterministic environment. The FP32 CPU profile has no scheduler or
+scaler; later profiles must save those states when they introduce them.
 
-Separate `torch.export` encoder and decoder packages will include small wrappers,
-manifests, checksums, shape/capacity rules, protocol/preprocessing versions,
-dependencies, and known-answer vectors. Each must load independently in clean
-CPU and GPU processes. Detection resistance, robust channels, larger capacities,
-and SOTA comparisons require later independent research and compute budgets.
+Separate experimental `torch.export` encoder and decoder package tooling includes
+runtime wrappers, manifests, checksums, shape/capacity rules, protocol/preprocessing
+versions, dependencies, and CPU tensor parity checks. The current package range is
+512–1024 pixels per side, batch one, including odd dimensions. This range does not
+qualify production capacity. Independent GPU loading, the release benchmark,
+detection resistance, robust channels, larger capacities, and SOTA comparisons
+remain later work. Sprint 4 records acceptance evidence separately.
 
 ## 8. Deployment, privacy, and failure boundaries
 
@@ -338,7 +356,7 @@ failed writes, and privacy. Expensive GPU benchmarks belong to promotion gates.
 |---|---|
 | 1–2: foundation and protocol | Implemented; service/test foundations are available |
 | 3: dataset adapters | Local preparation/manifests implemented; remote adapters/cache and complete pilot data remain open |
-| 4: model/training engine | Depends on protocol and validated data; tiny-set learning, checkpoint resume, saved-PNG evaluation, CPU exports |
+| 4: model/training engine | Experimental CPU CLI engine implemented in Sprint 4; its acceptance record controls tiny-set learning, saved-PNG and export evidence; full pilot/model gates remain open |
 | 5: complete four-tab frontend | Build against contracts; final acceptance needs real models and artifacts |
 | 6: EC2 readiness | Depends on CPU/export proof; CUDA, private access, recovery, ledger and shutdown drill |
 | 7: capped pilot | 2 hours readiness, 14 baseline, 4 controlled critic ablation, 4 evaluation/integration; hard total 24 |
@@ -355,5 +373,6 @@ directories, reserved CLI names, or existing metadata schemas.
 
 Actual hiding, exact recovery from model-produced images, visual quality,
 statistical detectability, and resistance to changed images are separate gates.
-The current system establishes only the foundation, message protocol, and
-prepared-PNG pixel preservation.
+The current system provides the foundation, message protocol, prepared-PNG pixel
+preservation, and experimental CPU model tools. Model promotion and release
+quality require the separate measured gates above; public capacity remains zero.

@@ -1,0 +1,186 @@
+{
+  "$defs": {
+    "ExportFile": {
+      "additionalProperties": false,
+      "description": "Describe one bounded, checksummed package file.",
+      "properties": {
+        "checksum": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Checksum",
+          "type": "string"
+        },
+        "size_bytes": {
+          "maximum": 16777216,
+          "minimum": 1,
+          "title": "Size Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "checksum",
+        "size_bytes"
+      ],
+      "title": "ExportFile",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Freeze the tensor interface, protocol, and independent dependencies.",
+  "properties": {
+    "architecture_identifier": {
+      "const": "dense_residual_v1",
+      "default": "dense_residual_v1",
+      "title": "Architecture Identifier",
+      "type": "string"
+    },
+    "batch_size": {
+      "const": 1,
+      "default": 1,
+      "title": "Batch Size",
+      "type": "integer"
+    },
+    "capacity_rule": {
+      "const": "min(1024, width * height // 1024)",
+      "default": "min(1024, width * height // 1024)",
+      "title": "Capacity Rule",
+      "type": "string"
+    },
+    "compatibility_identifier": {
+      "pattern": "^dense_v1_[0-9a-f]{64}$",
+      "title": "Compatibility Identifier",
+      "type": "string"
+    },
+    "dependencies": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "maxProperties": 32,
+      "minProperties": 1,
+      "title": "Dependencies",
+      "type": "object"
+    },
+    "files": {
+      "additionalProperties": {
+        "$ref": "#/$defs/ExportFile"
+      },
+      "maxProperties": 64,
+      "minProperties": 1,
+      "title": "Files",
+      "type": "object"
+    },
+    "format_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Format Version",
+      "type": "integer"
+    },
+    "graph_filename": {
+      "const": "model.pt2",
+      "default": "model.pt2",
+      "title": "Graph Filename",
+      "type": "string"
+    },
+    "image_policy": {
+      "const": "rgb_zero_to_one_round_255",
+      "default": "rgb_zero_to_one_round_255",
+      "title": "Image Policy",
+      "type": "string"
+    },
+    "maximum_side": {
+      "const": 1024,
+      "default": 1024,
+      "title": "Maximum Side",
+      "type": "integer"
+    },
+    "minimum_side": {
+      "const": 512,
+      "default": 512,
+      "title": "Minimum Side",
+      "type": "integer"
+    },
+    "producer_environment": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "maxProperties": 8,
+      "minProperties": 1,
+      "title": "Producer Environment",
+      "type": "object"
+    },
+    "profile_identifier": {
+      "const": "test_only_v1",
+      "default": "test_only_v1",
+      "title": "Profile Identifier",
+      "type": "string"
+    },
+    "protocol_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Protocol Version",
+      "type": "integer"
+    },
+    "python_version": {
+      "const": "3.12",
+      "default": "3.12",
+      "title": "Python Version",
+      "type": "string"
+    },
+    "role": {
+      "enum": [
+        "encoder",
+        "decoder"
+      ],
+      "title": "Role",
+      "type": "string"
+    },
+    "source_identifier": {
+      "maxLength": 256,
+      "minLength": 1,
+      "title": "Source Identifier",
+      "type": "string"
+    },
+    "status": {
+      "const": "experimental",
+      "default": "experimental",
+      "title": "Status",
+      "type": "string"
+    },
+    "tensor_dtype": {
+      "const": "float32",
+      "default": "float32",
+      "title": "Tensor Dtype",
+      "type": "string"
+    },
+    "tensor_layout": {
+      "const": "batch_channels_height_width",
+      "default": "batch_channels_height_width",
+      "title": "Tensor Layout",
+      "type": "string"
+    }
+  },
+  "required": [
+    "compatibility_identifier",
+    "source_identifier",
+    "format_version",
+    "role",
+    "architecture_identifier",
+    "status",
+    "graph_filename",
+    "tensor_dtype",
+    "tensor_layout",
+    "batch_size",
+    "minimum_side",
+    "maximum_side",
+    "protocol_version",
+    "profile_identifier",
+    "image_policy",
+    "capacity_rule",
+    "python_version",
+    "dependencies",
+    "producer_environment",
+    "files"
+  ],
+  "title": "ModelExportManifest",
+  "type": "object"
+}

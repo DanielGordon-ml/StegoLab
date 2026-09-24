@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Rank measured candidates by exact recovery, image error, then structure.",
+  "properties": {
+    "exact_message_recovery": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Exact Message Recovery",
+      "type": "number"
+    },
+    "median_psnr": {
+      "title": "Median Psnr",
+      "type": "number"
+    },
+    "median_ssim": {
+      "maximum": 1,
+      "minimum": -1,
+      "title": "Median Ssim",
+      "type": "number"
+    }
+  },
+  "required": [
+    "exact_message_recovery",
+    "median_psnr",
+    "median_ssim"
+  ],
+  "title": "CheckpointMetrics",
+  "type": "object"
+}

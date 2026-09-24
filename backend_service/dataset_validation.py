@@ -2,6 +2,7 @@
 
 import hashlib
 from collections import Counter
+from collections.abc import Callable
 from pathlib import Path
 
 from backend_service.dataset_groups import assign_groups
@@ -52,18 +53,28 @@ def validate_dataset(
 
 
 def load_validated_dataset(
-    directory: Path, *, require_revision_name: bool = True
+    directory: Path,
+    *,
+    require_revision_name: bool = True,
+    check_progress: Callable[[], None] | None = None,
 ) -> tuple[DatasetManifest, list[DatasetImageRecord]]:
     """Return the same frozen records whose outputs and metadata were validated."""
+    if check_progress is not None:
+        check_progress()
     try:
         manifest, records = validated_records(directory, require_revision_name)
-        from backend_service.dataset_image import validate_dataset_png
+    except (OSError, ValueError, MemoryError, ApplicationFailure):
+        raise _integrity_failure() from None
+    from backend_service.dataset_image import validate_dataset_png
 
-        checked: set[str] = set()
-        for record in records:
-            if record.prepared_path in checked:
-                continue
-            checked.add(record.prepared_path)
+    checked: set[str] = set()
+    for record in records:
+        if record.prepared_path in checked:
+            continue
+        if check_progress is not None:
+            check_progress()
+        checked.add(record.prepared_path)
+        try:
             path = contained_file(directory, record.prepared_path)
             digest, size = file_checksum(path, 128 * 1024**2)
             if (digest, size) != (record.prepared_checksum, record.prepared_bytes):
@@ -85,9 +96,11 @@ def load_validated_dataset(
                 record.prepared_bytes,
             ):
                 raise ValueError("Prepared pixels do not match frozen records.")
-        return manifest, records
-    except (OSError, ValueError, MemoryError, ApplicationFailure):
-        raise _integrity_failure() from None
+        except (OSError, ValueError, MemoryError, ApplicationFailure):
+            raise _integrity_failure() from None
+    if check_progress is not None:
+        check_progress()
+    return manifest, records
 
 
 def validated_records(

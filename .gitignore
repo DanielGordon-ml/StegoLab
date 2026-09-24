@@ -13,6 +13,7 @@ AGENT.md
 /datasets/
 /data/
 /models/
+/state/
 /secrets/
 *.pem
 *.key

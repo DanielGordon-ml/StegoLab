@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Evaluate frozen checkpoint weights on the selected tuning cases.",
+  "properties": {
+    "checkpoint": {
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Checkpoint",
+      "type": "string"
+    },
+    "dataset_directory": {
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Dataset Directory",
+      "type": "string"
+    },
+    "experiment_identifier": {
+      "pattern": "^[a-z][a-z0-9_]{0,63}$",
+      "title": "Experiment Identifier",
+      "type": "string"
+    },
+    "lightweight": {
+      "default": false,
+      "title": "Lightweight",
+      "type": "boolean"
+    },
+    "output_root": {
+      "default": ".",
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Output Root",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "experiment_identifier",
+    "output_root",
+    "checkpoint",
+    "dataset_directory",
+    "lightweight"
+  ],
+  "title": "EvaluationRequest",
+  "type": "object"
+}

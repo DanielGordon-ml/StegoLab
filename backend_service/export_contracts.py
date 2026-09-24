@@ -6,6 +6,7 @@ from pathlib import Path
 
 from backend_service.application import create_application
 from schemas.capabilities import Capabilities, HealthStatus, ModelList
+from schemas.checkpoints import CheckpointMetrics, CheckpointSummary
 from schemas.configuration import (
     ConfigurationProfile,
     ConfigurationReset,
@@ -19,11 +20,39 @@ from schemas.datasets import (
     DatasetSummary,
 )
 from schemas.errors import ApplicationError, ErrorEnvelope
+from schemas.evaluation import EvaluationReport
+from schemas.export_recovery import ExportRecoveryReport
 from schemas.images import ImageSummary
 from schemas.jobs import JobEvent, JobList, JobSnapshot
+from schemas.model_exports import (
+    ExportVerification,
+    ModelExportManifest,
+    ModelExportSummary,
+)
 from schemas.protocol import PayloadCapacity, ProtocolContext, ProtocolVerification
+from schemas.training import (
+    EvaluationRequest,
+    ExportRequest,
+    TrainingConfiguration,
+    TrainingRequest,
+    TrainingRun,
+    TrainingStep,
+)
 
 ENTITY_MODELS = (
+    TrainingConfiguration,
+    TrainingRequest,
+    EvaluationRequest,
+    ExportRequest,
+    TrainingRun,
+    TrainingStep,
+    CheckpointSummary,
+    CheckpointMetrics,
+    EvaluationReport,
+    ExportRecoveryReport,
+    ExportVerification,
+    ModelExportManifest,
+    ModelExportSummary,
     DatasetPreparationRequest,
     DatasetImageRecord,
     DatasetRejection,
