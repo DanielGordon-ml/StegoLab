@@ -8,25 +8,34 @@ GitHub displays the [static SVG](architecture.svg); it does not run this HTML vi
 
 ## Scope and evidence
 
-The diagram captures the application paths through Sprint 3. Sprint 4's CPU
-proof and Sprint 5's separate pilot preparation CLI are described in the
-[model guide](model_training.md) and [pilot guide](pilot_training.md). They do
-not yet connect to the diagram's planned API workers or browser model flows.
+The diagram captures the application paths through Sprint 3 and has not been
+regenerated since. Sprint 4's CPU proof and Sprint 5's separate pilot
+preparation CLI are described in the [model guide](model_training.md) and
+[pilot guide](pilot_training.md). Since then the training-first GUI and Sprint 6
+delivered what the diagram still draws as planned: the Train tab runs dataset,
+training, evaluation and export jobs on one scheduler lane with an ordered
+event stream; Encode and Decode work with an explicitly installed experimental
+model through bounded uploads and secret-safe jobs in isolated package
+processes. Treat those dashed paths as implemented; the map itself is regenerated
+at the next architecture review, and the measured state is in the
+[Sprint 6 record](../plan/sprint_06.md).
 
 - Solid paths show implemented settings, protocol, image tools, and local
   UHD-IQA dataset preparation with frozen manifests.
   Dashed paths and components labelled **planned** show the target system.
 - The target keeps two application containers. Protocol/image/dataset modules
-  and future model/data worker processes belong to the backend. Local dataset
+  and the model/data worker processes belong to the backend. Local dataset
   commands run synchronously; they do not start background workers.
-- The API will own scheduling and job transitions for both kinds of worker.
+- The API owns scheduling and job transitions for both kinds of worker.
   The map shows the main paths; detailed control, return, event, and file flows
   are described in `Architecture.md` rather than repeated as crossing arrows.
 - The local dataset path preserves official source splits, verifies prepared
   copies and checksums, and works offline after the source is unmounted.
-  Remote downloads, shared cache, browser uploads, models, workers, training,
-  checkpoints, independent model packages, SSE, CUDA, and EC2 remain planned.
-- Public capacity remains zero. Protocol tests and PNG pixel preservation do
+  Remote downloads, shared cache, CUDA, and EC2 remain planned. Browser
+  uploads, installed models, workers, training, checkpoints, independent model
+  packages and the event stream are implemented since the diagram was drawn.
+- Advertised capacity comes only from explicitly installed experimental models.
+  Protocol tests and PNG pixel preservation do
   not establish actual image hiding, model quality, or detection resistance.
 - Evidence: application/routes/storage, frontend components/contracts, protocol,
   image and dataset modules, schemas, Docker/Compose, CI/tests, and delivery

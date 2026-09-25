@@ -1,11 +1,13 @@
 # StegoLab Infrastructure Plan
 
-Status: researched implementation plan; no AWS resources have been launched.
+Status: researched implementation plan. One g6.2xlarge, `i-0ccaee67f0acaa574`
+in eu-central-1c, exists and is stopped since 2026-09-24; its 3,629-second run
+is charged to the setup stage in the operator ledger. No GPU session has run.
 
 Sprint 5 implements CUDA build preparation, the instance-time ledger, mocked
 deadline controls, and a manual host runbook. See [GPU preparation](../docs/gpu_preparation.md)
-and [acceptance](sprint_05.md). No EC2 launch, physical stop drill or GPU test is
-implied by these files; those remain later explicit gates.
+and [acceptance](sprint_05.md). The physical stop drill and any GPU test remain
+later explicit gates; the one existing instance has not run a session.
 Research date: 2026-09-23. Related plans: [Backend](backend.md), [Frontend](frontend.md), [Execution order](execution_order.md).
 
 ## 1. Deployment shape
@@ -14,7 +16,7 @@ Research date: 2026-09-23. Related plans: [Backend](backend.md), [Frontend](fron
 - Run two application containers: frontend/reverse proxy and backend. The backend supervisor runs the API plus separate spawned GPU and dataset-download worker processes.
 - Use bounded in-memory process channels for secret inputs and commands. The API/scheduler owns persistent job state. Do not add Redis, Kubernetes, a distributed scheduler, or separate accounts to this release.
 - One GPU operation runs at a time. Training/evaluation occupies that slot; inference queues. Worker heartbeat failure releases stale ownership only after the supervisor confirms the old process has stopped.
-- After restart, reconcile jobs before accepting new work. Training requires explicit checkpoint resume; secret-bearing inference becomes needs_input. Never restart paid training automatically.
+- After restart, reconcile jobs before accepting new work. Training requires explicit checkpoint resume; secret-bearing inference is marked interrupted with lost inputs and must be started again (`needs_input` stays reserved for resumable GPU work). Never restart paid training automatically.
 - The [Archify map](../docs/architecture.md) shows the browser, frontend container, backend API, implemented local dataset services, and planned workers/models/cache. Solid and dashed paths distinguish implemented work from planned components; independent deployment packages remain planned.
 
 ## 2. Local and cloud environments
@@ -25,7 +27,7 @@ Research date: 2026-09-23. Related plans: [Backend](backend.md), [Frontend](fron
 | Full training | Linux amd64 CUDA containers on one NVIDIA EC2 instance. |
 | Default EC2 instance | On-Demand g6.2xlarge: one L4 GPU, 8 virtual CPUs, 32 GiB system RAM. |
 | Host image | AWS Deep Learning Base GPU image for Ubuntu 24.04, resolved in the chosen region and pinned by image identifier. |
-| Persistent storage | Encrypted 60 GiB root volume and separate encrypted 200 GiB gp3 data volume mounted at /srv/stegolab. |
+| Persistent storage | The existing host keeps a 500 GiB unencrypted root volume, accepted as a deviation, and a separate encrypted 200 GiB gp3 data volume mounted at /srv/stegolab for data, checkpoints and the ledger. |
 
 - AWS lists 24 GB GPU memory for G6; preflight uses actual driver-reported memory and keeps headroom. [AWS G6 specifications](https://aws.amazon.com/ec2/instance-types/g6/)
 - Use native architecture builds; do not emulate the CUDA image on Apple Silicon. [Docker multi-platform guidance](https://docs.docker.com/build/building/multi-platform/)

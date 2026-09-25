@@ -13,8 +13,11 @@ groups, immutable manifests, safe storage, and offline validation. Sprint 4 adds
 an experimental CPU CLI model engine for training, saved-PNG evaluation,
 checkpoint inspection/resume, and independent exports. Measured acceptance is
 recorded in [Sprint 4](plan/sprint_04.md); code availability is not a quality pass.
-The GUI and HTTP API still cannot encode, decode, or train. Remote dataset
-downloads, application workers, GPU runtime, and cloud deployment remain planned.
+The training-first GUI added CPU training, evaluation and export jobs on one
+scheduler lane with an ordered event stream, and Sprint 6 added explicit model
+installation, bounded uploads, secret-safe encode and decode jobs, and the
+Encode and Decode tabs; measured acceptance is in [Sprint 6](plan/sprint_06.md).
+Remote dataset downloads, GPU runtime, and cloud deployment remain planned.
 
 See the [system diagram in the README](README.md#system-architecture) and the
 [interactive Archify map and delivery record](docs/architecture.md).
@@ -63,17 +66,19 @@ Kubernetes, a distributed scheduler, or a multi-user account service.
 
 | Boundary | Implemented today | Planned extension |
 |---|---|---|
-| Browser | React/TypeScript shell, Encode/Decode/Train/Config tabs, working Config, connection state | Image transfer, jobs, training charts, model selection, temporary text results |
-| Frontend container | Nginx serves bundled Vite assets and proxies `/api/v1` on the same origin | Upload handling and long-lived event streaming within coordinated limits |
-| Backend container | One Uvicorn/FastAPI process; CLI and reusable CPU services, including experimental model services | Supervisor, scheduler, spawned GPU/download workers, application model integration |
-| Shared contracts | Strict Pydantic records, dataset/training/checkpoint/evaluation/export records, exported schemas, browser validation | Registered application artifacts and model-promotion records |
-| Persistent storage | SQLite configuration/retry/job metadata; structured run logs; prepared datasets; CLI checkpoints/exports and CPU proof ledger | Shared download cache, registered artifacts, durable job events |
-| Independent packages | Experimental separate CPU encoder/decoder export tooling and runtime wrappers | Qualified CPU/GPU deployment packages and application registration |
-| External sources | Read-only local image folders and UHD-IQA metadata | Browser uploads, Hugging Face, and controlled HTTPS downloads |
+| Browser | React/TypeScript shell, working Config, Train jobs and charts, Encode/Decode with an installed experimental model, uploads, exact PNG download, temporary decoded text | Remote dataset jobs, GPU model selection |
+| Frontend container | Nginx serves bundled Vite assets, proxies `/api/v1` on the same origin, passes 16 MiB upload bodies through unbuffered, and streams events | Coordinated limits for larger transfers |
+| Backend container | One Uvicorn/FastAPI process with one scheduler thread, subprocess and isolated package-process workers, model installation, CLI and reusable CPU services | Spawned GPU and download workers |
+| Shared contracts | Strict Pydantic records for settings, datasets, training, checkpoints, evaluation, exports, installed models, uploads, capacity, jobs and decoded text; exported schemas; browser validation | Model-promotion records |
+| Persistent storage | SQLite settings, jobs, durable events and retry results; installed-model store; expiring uploads and results; structured run logs; prepared datasets; checkpoints, exports and ledgers | Shared download cache |
+| Independent packages | Experimental separate CPU encoder/decoder packages, installed explicitly and run in isolated processes | Qualified CPU/GPU deployment packages |
+| External sources | Read-only local image folders, UHD-IQA metadata, and browser uploads | Hugging Face and controlled HTTPS downloads |
 
-Current request flow is browser → frontend/proxy → API → state store.
-Protocol, image, local dataset, and experimental model services are reached through Python or the CLI;
-there is no HTTP connection from the browser to those services yet.
+Current request flow is browser → frontend/proxy → API → scheduler and state
+stores. The browser reaches uploads, capacity, encode/decode jobs and decoded
+text over HTTP (section 3); the message protocol, local dataset preparation and
+the model services run inside the API process or its child processes. Remote
+dataset downloads and GPU workers have no HTTP path yet.
 
 ### Repository map
 
@@ -96,9 +101,10 @@ there is no HTTP connection from the browser to those services yet.
 **Implemented:** React, TypeScript, Vite, and TanStack Query use small transport
 adapters. Health and capabilities refresh every 30 seconds. Config accepts
 positive whole minutes and persists seconds; its default is 300 seconds.
-Save and Reset confirm success only after the backend response. The other three
-tabs show unavailable states. Public capabilities report CPU, no models or
-profiles, zero payload bytes, and encoding/decoding/training disabled.
+Save and Reset confirm success only after the backend response. Train runs
+datasets, training, evaluation and exports as background jobs; Encode and Decode
+work with an explicitly installed experimental model. Capabilities are derived
+from the installed-model list and stay consistent with it by validation.
 
 Pydantic `StrictRecord` rejects unknown fields and unwanted type conversion.
 `backend_service.export_contracts` exports OpenAPI plus entity JSON Schemas;
@@ -110,24 +116,27 @@ schemas are exported without creating HTTP routes.
 | Implemented route under `/api/v1` | Behavior |
 |---|---|
 | `GET /health` | Readiness after startup and saved-state validation |
-| `GET /capabilities`, `GET /models` | Actual available features and empty model list |
+| `GET /capabilities`, `GET /models` | Features derived from the installed experimental models |
+| `POST /models/install`, `DELETE /models/{id}` | Explicit, verified installation and removal of an export pair |
 | `GET /configuration` | Read saved settings |
 | `PUT /configuration`, `POST /configuration/reset` | Transactional settings changes with client request identifiers |
-| `GET /jobs`, `GET /jobs/{job_identifier}` | Read stored metadata; these do not start work |
+| `GET /workspace`, `GET /artifacts/{id}` | Registered datasets, runs, checkpoints, exports; exact package, upload and result downloads |
+| `POST /images`, `POST /capacity` | Raw-body uploads with a 16 MiB limit; message limit for one image and model |
+| `POST /*_jobs`, `POST /jobs/{id}/actions` | Training-family and encode/decode jobs on one scheduler lane; cancel and stop |
+| `GET /jobs`, `GET /jobs/{id}`, `GET /events` | Durable snapshots and one ordered server-sent event stream |
+| `GET`/`DELETE /jobs/{id}/decoded_text` | Recovered text from memory with `no-store`; forgotten on clear, leave or expiry |
 
-**Planned:** image registration and capacity routes; encoding, decoding,
-training, evaluation, dataset, checkpoint, and export jobs; action requests;
-registered artifact downloads; versioned configuration import/export; and one
-ordered server-sent event (SSE) stream. The backend supplies job actions and
-tested profile limits. A request identifier makes uncertain mutation retries
-safe. Running jobs keep a frozen resolved configuration.
+**Planned:** versioned configuration import/export, `needs_input` recovery for
+resumable GPU work, tiling above 1024 pixels, and remote dataset jobs. A request
+identifier makes uncertain mutation retries safe; inference retries bind the
+secrets through an in-memory key. Running jobs keep a frozen resolved
+configuration.
 
-The browser will count UTF-8 bytes with `TextEncoder`, display the prepared
-cover, and download the exact backend PNG without canvas redraw or recompression.
-Decoded text will stay outside the shared query cache and browser storage.
-Reconnection will deduplicate events, replay by cursor, or reload snapshots.
-Polling every five seconds is a planned fallback only while disconnected with
-active work. Keyboard access, labels, visible focus, and text beside status
+The browser counts UTF-8 bytes with `TextEncoder` against the backend capacity,
+shows the prepared cover, and downloads the exact backend PNG without canvas
+redraw or recompression. Decoded text stays outside the shared query cache and
+browser storage. Reconnection replays events by cursor or reloads snapshots;
+polling every five seconds runs only while disconnected with active work. Keyboard access, labels, visible focus, and text beside status
 colors remain required; automated checks alone are not a full accessibility audit.
 
 ## 4. Message path and model boundary
@@ -163,8 +172,9 @@ The [protocol guide](docs/message_protocol.md) freezes the complete byte layout.
 Four [independently generated public examples](docs/protocol_fixture_provenance.md)
 check compatibility. Production calls have no deterministic-randomness switch.
 
-### Planned image-to-message integration
+### Image-to-message integration
 
+Implemented in Sprint 6 with an explicitly installed experimental model.
 The encoder receives prepared RGB plus the payload map and returns RGB.
 The application clamps and rounds to eight-bit pixels, preserves oriented alpha,
 saves PNG, then reopens it and runs the matching decoder before enabling download.
@@ -201,14 +211,18 @@ See [image preparation](docs/image_preparation.md) for exact rules and commands.
 Its tables are `configuration`, `mutation_results`, and `jobs`. Configuration
 and its retry result commit together; conflicting reuse of a request identifier
 fails. Saved state is validated on read. Corrupt/unsupported state fails safely
-without silently replacing it with defaults. `JobSnapshot` and `JobEvent`
-contracts exist, but no worker, scheduler, event table, or live event route does.
+without silently replacing it with defaults. A separate `workflows.sqlite3`
+holds durable job snapshots, an ordered event table and retry results; one
+scheduler thread runs one job at a time in a subprocess (training-family
+commands) or in isolated package processes (encode and decode), and `GET /events`
+replays the event table by cursor. Installed models live in
+`installed_models.sqlite3`; uploads and results in `inference/` with JSON
+sidecars, expiring after 24 hours.
 
-**Planned:** the backend supervisor owns spawned GPU and download processes.
-The API/scheduler alone changes durable job state; workers send progress,
-heartbeats, and results over bounded in-memory channels. Heavy work stays out
-of the HTTP event loop. One GPU operation runs at a time; inference queues
-behind training/evaluation. A lost heartbeat does not free that slot until the
+**Planned:** GPU and download workers under the same supervisor, with progress,
+heartbeats and results over bounded in-memory channels. Heavy work stays out of
+the HTTP event loop. One GPU operation runs at a time; inference queues behind
+training/evaluation. A lost heartbeat does not free that slot until the
 supervisor confirms the old process has stopped.
 
 Job states are `queued`, `running`, `paused`, `stopped`, `completed`, `cancelled`,
@@ -222,12 +236,12 @@ paid training must never restart automatically.
 | Configuration, job snapshots, request retry results | SQLite now; future durable events remain metadata only |
 | `ProtocolContext`, `PayloadCapacity`, `ProtocolVerification`, `ImageSummary` | Implemented strict service records; no message/password fields |
 | Dataset manifests | Implemented strict records, software/source provenance, checksums, fixed splits, and coverage |
-| Model export manifests, checkpoint summaries, evaluation reports | Implemented experimental CPU records with compatibility, provenance, and checksums; registered application artifacts remain planned |
+| Model export manifests, checkpoint summaries, evaluation reports, installed models | Implemented experimental CPU records with compatibility, provenance, and checksums; installed models are registered explicitly |
 | Prepared datasets/cache | Implemented `datasets/<name>/<revision>/`; download cache remains planned |
 | Models/checkpoints | Separate experimental CLI export and checkpoint directories; pruning retains latest recovery, three best, and pinned states and never deletes exports |
 | CPU proof ledger | Persistent exclusive accounting across train/resume/evaluate/export; two experiments, four hours total, two hours each; crash reservations are charged conservatively |
-| Uploads/previews/PNG results | Planned registered files, expiring after 24 hours or explicit deletion; never arbitrary path downloads |
-| Plaintext/passwords/keys | Temporary memory only; decoded text planned for five minutes or explicit Clear, with `Cache-Control: no-store` |
+| Uploads/PNG results | Opaque `image_*` and `encoded_*` folders under the state directory with checksummed sidecars, expiring after 24 hours, with new files refused while stored files would pass 512 MiB; never arbitrary path downloads |
+| Plaintext/passwords/keys | Temporary memory only: job secrets until the job runs, decoded text for five minutes or until Clear or leaving Decode, with `Cache-Control: no-store` |
 | Logs | Bounded `events.jsonl` files and experimental scalar training/evaluation reports in unique date-labelled run directories; no secret payload contents |
 
 ## 7. Local datasets and experimental model services
@@ -306,14 +320,16 @@ default to `.runtime` state and `logs` unless environment settings override them
 Both images run as non-root with read-only root filesystems, dropped capabilities,
 no privilege escalation, health checks, and bounded Docker logs. Backend/frontend
 host-memory limits are 10 GiB/256 MiB and `/tmp` limits are 64/32 MiB. Nginx
-currently permits 1 MiB request bodies. These foundation settings do not yet
-support the planned 50 MiB browser upload workflow. Dependencies and base-image
+permits 1 MiB request bodies by default and 16 MiB on the upload route, passed
+through without buffering to match the backend's 16 MiB limit; the 50 MiB
+figure applies only to command-line image preparation. Dependencies and base-image
 digests are locked; application version remains `0.1.0`.
 
 **Planned GPU deployment:** a separate Linux amd64 CUDA target runs on one private
 EC2 NVIDIA instance; the plan selects g6.2xlarge and an image resolved/pinned for
-the chosen region. A 60 GiB encrypted root volume and 200 GiB encrypted gp3 data
-volume support the pilot. The browser connects through SSH, with no public app
+the chosen region. The existing host keeps a 500 GiB unencrypted root volume,
+accepted as a deviation, and an encrypted 200 GiB gp3 data volume for data,
+checkpoints and the ledger. The browser connects through SSH, with no public app
 port. The app receives no AWS credentials/role; optional Hugging Face read tokens
 are protected files. GPU availability, exports, restores, and the stop guard must
 be checked before paid training.
@@ -364,10 +380,10 @@ failed writes, and privacy. Expensive GPU benchmarks belong to promotion gates.
 | 9: SOTA research | Separate budget, independent detectors, fair classical/neural comparisons, robust profiles |
 
 The target product choices are recorded, but implementation contracts still need
-work: multipart transport and temporary-storage limits; registered artifact
-ownership/expiry; worker channels, queue limits and crash reconciliation; durable
-event replay/retention; remote dataset adapter and model/checkpoint compatibility;
-temporary decoded-result handling; and CUDA/tiling resource policies. Neither
+work: worker channels and crash reconciliation for GPU and download workers;
+remote dataset adapter and model/checkpoint compatibility; and CUDA/tiling
+resource policies. Upload limits, artifact expiry, durable event replay and
+temporary decoded-text handling are implemented as sections 3 and 6 describe. Neither
 these services nor their future safety guarantees should be inferred from empty
 directories, reserved CLI names, or existing metadata schemas.
 
@@ -375,4 +391,5 @@ Actual hiding, exact recovery from model-produced images, visual quality,
 statistical detectability, and resistance to changed images are separate gates.
 The current system provides the foundation, message protocol, prepared-PNG pixel
 preservation, and experimental CPU model tools. Model promotion and release
-quality require the separate measured gates above; public capacity remains zero.
+quality require the separate measured gates above; advertised capacity comes
+only from explicitly installed experimental models.

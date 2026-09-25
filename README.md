@@ -92,18 +92,21 @@ development commands, browser tests, and troubleshooting.
   instance-time accounting. Local checks spend zero GPU hours. Start with the
   [pilot guide](docs/pilot_training.md) and [Sprint 5 evidence](plan/sprint_05.md).
 
-- Sprint 6 (in progress) makes Encode and Decode work in the browser with an
-  explicitly installed **experimental** model: bounded uploads, a per-image
-  message limit, decoder-verified downloads, and recovered text that lives in
-  memory only. See the [GUI guide](docs/gui_training.md).
+- Sprint 6 makes Encode and Decode work in the browser with an explicitly
+  installed **experimental** model: bounded uploads, a per-image message limit,
+  decoder-verified downloads, and recovered text that lives in memory only. The
+  critic, the checkpoint fork and the ledger records exist as tested code and
+  have not run on a GPU. See the [GUI guide](docs/gui_training.md) and the
+  measured [Sprint 6 record](plan/sprint_06.md).
 
 The GUI connects local dataset preparation, experimental CPU training, checkpoint
 review, evaluation, and exports through background jobs. Read the
 [GUI training guide](docs/gui_training.md) for mounted folders, compatibility,
-and the shared experiment budget. Encoding, decoding, and dataset downloads
-remain unavailable. Public payload capacity remains zero, and
-no model is approved for application use or release. GPU readiness and model
-quality gates remain open; the existing tools do not establish release-level recovery quality,
+and the shared experiment budget. Encoding and decoding need a model installed
+from Train → Model exports and stay experimental: image quality is visibly
+reduced and recovery is not guaranteed. Dataset downloads remain unavailable,
+and no model is approved for release. GPU readiness and model quality gates
+remain open; the existing tools do not establish release-level recovery quality,
 pilot readiness, or SOTA results.
 
 ## System architecture
