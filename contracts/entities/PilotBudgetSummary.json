@@ -1,4 +1,45 @@
 {
+  "$defs": {
+    "PilotStageTotal": {
+      "additionalProperties": false,
+      "description": "Report one stage's allocation after transfers, its spending, and its rest.",
+      "properties": {
+        "allocated_seconds": {
+          "minimum": 0,
+          "title": "Allocated Seconds",
+          "type": "number"
+        },
+        "consumed_seconds": {
+          "minimum": 0,
+          "title": "Consumed Seconds",
+          "type": "number"
+        },
+        "remaining_seconds": {
+          "minimum": 0,
+          "title": "Remaining Seconds",
+          "type": "number"
+        },
+        "stage": {
+          "enum": [
+            "setup",
+            "baseline",
+            "ablation",
+            "evaluation"
+          ],
+          "title": "Stage",
+          "type": "string"
+        }
+      },
+      "required": [
+        "stage",
+        "allocated_seconds",
+        "consumed_seconds",
+        "remaining_seconds"
+      ],
+      "title": "PilotStageTotal",
+      "type": "object"
+    }
+  },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "description": "Expose read-only spending information without starting an instance session.",
@@ -30,6 +71,14 @@
       "title": "Remaining Seconds",
       "type": "number"
     },
+    "stage_totals": {
+      "items": {
+        "$ref": "#/$defs/PilotStageTotal"
+      },
+      "maxItems": 4,
+      "title": "Stage Totals",
+      "type": "array"
+    },
     "total_seconds": {
       "const": 86400,
       "default": 86400,
@@ -42,7 +91,8 @@
     "total_seconds",
     "consumed_seconds",
     "remaining_seconds",
-    "active_session_identifier"
+    "active_session_identifier",
+    "stage_totals"
   ],
   "title": "PilotBudgetSummary",
   "type": "object"

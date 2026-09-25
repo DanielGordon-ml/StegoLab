@@ -17,6 +17,8 @@ AGENT.md
 /secrets/
 *.pem
 *.key
+# An SSH client file with host addresses belongs in ~/.ssh/config, never here.
+/config
 *.sqlite*
 *.db
 
