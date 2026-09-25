@@ -29,7 +29,7 @@ def fixture_workspace(tmp_path_factory: pytest.TempPathFactory) -> Path:
     torch.set_num_threads(1)
     try:
         root = tmp_path_factory.mktemp("fixture-workspace")
-        (root / "models").mkdir()
+        # The builder creates the missing models folder, as CI relies on it.
         build_fixture_package(root / "models" / FIXTURE_PACKAGE_NAME)
         return root
     finally:
