@@ -1,0 +1,164 @@
+{
+  "$defs": {
+    "PayloadCapacity": {
+      "additionalProperties": false,
+      "description": "Distinguish layout capacity from an available trained model.",
+      "properties": {
+        "additional_repetitions": {
+          "minimum": 0,
+          "title": "Additional Repetitions",
+          "type": "integer"
+        },
+        "authentication_bytes": {
+          "const": 16,
+          "default": 16,
+          "title": "Authentication Bytes",
+          "type": "integer"
+        },
+        "block_count": {
+          "maximum": 5,
+          "minimum": 2,
+          "title": "Block Count",
+          "type": "integer"
+        },
+        "correction_bytes": {
+          "maximum": 160,
+          "minimum": 64,
+          "title": "Correction Bytes",
+          "type": "integer"
+        },
+        "frame_bytes": {
+          "maximum": 1115,
+          "minimum": 446,
+          "title": "Frame Bytes",
+          "type": "integer"
+        },
+        "header_bytes": {
+          "const": 45,
+          "default": 45,
+          "title": "Header Bytes",
+          "type": "integer"
+        },
+        "maximum_message_bytes": {
+          "maximum": 1024,
+          "minimum": 256,
+          "title": "Maximum Message Bytes",
+          "type": "integer"
+        },
+        "message_length_bytes": {
+          "const": 2,
+          "default": 2,
+          "title": "Message Length Bytes",
+          "type": "integer"
+        },
+        "minimum_repetitions": {
+          "minimum": 1,
+          "title": "Minimum Repetitions",
+          "type": "integer"
+        },
+        "padding_bytes_at_capacity": {
+          "exclusiveMaximum": 223,
+          "minimum": 0,
+          "title": "Padding Bytes At Capacity",
+          "type": "integer"
+        },
+        "payload_map_bits": {
+          "maximum": 8850000,
+          "minimum": 262144,
+          "title": "Payload Map Bits",
+          "type": "integer"
+        },
+        "profile_identifier": {
+          "const": "test_only_v1",
+          "default": "test_only_v1",
+          "title": "Profile Identifier",
+          "type": "string"
+        },
+        "protected_bits": {
+          "maximum": 10200,
+          "minimum": 4080,
+          "title": "Protected Bits",
+          "type": "integer"
+        },
+        "repeated_bits": {
+          "minimum": 0,
+          "title": "Repeated Bits",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "profile_identifier",
+        "maximum_message_bytes",
+        "header_bytes",
+        "message_length_bytes",
+        "authentication_bytes",
+        "padding_bytes_at_capacity",
+        "block_count",
+        "frame_bytes",
+        "correction_bytes",
+        "protected_bits",
+        "payload_map_bits",
+        "repeated_bits",
+        "minimum_repetitions",
+        "additional_repetitions"
+      ],
+      "title": "PayloadCapacity",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Report the message limit for one image and model inside the model range.",
+  "properties": {
+    "capacity": {
+      "$ref": "#/$defs/PayloadCapacity"
+    },
+    "height": {
+      "maximum": 1024,
+      "minimum": 512,
+      "title": "Height",
+      "type": "integer"
+    },
+    "image_reference": {
+      "pattern": "^image_[0-9a-f]{32}$",
+      "title": "Image Reference",
+      "type": "string"
+    },
+    "maximum_message_bytes": {
+      "maximum": 1024,
+      "minimum": 256,
+      "title": "Maximum Message Bytes",
+      "type": "integer"
+    },
+    "model_identifier": {
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$",
+      "title": "Model Identifier",
+      "type": "string"
+    },
+    "profile_identifier": {
+      "const": "test_only_v1",
+      "default": "test_only_v1",
+      "title": "Profile Identifier",
+      "type": "string"
+    },
+    "width": {
+      "maximum": 1024,
+      "minimum": 512,
+      "title": "Width",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "image_reference",
+    "model_identifier",
+    "profile_identifier",
+    "width",
+    "height",
+    "maximum_message_bytes",
+    "capacity"
+  ],
+  "title": "CapacityResult",
+  "type": "object"
+}

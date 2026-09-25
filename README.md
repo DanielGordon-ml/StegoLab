@@ -93,8 +93,9 @@ development commands, browser tests, and troubleshooting.
   [pilot guide](docs/pilot_training.md) and [Sprint 5 evidence](plan/sprint_05.md).
 
 - Sprint 6 (in progress) adds explicit installation of an exported encoder and
-  decoder pair as an **experimental** model through the API, so that Encode and
-  Decode can follow. See the [GUI guide](docs/gui_training.md).
+  decoder pair as an **experimental** model, bounded image uploads that expire
+  after one day, and a per-image message limit, so that Encode and Decode can
+  follow. See the [GUI guide](docs/gui_training.md).
 
 The GUI connects local dataset preparation, experimental CPU training, checkpoint
 review, evaluation, and exports through background jobs. Read the

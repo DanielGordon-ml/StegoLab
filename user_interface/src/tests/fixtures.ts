@@ -20,6 +20,53 @@ export const capabilities = {
   maximum_upload_bytes: 16777216,
 };
 
+export const uploaded_image = {
+  image_reference: 'image_0123456789abcdef0123456789abcdef',
+  purpose: 'cover',
+  summary: {
+    source_format: 'JPEG',
+    mode: 'RGB',
+    pixel_policy: 'prepare_srgb',
+    source_width: 1024,
+    source_height: 768,
+    prepared_width: 1024,
+    prepared_height: 768,
+    input_size_bytes: 204800,
+    orientation: 1,
+    color_policy: 'assumed_srgb',
+  },
+  warnings: [
+    'The JPEG file was converted to PNG. Encode and Decode always use PNG.',
+  ],
+  created_at: '2026-09-25T10:00:00+00:00',
+  expires_at: '2026-09-26T10:00:00+00:00',
+};
+
+export const capacity_result = {
+  image_reference: uploaded_image.image_reference,
+  model_identifier: '001V_2026-09-24',
+  profile_identifier: 'test_only_v1',
+  width: 1024,
+  height: 768,
+  maximum_message_bytes: 768,
+  capacity: {
+    profile_identifier: 'test_only_v1',
+    maximum_message_bytes: 768,
+    header_bytes: 45,
+    message_length_bytes: 2,
+    authentication_bytes: 16,
+    padding_bytes_at_capacity: 61,
+    block_count: 4,
+    frame_bytes: 892,
+    correction_bytes: 128,
+    protected_bits: 8160,
+    payload_map_bits: 786432,
+    repeated_bits: 778272,
+    minimum_repetitions: 96,
+    additional_repetitions: 3072,
+  },
+};
+
 /** Serve real contract-shaped reads, delegating mutation behavior to each test. */
 export function mock_backend(
   mutate?: (options: RequestInit) => Promise<Response>,

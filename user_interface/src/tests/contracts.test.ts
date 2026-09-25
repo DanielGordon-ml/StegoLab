@@ -1,12 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import {
   validate_capabilities,
+  validate_capacity_result,
   validate_configuration,
   validate_error,
   validate_health,
   validate_update,
+  validate_uploaded_image,
 } from '../contracts/validation';
-import { capabilities, saved_configuration } from './fixtures';
+import {
+  capabilities,
+  capacity_result,
+  saved_configuration,
+  uploaded_image,
+} from './fixtures';
 import { request_validated } from '../contracts/transport';
 import { vi } from 'vitest';
 
@@ -63,6 +70,31 @@ describe('backend JSON Schemas', () => {
     expect(
       validate_error({ error: { code: 'unavailable', message: 'Try again.' } }),
     ).toBe(false);
+  });
+  it('checks upload and capacity records against the shared schemas', () => {
+    expect(validate_uploaded_image(uploaded_image)).toBe(true);
+    expect(
+      validate_uploaded_image({ ...uploaded_image, purpose: 'secret' }),
+    ).toBe(false);
+    expect(
+      validate_uploaded_image({
+        ...uploaded_image,
+        image_reference: 'image_1',
+      }),
+    ).toBe(false);
+    expect(validate_uploaded_image({ ...uploaded_image, path: '/tmp' })).toBe(
+      false,
+    );
+    expect(validate_capacity_result(capacity_result)).toBe(true);
+    expect(
+      validate_capacity_result({
+        ...capacity_result,
+        maximum_message_bytes: 4096,
+      }),
+    ).toBe(false);
+    expect(validate_capacity_result({ ...capacity_result, width: 2048 })).toBe(
+      false,
+    );
   });
   it('never exposes an untrusted response body in an error', async () => {
     vi.stubGlobal(

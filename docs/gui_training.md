@@ -119,6 +119,35 @@ image quality is visibly reduced and recovery is not guaranteed. The browser
 controls for installation, encoding, and decoding arrive with the Sprint 6
 interface work.
 
+## Upload an image and check its message limit
+
+Encode and Decode start from an upload. Send the image file itself as the request
+body, with the content type `image/png` or `image/jpeg`, and say what the file is
+for with the `purpose` query parameter:
+
+- `cover` prepares the image for encoding: it is rotated to its displayed
+  orientation, converted to standard sRGB, and saved as a metadata-free PNG.
+- `encoded` keeps the file exactly as sent so that Decode reads the same pixels
+  Encode wrote. Only unchanged PNG files are accepted here; JPEG and re-saved
+  files are refused with a plain explanation.
+
+```bash
+curl --request POST "http://127.0.0.1:8080/api/v1/images?purpose=cover" \
+  --header "Content-Type: image/png" --data-binary @cover.png
+```
+
+The answer names the image by an opaque reference, describes the preparation
+(source and prepared sizes, colour handling, warnings), and gives the expiry
+time. Uploads are limited to 16 MiB and to sides between 512 and 4096 pixels.
+They are deleted after 24 hours or when local image storage reaches 512 MiB. The
+prepared file can be downloaded unchanged from `GET /api/v1/artifacts/<image
+reference>`.
+
+`POST /api/v1/capacity` with `{"image_reference": ..., "model_identifier": ...}`
+reports how many message bytes that image can carry with one installed model.
+Images outside the model's side range (512 to 1024 pixels for the experimental
+model) are refused before any model process starts.
+
 ## Delivery boundaries
 
 Local dataset preparation, bounded CPU experiments, review, and export form the

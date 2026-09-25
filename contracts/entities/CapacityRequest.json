@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Ask how many message bytes one uploaded image can carry with one model.",
+  "properties": {
+    "image_reference": {
+      "pattern": "^image_[0-9a-f]{32}$",
+      "title": "Image Reference",
+      "type": "string"
+    },
+    "model_identifier": {
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$",
+      "title": "Model Identifier",
+      "type": "string"
+    }
+  },
+  "required": [
+    "image_reference",
+    "model_identifier"
+  ],
+  "title": "CapacityRequest",
+  "type": "object"
+}

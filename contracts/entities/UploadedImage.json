@@ -1,0 +1,134 @@
+{
+  "$defs": {
+    "ImageSummary": {
+      "additionalProperties": false,
+      "description": "Describe image handling without paths or source metadata.",
+      "properties": {
+        "color_policy": {
+          "enum": [
+            "icc_to_srgb",
+            "declared_srgb",
+            "assumed_srgb"
+          ],
+          "title": "Color Policy",
+          "type": "string"
+        },
+        "input_size_bytes": {
+          "maximum": 52428800,
+          "minimum": 1,
+          "title": "Input Size Bytes",
+          "type": "integer"
+        },
+        "mode": {
+          "enum": [
+            "RGB",
+            "RGBA"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "orientation": {
+          "maximum": 8,
+          "minimum": 1,
+          "title": "Orientation",
+          "type": "integer"
+        },
+        "pixel_policy": {
+          "enum": [
+            "prepare_srgb",
+            "preserve_stored"
+          ],
+          "title": "Pixel Policy",
+          "type": "string"
+        },
+        "prepared_height": {
+          "title": "Prepared Height",
+          "type": "integer"
+        },
+        "prepared_width": {
+          "title": "Prepared Width",
+          "type": "integer"
+        },
+        "source_format": {
+          "enum": [
+            "JPEG",
+            "PNG"
+          ],
+          "title": "Source Format",
+          "type": "string"
+        },
+        "source_height": {
+          "title": "Source Height",
+          "type": "integer"
+        },
+        "source_width": {
+          "title": "Source Width",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "source_format",
+        "mode",
+        "pixel_policy",
+        "source_width",
+        "source_height",
+        "prepared_width",
+        "prepared_height",
+        "input_size_bytes",
+        "orientation",
+        "color_policy"
+      ],
+      "title": "ImageSummary",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Describe one accepted upload without its file name, path, or bytes.",
+  "properties": {
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "expires_at": {
+      "format": "date-time",
+      "title": "Expires At",
+      "type": "string"
+    },
+    "image_reference": {
+      "pattern": "^image_[0-9a-f]{32}$",
+      "title": "Image Reference",
+      "type": "string"
+    },
+    "purpose": {
+      "enum": [
+        "cover",
+        "encoded"
+      ],
+      "title": "Purpose",
+      "type": "string"
+    },
+    "summary": {
+      "$ref": "#/$defs/ImageSummary"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 4,
+      "title": "Warnings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "image_reference",
+    "purpose",
+    "summary",
+    "warnings",
+    "created_at",
+    "expires_at"
+  ],
+  "title": "UploadedImage",
+  "type": "object"
+}
