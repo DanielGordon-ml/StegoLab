@@ -5,9 +5,16 @@ from typing import Final, Literal, Self
 from pydantic import Field, field_validator, model_validator
 
 from schemas.base import StrictRecord
+from schemas.dataset_uploads import (
+    DATASET_UPLOAD_CHUNK_BYTES,
+    MAXIMUM_DATASET_UPLOAD_BYTES,
+)
 from schemas.models import InstalledModel, ModelIdentifier
 
 MAXIMUM_UPLOAD_BYTES: Final = 16_777_216
+DatasetSourceKindName = Literal[
+    "server_folder", "upload", "hugging_face", "https_archive"
+]
 
 
 class HealthStatus(StrictRecord):
@@ -36,9 +43,19 @@ class Capabilities(StrictRecord):
     minimum_image_side: int = Field(default=0, ge=0, le=4096)
     maximum_image_side: int = Field(default=0, ge=0, le=4096)
     maximum_upload_bytes: Literal[16_777_216] = 16_777_216
+    maximum_dataset_upload_bytes: Literal[2_147_483_648] = MAXIMUM_DATASET_UPLOAD_BYTES
+    dataset_upload_chunk_bytes: Literal[16_777_216] = DATASET_UPLOAD_CHUNK_BYTES
+    hugging_face_token_configured: bool = False
+    dataset_source_kinds: list[DatasetSourceKindName] = Field(
+        default=["server_folder"], min_length=1, max_length=4
+    )
 
     @field_validator(
-        "encoding_available", "decoding_available", "training_available", mode="before"
+        "encoding_available",
+        "decoding_available",
+        "training_available",
+        "hugging_face_token_configured",
+        mode="before",
     )
     @classmethod
     def validate_availability_type(cls, value: object) -> object:

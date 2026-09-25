@@ -227,6 +227,10 @@ test('without an installed model both tabs explain installation', async ({
     minimum_image_side: 0,
     maximum_image_side: 0,
     maximum_upload_bytes: 16777216,
+    maximum_dataset_upload_bytes: 2147483648,
+    dataset_upload_chunk_bytes: 16777216,
+    hugging_face_token_configured: false,
+    dataset_source_kinds: ['server_folder'],
   };
   await page.route('**/api/v1/capabilities', (route) =>
     route.fulfill({ json: zero_models }),

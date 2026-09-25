@@ -72,6 +72,30 @@
             "title": "Available Profiles",
             "type": "array"
           },
+          "dataset_source_kinds": {
+            "default": [
+              "server_folder"
+            ],
+            "items": {
+              "enum": [
+                "server_folder",
+                "upload",
+                "hugging_face",
+                "https_archive"
+              ],
+              "type": "string"
+            },
+            "maxItems": 4,
+            "minItems": 1,
+            "title": "Dataset Source Kinds",
+            "type": "array"
+          },
+          "dataset_upload_chunk_bytes": {
+            "const": 16777216,
+            "default": 16777216,
+            "title": "Dataset Upload Chunk Bytes",
+            "type": "integer"
+          },
           "decoding_available": {
             "default": false,
             "title": "Decoding Available",
@@ -87,6 +111,17 @@
             "default": true,
             "title": "Experimental Models Only",
             "type": "boolean"
+          },
+          "hugging_face_token_configured": {
+            "default": false,
+            "title": "Hugging Face Token Configured",
+            "type": "boolean"
+          },
+          "maximum_dataset_upload_bytes": {
+            "const": 2147483648,
+            "default": 2147483648,
+            "title": "Maximum Dataset Upload Bytes",
+            "type": "integer"
           },
           "maximum_image_side": {
             "default": 0,
@@ -133,7 +168,11 @@
           "maximum_payload_bytes",
           "minimum_image_side",
           "maximum_image_side",
-          "maximum_upload_bytes"
+          "maximum_upload_bytes",
+          "maximum_dataset_upload_bytes",
+          "dataset_upload_chunk_bytes",
+          "hugging_face_token_configured",
+          "dataset_source_kinds"
         ],
         "title": "Capabilities",
         "type": "object"
@@ -1658,6 +1697,14 @@
         "additionalProperties": false,
         "description": "Name a server-approved source root without returning its private path.",
         "properties": {
+          "folders": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 200,
+            "title": "Folders",
+            "type": "array"
+          },
           "identifier": {
             "title": "Identifier",
             "type": "string"
@@ -1669,7 +1716,8 @@
         },
         "required": [
           "identifier",
-          "label"
+          "label",
+          "folders"
         ],
         "title": "WorkspaceSource",
         "type": "object"
@@ -1743,7 +1791,7 @@
     },
     "/api/v1/capabilities": {
       "get": {
-        "description": "Advertise experimental inference only for explicitly installed models.",
+        "description": "Advertise installed models and whether a server-side token exists.",
         "operationId": "read_capabilities",
         "responses": {
           "200": {

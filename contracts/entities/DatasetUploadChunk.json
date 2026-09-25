@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Acknowledge one received part with the digest the server computed.",
+  "properties": {
+    "bytes": {
+      "maximum": 16777216,
+      "minimum": 1,
+      "title": "Bytes",
+      "type": "integer"
+    },
+    "index": {
+      "exclusiveMaximum": 128,
+      "minimum": 0,
+      "title": "Index",
+      "type": "integer"
+    },
+    "received_chunks": {
+      "items": {
+        "type": "integer"
+      },
+      "maxItems": 128,
+      "title": "Received Chunks",
+      "type": "array"
+    },
+    "sha256": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Sha256",
+      "type": "string"
+    },
+    "upload_identifier": {
+      "pattern": "^upload_[0-9a-f]{32}$",
+      "title": "Upload Identifier",
+      "type": "string"
+    }
+  },
+  "required": [
+    "upload_identifier",
+    "index",
+    "bytes",
+    "sha256",
+    "received_chunks"
+  ],
+  "title": "DatasetUploadChunk",
+  "type": "object"
+}

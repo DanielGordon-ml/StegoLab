@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Summarize the near-duplicate report that preflight read and checked.",
+  "properties": {
+    "audit_identifier": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Audit Identifier",
+      "type": "string"
+    },
+    "benchmark_pairs": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Benchmark Pairs"
+    },
+    "benchmark_status": {
+      "enum": [
+        "not_included",
+        "pixels_unavailable",
+        "compared"
+      ],
+      "title": "Benchmark Status",
+      "type": "string"
+    },
+    "cross_split_pairs": {
+      "minimum": 0,
+      "title": "Cross Split Pairs",
+      "type": "integer"
+    },
+    "limited": {
+      "title": "Limited",
+      "type": "boolean"
+    },
+    "method_version": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Method Version",
+      "type": "string"
+    },
+    "report_checksum": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Report Checksum",
+      "type": "string"
+    },
+    "threshold": {
+      "const": 8,
+      "default": 8,
+      "title": "Threshold",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "report_checksum",
+    "audit_identifier",
+    "method_version",
+    "threshold",
+    "cross_split_pairs",
+    "benchmark_status",
+    "benchmark_pairs",
+    "limited"
+  ],
+  "title": "PreflightAuditSummary",
+  "type": "object"
+}

@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Open an upload session for one archive of a known total size.",
+  "properties": {
+    "client_request_identifier": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+      "title": "Client Request Identifier",
+      "type": "string"
+    },
+    "expected_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Expected Sha256"
+    },
+    "file_name": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9 ._-]{0,254}$",
+      "title": "File Name",
+      "type": "string"
+    },
+    "total_bytes": {
+      "maximum": 2147483648,
+      "minimum": 1,
+      "title": "Total Bytes",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "client_request_identifier",
+    "file_name",
+    "total_bytes",
+    "expected_sha256"
+  ],
+  "title": "DatasetUploadCreateRequest",
+  "type": "object"
+}

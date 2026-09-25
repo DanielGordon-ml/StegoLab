@@ -1,0 +1,364 @@
+{
+  "$defs": {
+    "BenchmarkComparison": {
+      "additionalProperties": false,
+      "description": "State whether benchmark pixels were available for comparison.",
+      "properties": {
+        "benchmark_revision": {
+          "anyOf": [
+            {
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Benchmark Revision"
+        },
+        "compared_members": {
+          "maximum": 300000,
+          "minimum": 0,
+          "title": "Compared Members",
+          "type": "integer"
+        },
+        "identities_checksum": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Identities Checksum",
+          "type": "string"
+        },
+        "member_count": {
+          "maximum": 300000,
+          "minimum": 0,
+          "title": "Member Count",
+          "type": "integer"
+        },
+        "missing_members": {
+          "maximum": 300000,
+          "minimum": 0,
+          "title": "Missing Members",
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "pixels_unavailable",
+            "compared"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "identities_checksum",
+        "status",
+        "benchmark_revision",
+        "member_count",
+        "compared_members",
+        "missing_members"
+      ],
+      "title": "BenchmarkComparison",
+      "type": "object"
+    },
+    "NearDuplicatePair": {
+      "additionalProperties": false,
+      "description": "One pair of images whose perceptual hashes are close.",
+      "properties": {
+        "distance": {
+          "maximum": 64,
+          "minimum": 0,
+          "title": "Distance",
+          "type": "integer"
+        },
+        "first_identity": {
+          "maxLength": 4096,
+          "minLength": 1,
+          "title": "First Identity",
+          "type": "string"
+        },
+        "first_source": {
+          "enum": [
+            "dataset",
+            "benchmark"
+          ],
+          "title": "First Source",
+          "type": "string"
+        },
+        "first_split": {
+          "anyOf": [
+            {
+              "enum": [
+                "train",
+                "tuning",
+                "held_out"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "First Split"
+        },
+        "second_identity": {
+          "maxLength": 4096,
+          "minLength": 1,
+          "title": "Second Identity",
+          "type": "string"
+        },
+        "second_source": {
+          "enum": [
+            "dataset",
+            "benchmark"
+          ],
+          "title": "Second Source",
+          "type": "string"
+        },
+        "second_split": {
+          "anyOf": [
+            {
+              "enum": [
+                "train",
+                "tuning",
+                "held_out"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Second Split"
+        }
+      },
+      "required": [
+        "first_identity",
+        "first_split",
+        "first_source",
+        "second_identity",
+        "second_split",
+        "second_source",
+        "distance"
+      ],
+      "title": "NearDuplicatePair",
+      "type": "object"
+    },
+    "NearDuplicateThresholdCounts": {
+      "additionalProperties": false,
+      "description": "Pair counts at one Hamming distance level.",
+      "properties": {
+        "benchmark_by_split": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "integer"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Benchmark By Split"
+        },
+        "benchmark_total": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Benchmark Total"
+        },
+        "cross_split": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Cross Split",
+          "type": "object"
+        },
+        "cross_split_total": {
+          "minimum": 0,
+          "title": "Cross Split Total",
+          "type": "integer"
+        },
+        "threshold": {
+          "enum": [
+            0,
+            4,
+            8,
+            12
+          ],
+          "title": "Threshold",
+          "type": "integer"
+        },
+        "within_split": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Within Split",
+          "type": "object"
+        }
+      },
+      "required": [
+        "threshold",
+        "within_split",
+        "cross_split",
+        "cross_split_total",
+        "benchmark_by_split",
+        "benchmark_total"
+      ],
+      "title": "NearDuplicateThresholdCounts",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Evidence report bound to one revision; never a readiness decision.",
+  "properties": {
+    "audit_identifier": {
+      "pattern": "^[a-f0-9]{12}_[0-9]{8}T[0-9]{6}Z$",
+      "title": "Audit Identifier",
+      "type": "string"
+    },
+    "benchmark": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/BenchmarkComparison"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "dataset_name": {
+      "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+      "title": "Dataset Name",
+      "type": "string"
+    },
+    "dataset_revision": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Dataset Revision",
+      "type": "string"
+    },
+    "elapsed_seconds": {
+      "minimum": 0,
+      "title": "Elapsed Seconds",
+      "type": "number"
+    },
+    "environment": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Environment",
+      "type": "object"
+    },
+    "hashed_by_split": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Hashed By Split",
+      "type": "object"
+    },
+    "hashed_images": {
+      "maximum": 200000,
+      "minimum": 0,
+      "title": "Hashed Images",
+      "type": "integer"
+    },
+    "limited": {
+      "title": "Limited",
+      "type": "boolean"
+    },
+    "method_version": {
+      "const": "phash_dct_32_v1",
+      "default": "phash_dct_32_v1",
+      "title": "Method Version",
+      "type": "string"
+    },
+    "pairs": {
+      "items": {
+        "$ref": "#/$defs/NearDuplicatePair"
+      },
+      "maxItems": 2000,
+      "title": "Pairs",
+      "type": "array"
+    },
+    "pairs_total_at_maximum_threshold": {
+      "minimum": 0,
+      "title": "Pairs Total At Maximum Threshold",
+      "type": "integer"
+    },
+    "pairs_truncated": {
+      "title": "Pairs Truncated",
+      "type": "boolean"
+    },
+    "peak_process_mebibytes": {
+      "minimum": 0,
+      "title": "Peak Process Mebibytes",
+      "type": "integer"
+    },
+    "pilot_ready": {
+      "const": false,
+      "default": false,
+      "title": "Pilot Ready",
+      "type": "boolean"
+    },
+    "records_checksum": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Records Checksum",
+      "type": "string"
+    },
+    "report_checksum": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Report Checksum",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "thresholds": {
+      "items": {
+        "$ref": "#/$defs/NearDuplicateThresholdCounts"
+      },
+      "maxItems": 4,
+      "minItems": 4,
+      "title": "Thresholds",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "method_version",
+    "audit_identifier",
+    "dataset_name",
+    "dataset_revision",
+    "records_checksum",
+    "hashed_images",
+    "hashed_by_split",
+    "limited",
+    "thresholds",
+    "pairs",
+    "pairs_total_at_maximum_threshold",
+    "pairs_truncated",
+    "benchmark",
+    "elapsed_seconds",
+    "peak_process_mebibytes",
+    "environment",
+    "pilot_ready",
+    "report_checksum"
+  ],
+  "title": "NearDuplicateAuditReport",
+  "type": "object"
+}

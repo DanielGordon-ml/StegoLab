@@ -1,0 +1,178 @@
+{
+  "$defs": {
+    "PlannedAssetRecord": {
+      "additionalProperties": false,
+      "description": "Describe one file that a fetch would download or reuse.",
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sha256"
+        },
+        "size_bytes": {
+          "anyOf": [
+            {
+              "maximum": 107374182400,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Size Bytes"
+        }
+      },
+      "required": [
+        "path",
+        "size_bytes",
+        "sha256"
+      ],
+      "title": "PlannedAssetRecord",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Provenance stored beside materialized raw files under data/<source_name>/.",
+  "properties": {
+    "assets": {
+      "items": {
+        "$ref": "#/$defs/PlannedAssetRecord"
+      },
+      "maxItems": 10000,
+      "title": "Assets",
+      "type": "array"
+    },
+    "completed": {
+      "title": "Completed",
+      "type": "boolean"
+    },
+    "content": {
+      "enum": [
+        "images",
+        "text"
+      ],
+      "title": "Content",
+      "type": "string"
+    },
+    "created_at": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Created At",
+      "type": "string"
+    },
+    "declared_splits": {
+      "title": "Declared Splits",
+      "type": "boolean"
+    },
+    "materialization_identity": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Materialization Identity",
+      "type": "string"
+    },
+    "member_count": {
+      "maximum": 200000,
+      "minimum": 0,
+      "title": "Member Count",
+      "type": "integer"
+    },
+    "reference": {
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Reference",
+      "type": "string"
+    },
+    "rejected_member_count": {
+      "maximum": 200000,
+      "minimum": 0,
+      "title": "Rejected Member Count",
+      "type": "integer"
+    },
+    "resolved_revision": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Resolved Revision",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "source_kind": {
+      "enum": [
+        "uhd_iqa",
+        "local",
+        "hugging_face",
+        "https_archive",
+        "upload"
+      ],
+      "title": "Source Kind",
+      "type": "string"
+    },
+    "source_name": {
+      "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+      "title": "Source Name",
+      "type": "string"
+    },
+    "source_url": {
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Source Url",
+      "type": "string"
+    },
+    "split_mapping": {
+      "additionalProperties": {
+        "enum": [
+          "train",
+          "tuning",
+          "held_out"
+        ],
+        "type": "string"
+      },
+      "title": "Split Mapping",
+      "type": "object"
+    },
+    "terms_reference": {
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Terms Reference",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "source_kind",
+    "source_name",
+    "reference",
+    "source_url",
+    "terms_reference",
+    "resolved_revision",
+    "materialization_identity",
+    "content",
+    "assets",
+    "member_count",
+    "rejected_member_count",
+    "split_mapping",
+    "declared_splits",
+    "created_at",
+    "completed"
+  ],
+  "title": "SourceMarker",
+  "type": "object"
+}

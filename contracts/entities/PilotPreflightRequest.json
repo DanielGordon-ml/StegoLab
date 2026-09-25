@@ -3,6 +3,20 @@
   "additionalProperties": false,
   "description": "Locate prepared data and host state without launching or training anything.",
   "properties": {
+    "benchmark_identities_directory": {
+      "anyOf": [
+        {
+          "maxLength": 4096,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Benchmark Identities Directory"
+    },
     "dataset_directory": {
       "maxLength": 4096,
       "minLength": 1,
@@ -17,6 +31,20 @@
       ],
       "title": "Device",
       "type": "string"
+    },
+    "near_duplicate_audit_report": {
+      "anyOf": [
+        {
+          "maxLength": 4096,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Near Duplicate Audit Report"
     },
     "output_root": {
       "default": ".",
@@ -51,7 +79,9 @@
     "dataset_directory",
     "output_root",
     "device",
-    "session_identifier"
+    "session_identifier",
+    "near_duplicate_audit_report",
+    "benchmark_identities_directory"
   ],
   "title": "PilotPreflightRequest",
   "type": "object"

@@ -12,7 +12,18 @@ export interface Capabilities {
   minimum_image_side: number;
   maximum_image_side: number;
   maximum_upload_bytes: number;
+  maximum_dataset_upload_bytes: number;
+  dataset_upload_chunk_bytes: number;
+  hugging_face_token_configured: boolean;
+  dataset_source_kinds: DatasetSourceKind[];
 }
+
+/** Dataset sources the backend accepts in the Train tab. */
+export type DatasetSourceKind =
+  | 'server_folder'
+  | 'upload'
+  | 'hugging_face'
+  | 'https_archive';
 
 /** Backend readiness, separate from model availability. */
 export interface HealthStatus {

@@ -5,12 +5,47 @@ import json
 from pathlib import Path
 
 from backend_service.application import create_application
+from schemas.benchmark_identities import (
+    BenchmarkFreezeRequest,
+    BenchmarkMember,
+    BenchmarkValidationReport,
+    ReleaseBenchmarkIdentities,
+)
 from schemas.capabilities import Capabilities, HealthStatus, ModelList
 from schemas.checkpoints import CheckpointMetrics, CheckpointSummary
 from schemas.configuration import (
     ConfigurationProfile,
     ConfigurationReset,
     ConfigurationUpdate,
+)
+from schemas.dataset_cache import (
+    CacheEntryManifest,
+    CachePartialRecord,
+    DatasetCacheEntrySummary,
+    DatasetCacheSummary,
+)
+from schemas.dataset_fetch import (
+    DatasetFetchDocument,
+    DatasetFetchProgress,
+    DatasetFetchRequest,
+    DatasetFetchSummary,
+    TextCorpusSummary,
+)
+from schemas.dataset_sources import (
+    DatasetInspection,
+    DatasetInspectionRequest,
+    HttpsArchiveSourceSpec,
+    HuggingFaceSourceSpec,
+    PlannedAssetRecord,
+    SourceMarker,
+    UploadSourceSpec,
+)
+from schemas.dataset_storage import DatasetStorageSummary
+from schemas.dataset_uploads import (
+    DatasetUploadChunk,
+    DatasetUploadCompleteRequest,
+    DatasetUploadCreateRequest,
+    DatasetUploadSession,
 )
 from schemas.datasets import (
     DatasetImageRecord,
@@ -38,10 +73,18 @@ from schemas.model_exports import (
     ModelExportSummary,
 )
 from schemas.models import InstalledModel, ModelInstallRequest
+from schemas.near_duplicate_audit import (
+    NearDuplicateAuditReport,
+    NearDuplicateAuditRequest,
+)
 from schemas.pilot_budget import PilotBudgetSummary
 from schemas.pilot_data import PilotSelection
 from schemas.pilot_loading import PilotLoadingReport
-from schemas.pilot_preflight import PilotPreflightReport, PilotPreflightRequest
+from schemas.pilot_preflight import (
+    PilotPreflightReport,
+    PilotPreflightRequest,
+    PreflightAuditSummary,
+)
 from schemas.pilot_readiness import GpuReadinessReport, GpuReadinessRequest
 from schemas.pilot_training import (
     PilotEvaluationReport,
@@ -117,6 +160,34 @@ ENTITY_MODELS = (
     DatasetRejection,
     DatasetManifest,
     DatasetSummary,
+    HuggingFaceSourceSpec,
+    HttpsArchiveSourceSpec,
+    UploadSourceSpec,
+    DatasetInspectionRequest,
+    DatasetInspection,
+    PlannedAssetRecord,
+    SourceMarker,
+    DatasetFetchRequest,
+    DatasetFetchDocument,
+    DatasetFetchProgress,
+    DatasetFetchSummary,
+    TextCorpusSummary,
+    CacheEntryManifest,
+    CachePartialRecord,
+    DatasetCacheEntrySummary,
+    DatasetCacheSummary,
+    DatasetUploadCreateRequest,
+    DatasetUploadSession,
+    DatasetUploadChunk,
+    DatasetUploadCompleteRequest,
+    DatasetStorageSummary,
+    ReleaseBenchmarkIdentities,
+    BenchmarkMember,
+    BenchmarkFreezeRequest,
+    BenchmarkValidationReport,
+    NearDuplicateAuditRequest,
+    NearDuplicateAuditReport,
+    PreflightAuditSummary,
     ApplicationError,
     ErrorEnvelope,
     Capabilities,

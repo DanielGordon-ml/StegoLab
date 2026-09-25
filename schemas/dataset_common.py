@@ -9,6 +9,12 @@ from pydantic import AfterValidator, Field, model_validator
 from schemas.base import StrictRecord
 
 DatasetSplit = Literal["train", "tuning", "held_out"]
+SourceKind = Literal["uhd_iqa", "local", "hugging_face", "https_archive", "upload"]
+REMOTE_SOURCE_KINDS: tuple[SourceKind, ...] = (
+    "hugging_face",
+    "https_archive",
+    "upload",
+)
 SHA256 = Annotated[str, Field(pattern=r"^[a-f0-9]{64}$")]
 DATASET_SPLITS: tuple[DatasetSplit, ...] = ("train", "tuning", "held_out")
 SPLIT_MAPPING: dict[str, DatasetSplit] = {

@@ -1,0 +1,129 @@
+{
+  "$defs": {
+    "DatasetCacheEntrySummary": {
+      "additionalProperties": false,
+      "description": "List one cached file with the raw folders and revisions that use it.",
+      "properties": {
+        "created_at": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Created At",
+          "type": "string"
+        },
+        "identity": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Identity",
+          "type": "string"
+        },
+        "in_use_by": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 200,
+          "title": "In Use By",
+          "type": "array"
+        },
+        "kind": {
+          "enum": [
+            "hugging_face",
+            "https_archive",
+            "upload"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "reference": {
+          "maxLength": 4096,
+          "minLength": 1,
+          "title": "Reference",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "size_bytes": {
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "identity",
+        "kind",
+        "reference",
+        "revision",
+        "path",
+        "size_bytes",
+        "created_at",
+        "in_use_by"
+      ],
+      "title": "DatasetCacheEntrySummary",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Summarize cache usage without exposing filesystem paths.",
+  "properties": {
+    "entries": {
+      "items": {
+        "$ref": "#/$defs/DatasetCacheEntrySummary"
+      },
+      "maxItems": 1000,
+      "title": "Entries",
+      "type": "array"
+    },
+    "partial_bytes": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Partial Bytes",
+      "type": "integer"
+    },
+    "partial_entries": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Partial Entries",
+      "type": "integer"
+    },
+    "root_available": {
+      "title": "Root Available",
+      "type": "boolean"
+    },
+    "total_bytes": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Total Bytes",
+      "type": "integer"
+    },
+    "unused_bytes": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Unused Bytes",
+      "type": "integer"
+    },
+    "unused_entries": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Unused Entries",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "root_available",
+    "entries",
+    "total_bytes",
+    "unused_bytes",
+    "unused_entries",
+    "partial_bytes",
+    "partial_entries"
+  ],
+  "title": "DatasetCacheSummary",
+  "type": "object"
+}

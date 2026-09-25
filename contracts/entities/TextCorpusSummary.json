@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Describe saved text files without quoting their content.",
+  "properties": {
+    "bytes": {
+      "minimum": 0,
+      "title": "Bytes",
+      "type": "integer"
+    },
+    "characters": {
+      "minimum": 0,
+      "title": "Characters",
+      "type": "integer"
+    },
+    "files": {
+      "maximum": 10000,
+      "minimum": 1,
+      "title": "Files",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "files",
+    "characters",
+    "bytes"
+  ],
+  "title": "TextCorpusSummary",
+  "type": "object"
+}

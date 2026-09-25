@@ -75,6 +75,7 @@ class WorkspaceSource(StrictRecord):
 
     identifier: str
     label: str
+    folders: list[str] = Field(default_factory=list, max_length=200)
 
 
 class WorkspaceBudget(StrictRecord):

@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Freeze what one verified cached file is and where it came from.",
+  "properties": {
+    "basename": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,254}$",
+      "title": "Basename",
+      "type": "string"
+    },
+    "created_at": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Created At",
+      "type": "string"
+    },
+    "etag": {
+      "anyOf": [
+        {
+          "maxLength": 256,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Etag"
+    },
+    "identity": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Identity",
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "hugging_face",
+        "https_archive",
+        "upload"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "path": {
+      "title": "Path",
+      "type": "string"
+    },
+    "reference": {
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Reference",
+      "type": "string"
+    },
+    "revision": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Revision",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "sha256": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Sha256",
+      "type": "string"
+    },
+    "size_bytes": {
+      "maximum": 107374182400,
+      "minimum": 0,
+      "title": "Size Bytes",
+      "type": "integer"
+    },
+    "terms_reference": {
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Terms Reference",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "kind",
+    "identity",
+    "reference",
+    "revision",
+    "path",
+    "basename",
+    "size_bytes",
+    "sha256",
+    "etag",
+    "terms_reference",
+    "created_at"
+  ],
+  "title": "CacheEntryManifest",
+  "type": "object"
+}

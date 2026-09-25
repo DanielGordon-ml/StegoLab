@@ -51,7 +51,7 @@ export interface Workspace {
     experimental: true;
     artifact_identifier: string;
   }[];
-  sources: { identifier: string; label: string }[];
+  sources: { identifier: string; label: string; folders: string[] }[];
   budget: {
     remaining_seconds: number | null;
     remaining_experiments: number | null;

@@ -1,0 +1,246 @@
+{
+  "$defs": {
+    "BenchmarkAnnotationFile": {
+      "additionalProperties": false,
+      "description": "Record the annotation file that supplied identities and dimensions.",
+      "properties": {
+        "byte_count": {
+          "maximum": 1073741824,
+          "minimum": 1,
+          "title": "Byte Count",
+          "type": "integer"
+        },
+        "image_count": {
+          "maximum": 1000000,
+          "minimum": 0,
+          "title": "Image Count",
+          "type": "integer"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "sha256",
+        "byte_count",
+        "image_count"
+      ],
+      "title": "BenchmarkAnnotationFile",
+      "type": "object"
+    },
+    "BenchmarkSelectionRule": {
+      "additionalProperties": false,
+      "description": "State the deterministic ordering used to choose training-source members.",
+      "properties": {
+        "ordering": {
+          "const": "sha256_of_canonical_json_policy_seed_member_path",
+          "default": "sha256_of_canonical_json_policy_seed_member_path",
+          "title": "Ordering",
+          "type": "string"
+        },
+        "policy_version": {
+          "const": "release_benchmark_v1",
+          "default": "release_benchmark_v1",
+          "title": "Policy Version",
+          "type": "string"
+        },
+        "population_count": {
+          "maximum": 1000000,
+          "minimum": 1,
+          "title": "Population Count",
+          "type": "integer"
+        },
+        "population_split": {
+          "const": "train2017",
+          "default": "train2017",
+          "title": "Population Split",
+          "type": "string"
+        },
+        "reserve_count": {
+          "maximum": 100000,
+          "minimum": 0,
+          "title": "Reserve Count",
+          "type": "integer"
+        },
+        "seed": {
+          "maximum": 9223372036854775807,
+          "minimum": 0,
+          "title": "Seed",
+          "type": "integer"
+        },
+        "training_source_count": {
+          "maximum": 100000,
+          "minimum": 1,
+          "title": "Training Source Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "policy_version",
+        "seed",
+        "ordering",
+        "population_split",
+        "population_count",
+        "training_source_count",
+        "reserve_count"
+      ],
+      "title": "BenchmarkSelectionRule",
+      "type": "object"
+    },
+    "BenchmarkSourceArchive": {
+      "additionalProperties": false,
+      "description": "Pin one archive by repository commit, path, size and checksum.",
+      "properties": {
+        "archive_bytes": {
+          "maximum": 107374182400,
+          "minimum": 1,
+          "title": "Archive Bytes",
+          "type": "integer"
+        },
+        "archive_path": {
+          "title": "Archive Path",
+          "type": "string"
+        },
+        "archive_sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Archive Sha256",
+          "type": "string"
+        },
+        "repository": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}/[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Repository",
+          "type": "string"
+        },
+        "repository_kind": {
+          "const": "huggingface_dataset",
+          "default": "huggingface_dataset",
+          "title": "Repository Kind",
+          "type": "string"
+        },
+        "revision": {
+          "pattern": "^[a-f0-9]{40}$",
+          "title": "Revision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "repository",
+        "repository_kind",
+        "revision",
+        "archive_path",
+        "archive_sha256",
+        "archive_bytes"
+      ],
+      "title": "BenchmarkSourceArchive",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Frozen header for the 10,000-image release benchmark identities.",
+  "properties": {
+    "annotation_files": {
+      "items": {
+        "$ref": "#/$defs/BenchmarkAnnotationFile"
+      },
+      "maxItems": 8,
+      "minItems": 1,
+      "title": "Annotation Files",
+      "type": "array"
+    },
+    "benchmark_name": {
+      "const": "release_benchmark_v1",
+      "default": "release_benchmark_v1",
+      "title": "Benchmark Name",
+      "type": "string"
+    },
+    "identities_checksum": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Identities Checksum",
+      "type": "string"
+    },
+    "member_count": {
+      "maximum": 300000,
+      "minimum": 1,
+      "title": "Member Count",
+      "type": "integer"
+    },
+    "members_checksum": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Members Checksum",
+      "type": "string"
+    },
+    "pilot_ready": {
+      "const": false,
+      "default": false,
+      "title": "Pilot Ready",
+      "type": "boolean"
+    },
+    "preparation_policy": {
+      "const": "not_frozen",
+      "default": "not_frozen",
+      "title": "Preparation Policy",
+      "type": "string"
+    },
+    "reserve_count": {
+      "maximum": 100000,
+      "minimum": 0,
+      "title": "Reserve Count",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "selection_rule": {
+      "$ref": "#/$defs/BenchmarkSelectionRule"
+    },
+    "source_archives": {
+      "items": {
+        "$ref": "#/$defs/BenchmarkSourceArchive"
+      },
+      "maxItems": 8,
+      "minItems": 1,
+      "title": "Source Archives",
+      "type": "array"
+    },
+    "training_source_count": {
+      "maximum": 100000,
+      "minimum": 1,
+      "title": "Training Source Count",
+      "type": "integer"
+    },
+    "validation_count": {
+      "maximum": 100000,
+      "minimum": 1,
+      "title": "Validation Count",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "benchmark_name",
+    "source_archives",
+    "annotation_files",
+    "selection_rule",
+    "validation_count",
+    "training_source_count",
+    "reserve_count",
+    "member_count",
+    "members_checksum",
+    "identities_checksum",
+    "preparation_policy",
+    "pilot_ready"
+  ],
+  "title": "ReleaseBenchmarkIdentities",
+  "type": "object"
+}

@@ -1,10 +1,11 @@
 """Serialized, bounded dataset staging on persistent local storage."""
 
 import fcntl
+import hashlib
 import os
-import shutil
 import stat
 import uuid
+from collections.abc import Iterator
 from pathlib import Path
 from types import TracebackType
 
@@ -22,6 +23,7 @@ from backend_service.dataset_storage_ops import (
     recover_staging,
     remove_owned_stage,
 )
+from backend_service.disk_reserve import ensure_disk_reserve
 
 
 class DatasetWriter:
@@ -110,13 +112,8 @@ class DatasetWriter:
         self._check_free_space(estimated_bytes)
 
     def _check_free_space(self, next_bytes: int) -> None:
-        """Preserve the fixed disk reserve before any bounded write."""
-        try:
-            usage = shutil.disk_usage(self.output_root)
-        except OSError:
-            raise dataset_failure("dataset_storage") from None
-        if usage.free - next_bytes < max(10 * 1024**3, usage.total // 10):
-            raise dataset_failure("dataset_space")
+        """Preserve the shared disk reserve before any bounded write."""
+        ensure_disk_reserve(self.output_root, next_bytes)
 
     def reserve_write(self, size: int) -> None:
         """Charge each bounded write before it reaches the destination filesystem."""
@@ -147,6 +144,36 @@ class DatasetWriter:
             return path
         except OSError:
             raise dataset_failure("dataset_storage") from None
+
+    def write_stream(
+        self, relative_path: str, chunks: Iterator[bytes], *, maximum_bytes: int
+    ) -> tuple[str, int]:
+        """Stream a new file into this stage, charging bytes as they arrive."""
+        parts = relative_parts(relative_path)
+        path = self.stage.joinpath(*parts)
+        digest = hashlib.sha256()
+        total = 0
+        try:
+            with directory_descriptor(path.parent, create=True) as parent:
+                descriptor = os.open(
+                    parts[-1],
+                    os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+                    0o600,
+                    dir_fd=parent,
+                )
+                with os.fdopen(descriptor, "wb") as output:
+                    for chunk in chunks:
+                        total += len(chunk)
+                        if total > maximum_bytes:
+                            raise dataset_failure("dataset_limits")
+                        self.reserve_write(len(chunk))
+                        digest.update(chunk)
+                        output.write(chunk)
+                    os.fsync(output.fileno())
+                os.fsync(parent)
+        except OSError:
+            raise dataset_failure("dataset_storage") from None
+        return digest.hexdigest(), total
 
     def record_external_write(self, relative_path: str, size: int) -> None:
         """Check a callback-budgeted file without charging its bytes twice."""

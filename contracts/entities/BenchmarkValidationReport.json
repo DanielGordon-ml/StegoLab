@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Confirm a frozen identities folder without changing it.",
+  "properties": {
+    "benchmark_name": {
+      "const": "release_benchmark_v1",
+      "default": "release_benchmark_v1",
+      "title": "Benchmark Name",
+      "type": "string"
+    },
+    "identities_checksum": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Identities Checksum",
+      "type": "string"
+    },
+    "integrity": {
+      "enum": [
+        "verified",
+        "verified_with_annotations"
+      ],
+      "title": "Integrity",
+      "type": "string"
+    },
+    "member_count": {
+      "maximum": 300000,
+      "minimum": 1,
+      "title": "Member Count",
+      "type": "integer"
+    },
+    "members_checksum": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Members Checksum",
+      "type": "string"
+    },
+    "pilot_ready": {
+      "const": false,
+      "default": false,
+      "title": "Pilot Ready",
+      "type": "boolean"
+    },
+    "reserve_count": {
+      "maximum": 100000,
+      "minimum": 0,
+      "title": "Reserve Count",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "training_source_count": {
+      "maximum": 100000,
+      "minimum": 1,
+      "title": "Training Source Count",
+      "type": "integer"
+    },
+    "validation_count": {
+      "maximum": 100000,
+      "minimum": 1,
+      "title": "Validation Count",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "benchmark_name",
+    "identities_checksum",
+    "members_checksum",
+    "validation_count",
+    "training_source_count",
+    "reserve_count",
+    "member_count",
+    "integrity",
+    "pilot_ready"
+  ],
+  "title": "BenchmarkValidationReport",
+  "type": "object"
+}

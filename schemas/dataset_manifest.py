@@ -11,6 +11,7 @@ from schemas.dataset_common import (
     DatasetSplit,
     DatasetVersionedRecord,
     RelativePath,
+    SourceKind,
 )
 
 
@@ -21,7 +22,7 @@ class DatasetManifest(DatasetVersionedRecord):
     policy_version: Literal["dataset_v1"] = "dataset_v1"
     revision: SHA256
     dataset_name: DatasetName
-    source_kind: Literal["uhd_iqa", "local"]
+    source_kind: SourceKind
     source_url: str
     terms_reference: str
     source_provenance: dict[str, str]

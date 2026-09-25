@@ -1,0 +1,123 @@
+{
+  "$defs": {
+    "BenchmarkSourceArchive": {
+      "additionalProperties": false,
+      "description": "Pin one archive by repository commit, path, size and checksum.",
+      "properties": {
+        "archive_bytes": {
+          "maximum": 107374182400,
+          "minimum": 1,
+          "title": "Archive Bytes",
+          "type": "integer"
+        },
+        "archive_path": {
+          "title": "Archive Path",
+          "type": "string"
+        },
+        "archive_sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Archive Sha256",
+          "type": "string"
+        },
+        "repository": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}/[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Repository",
+          "type": "string"
+        },
+        "repository_kind": {
+          "const": "huggingface_dataset",
+          "default": "huggingface_dataset",
+          "title": "Repository Kind",
+          "type": "string"
+        },
+        "revision": {
+          "pattern": "^[a-f0-9]{40}$",
+          "title": "Revision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "repository",
+        "repository_kind",
+        "revision",
+        "archive_path",
+        "archive_sha256",
+        "archive_bytes"
+      ],
+      "title": "BenchmarkSourceArchive",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Build the frozen identities once from fetched annotations.",
+  "properties": {
+    "annotations_directory": {
+      "default": "data/coco2017/annotations",
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Annotations Directory",
+      "type": "string"
+    },
+    "expect_official_counts": {
+      "default": true,
+      "title": "Expect Official Counts",
+      "type": "boolean"
+    },
+    "output_directory": {
+      "default": "docs/benchmarks/release_benchmark_v1",
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Output Directory",
+      "type": "string"
+    },
+    "reserve_count": {
+      "default": 1000,
+      "maximum": 100000,
+      "minimum": 0,
+      "title": "Reserve Count",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "seed": {
+      "default": 0,
+      "maximum": 9223372036854775807,
+      "minimum": 0,
+      "title": "Seed",
+      "type": "integer"
+    },
+    "source_archives": {
+      "items": {
+        "$ref": "#/$defs/BenchmarkSourceArchive"
+      },
+      "maxItems": 8,
+      "minItems": 1,
+      "title": "Source Archives",
+      "type": "array"
+    },
+    "training_source_count": {
+      "default": 5000,
+      "maximum": 100000,
+      "minimum": 1,
+      "title": "Training Source Count",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "annotations_directory",
+    "output_directory",
+    "source_archives",
+    "seed",
+    "training_source_count",
+    "reserve_count",
+    "expect_official_counts"
+  ],
+  "title": "BenchmarkFreezeRequest",
+  "type": "object"
+}

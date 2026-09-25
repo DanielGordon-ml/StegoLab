@@ -1,0 +1,378 @@
+{
+  "$defs": {
+    "HttpsArchiveSourceSpec": {
+      "additionalProperties": false,
+      "description": "Download one zip or tar archive from a plain https address.",
+      "properties": {
+        "archive_splits": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "enum": [
+                  "train",
+                  "tuning",
+                  "held_out"
+                ],
+                "type": "string"
+              },
+              "maxProperties": 64,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Archive Splits"
+        },
+        "expected_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Sha256"
+        },
+        "maximum_download_bytes": {
+          "default": 26843545600,
+          "maximum": 107374182400,
+          "minimum": 1,
+          "title": "Maximum Download Bytes",
+          "type": "integer"
+        },
+        "source_kind": {
+          "const": "https_archive",
+          "default": "https_archive",
+          "title": "Source Kind",
+          "type": "string"
+        },
+        "terms_reference": {
+          "maxLength": 4096,
+          "minLength": 1,
+          "title": "Terms Reference",
+          "type": "string"
+        },
+        "url": {
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "archive_splits",
+        "maximum_download_bytes",
+        "terms_reference",
+        "source_kind",
+        "url",
+        "expected_sha256"
+      ],
+      "title": "HttpsArchiveSourceSpec",
+      "type": "object"
+    },
+    "HuggingFaceSourceSpec": {
+      "additionalProperties": false,
+      "description": "Pin a Hugging Face dataset repository and select files inside it.",
+      "properties": {
+        "archive_splits": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "enum": [
+                  "train",
+                  "tuning",
+                  "held_out"
+                ],
+                "type": "string"
+              },
+              "maxProperties": 64,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Archive Splits"
+        },
+        "content": {
+          "default": "images",
+          "enum": [
+            "images",
+            "text"
+          ],
+          "title": "Content",
+          "type": "string"
+        },
+        "file_names": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 200,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "File Names"
+        },
+        "image_column": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Image Column"
+        },
+        "maximum_download_bytes": {
+          "default": 26843545600,
+          "maximum": 107374182400,
+          "minimum": 1,
+          "title": "Maximum Download Bytes",
+          "type": "integer"
+        },
+        "maximum_files": {
+          "default": 200,
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Maximum Files",
+          "type": "integer"
+        },
+        "path_prefix": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Path Prefix"
+        },
+        "repository": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}/[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Repository",
+          "type": "string"
+        },
+        "revision": {
+          "default": "main",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,127}$",
+          "title": "Revision",
+          "type": "string"
+        },
+        "source_kind": {
+          "const": "hugging_face",
+          "default": "hugging_face",
+          "title": "Source Kind",
+          "type": "string"
+        },
+        "split": {
+          "anyOf": [
+            {
+              "enum": [
+                "train",
+                "validation",
+                "test"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Split"
+        },
+        "terms_reference": {
+          "maxLength": 4096,
+          "minLength": 1,
+          "title": "Terms Reference",
+          "type": "string"
+        },
+        "text_column": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Text Column"
+        }
+      },
+      "required": [
+        "archive_splits",
+        "maximum_download_bytes",
+        "terms_reference",
+        "source_kind",
+        "repository",
+        "revision",
+        "content",
+        "path_prefix",
+        "file_names",
+        "split",
+        "image_column",
+        "text_column",
+        "maximum_files"
+      ],
+      "title": "HuggingFaceSourceSpec",
+      "type": "object"
+    },
+    "UploadSourceSpec": {
+      "additionalProperties": false,
+      "description": "Use an archive that the browser uploaded in parts.",
+      "properties": {
+        "archive_splits": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "enum": [
+                  "train",
+                  "tuning",
+                  "held_out"
+                ],
+                "type": "string"
+              },
+              "maxProperties": 64,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Archive Splits"
+        },
+        "maximum_download_bytes": {
+          "default": 26843545600,
+          "maximum": 107374182400,
+          "minimum": 1,
+          "title": "Maximum Download Bytes",
+          "type": "integer"
+        },
+        "source_kind": {
+          "const": "upload",
+          "default": "upload",
+          "title": "Source Kind",
+          "type": "string"
+        },
+        "terms_reference": {
+          "default": "not_reviewed",
+          "maxLength": 4096,
+          "minLength": 1,
+          "title": "Terms Reference",
+          "type": "string"
+        },
+        "upload_identifier": {
+          "pattern": "^upload_[0-9a-f]{32}$",
+          "title": "Upload Identifier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "archive_splits",
+        "maximum_download_bytes",
+        "terms_reference",
+        "source_kind",
+        "upload_identifier"
+      ],
+      "title": "UploadSourceSpec",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Start a fetch that saves raw files under data/ and prepares a revision.",
+  "properties": {
+    "client_request_identifier": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+      "title": "Client Request Identifier",
+      "type": "string"
+    },
+    "dataset_name": {
+      "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+      "title": "Dataset Name",
+      "type": "string"
+    },
+    "maximum_images": {
+      "default": 200000,
+      "maximum": 200000,
+      "minimum": 1,
+      "title": "Maximum Images",
+      "type": "integer"
+    },
+    "operation": {
+      "const": "fetch_dataset",
+      "default": "fetch_dataset",
+      "title": "Operation",
+      "type": "string"
+    },
+    "prepare": {
+      "default": true,
+      "title": "Prepare",
+      "type": "boolean"
+    },
+    "source": {
+      "discriminator": {
+        "mapping": {
+          "https_archive": "#/$defs/HttpsArchiveSourceSpec",
+          "hugging_face": "#/$defs/HuggingFaceSourceSpec",
+          "upload": "#/$defs/UploadSourceSpec"
+        },
+        "propertyName": "source_kind"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/HuggingFaceSourceSpec"
+        },
+        {
+          "$ref": "#/$defs/HttpsArchiveSourceSpec"
+        },
+        {
+          "$ref": "#/$defs/UploadSourceSpec"
+        }
+      ],
+      "title": "Source"
+    },
+    "source_name": {
+      "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+      "title": "Source Name",
+      "type": "string"
+    },
+    "training_intended": {
+      "default": true,
+      "title": "Training Intended",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "client_request_identifier",
+    "operation",
+    "source",
+    "source_name",
+    "dataset_name",
+    "maximum_images",
+    "training_intended",
+    "prepare"
+  ],
+  "title": "DatasetFetchRequest",
+  "type": "object"
+}

@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Pin a Hugging Face dataset repository and select files inside it.",
+  "properties": {
+    "archive_splits": {
+      "anyOf": [
+        {
+          "additionalProperties": {
+            "enum": [
+              "train",
+              "tuning",
+              "held_out"
+            ],
+            "type": "string"
+          },
+          "maxProperties": 64,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Archive Splits"
+    },
+    "content": {
+      "default": "images",
+      "enum": [
+        "images",
+        "text"
+      ],
+      "title": "Content",
+      "type": "string"
+    },
+    "file_names": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 200,
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "File Names"
+    },
+    "image_column": {
+      "anyOf": [
+        {
+          "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Image Column"
+    },
+    "maximum_download_bytes": {
+      "default": 26843545600,
+      "maximum": 107374182400,
+      "minimum": 1,
+      "title": "Maximum Download Bytes",
+      "type": "integer"
+    },
+    "maximum_files": {
+      "default": 200,
+      "maximum": 10000,
+      "minimum": 1,
+      "title": "Maximum Files",
+      "type": "integer"
+    },
+    "path_prefix": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Path Prefix"
+    },
+    "repository": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}/[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+      "title": "Repository",
+      "type": "string"
+    },
+    "revision": {
+      "default": "main",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,127}$",
+      "title": "Revision",
+      "type": "string"
+    },
+    "source_kind": {
+      "const": "hugging_face",
+      "default": "hugging_face",
+      "title": "Source Kind",
+      "type": "string"
+    },
+    "split": {
+      "anyOf": [
+        {
+          "enum": [
+            "train",
+            "validation",
+            "test"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Split"
+    },
+    "terms_reference": {
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Terms Reference",
+      "type": "string"
+    },
+    "text_column": {
+      "anyOf": [
+        {
+          "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Text Column"
+    }
+  },
+  "required": [
+    "archive_splits",
+    "maximum_download_bytes",
+    "terms_reference",
+    "source_kind",
+    "repository",
+    "revision",
+    "content",
+    "path_prefix",
+    "file_names",
+    "split",
+    "image_column",
+    "text_column",
+    "maximum_files"
+  ],
+  "title": "HuggingFaceSourceSpec",
+  "type": "object"
+}

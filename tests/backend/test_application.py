@@ -22,8 +22,12 @@ def update_body(identifier: str, interval: int = 600) -> dict[str, object]:
     }
 
 
-def test_initial_capabilities_and_empty_lists(client: TestClient) -> None:
+def test_initial_capabilities_and_empty_lists(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Expose ready CPU operation while model features and job lists stay empty."""
+    monkeypatch.delenv("HF_TOKEN", raising=False)
+    monkeypatch.delenv("HF_TOKEN_FILE", raising=False)
     assert client.get(f"{PREFIX}/health").json() == {
         "status": "ready",
         "application_version": "0.1.0",
@@ -41,6 +45,10 @@ def test_initial_capabilities_and_empty_lists(client: TestClient) -> None:
         "minimum_image_side": 0,
         "maximum_image_side": 0,
         "maximum_upload_bytes": 16_777_216,
+        "maximum_dataset_upload_bytes": 2_147_483_648,
+        "dataset_upload_chunk_bytes": 16_777_216,
+        "hugging_face_token_configured": False,
+        "dataset_source_kinds": ["server_folder"],
     }
     for collection in ("models", "jobs"):
         assert client.get(f"{PREFIX}/{collection}").json() == {"items": []}

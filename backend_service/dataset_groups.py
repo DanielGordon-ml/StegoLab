@@ -1,17 +1,21 @@
 """Deterministic exact-duplicate and upstream-identity leakage controls."""
 
 from collections import defaultdict
-from typing import Literal
 
 from backend_service.dataset_serialization import canonical_json, checksum
 from backend_service.failures import ApplicationFailure
-from schemas.dataset_common import DATASET_SPLITS, SPLIT_MAPPING, DatasetSplit
+from schemas.dataset_common import (
+    DATASET_SPLITS,
+    SPLIT_MAPPING,
+    DatasetSplit,
+    SourceKind,
+)
 from schemas.datasets import DatasetImageRecord
 
 
 def assign_groups(
     records: list[DatasetImageRecord],
-    source_kind: Literal["uhd_iqa", "local"],
+    source_kind: SourceKind,
     seed: int = 0,
 ) -> list[DatasetImageRecord]:
     """Group related sources before assigning splits and duplicate representatives."""
@@ -31,7 +35,7 @@ def assign_groups(
 
 def _assign(
     records: list[DatasetImageRecord],
-    source_kind: Literal["uhd_iqa", "local"],
+    source_kind: SourceKind,
     seed: int,
 ) -> list[DatasetImageRecord]:
     """Use union-find so linked identities and RGB duplicates cannot leak."""

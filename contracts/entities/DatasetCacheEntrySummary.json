@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "List one cached file with the raw folders and revisions that use it.",
+  "properties": {
+    "created_at": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Created At",
+      "type": "string"
+    },
+    "identity": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Identity",
+      "type": "string"
+    },
+    "in_use_by": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 200,
+      "title": "In Use By",
+      "type": "array"
+    },
+    "kind": {
+      "enum": [
+        "hugging_face",
+        "https_archive",
+        "upload"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "path": {
+      "title": "Path",
+      "type": "string"
+    },
+    "reference": {
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Reference",
+      "type": "string"
+    },
+    "revision": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Revision",
+      "type": "string"
+    },
+    "size_bytes": {
+      "minimum": 0,
+      "title": "Size Bytes",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "identity",
+    "kind",
+    "reference",
+    "revision",
+    "path",
+    "size_bytes",
+    "created_at",
+    "in_use_by"
+  ],
+  "title": "DatasetCacheEntrySummary",
+  "type": "object"
+}

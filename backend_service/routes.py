@@ -5,6 +5,7 @@ from typing import cast
 from fastapi import APIRouter, Request
 
 from backend_service.failures import ApplicationFailure
+from backend_service.hugging_face_credentials import hugging_face_token_configured
 from backend_service.model_installation import InstalledModelStore
 from backend_service.storage import StateStore
 from backend_service.workspace_jobs import WorkspaceJobService
@@ -49,8 +50,14 @@ def read_health() -> HealthStatus:
     "/capabilities", response_model=Capabilities, operation_id="read_capabilities"
 )
 def read_capabilities(request: Request) -> Capabilities:
-    """Advertise experimental inference only for explicitly installed models."""
-    return cast(InstalledModelStore, request.app.state.installed_models).capabilities()
+    """Advertise installed models and whether a server-side token exists."""
+    installed = cast(InstalledModelStore, request.app.state.installed_models)
+    return Capabilities.model_validate(
+        {
+            **installed.capabilities().model_dump(),
+            "hugging_face_token_configured": hugging_face_token_configured(),
+        }
+    )
 
 
 @router.get(
