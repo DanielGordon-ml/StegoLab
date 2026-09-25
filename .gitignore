@@ -1,6 +1,7 @@
 # Local instructions belong to the working machine.
 CLAUDE.md
 AGENT.md
+AGENTS.md
 
 # Runtime data and secrets.
 .env

@@ -6,8 +6,9 @@ dataset preparation and offline integrity checks; see [datasets](datasets.md).
 Sprint 4 adds experimental CPU training, checkpoint inspection, evaluation, and
 independent model exports through the [command-line workflow](model_training.md).
 The browser now connects the local CPU workflow through durable jobs; see the
-[GUI training guide](gui_training.md). Encoding/decoding, dataset downloads,
-and model installation remain unavailable. Public model capacity is still zero.
+[GUI training guide](gui_training.md). Encoding and decoding work with an
+experimental model installed from the Train tab; dataset downloads remain
+unavailable, and no model is approved for release.
 
 ## Start with Docker
 
@@ -152,7 +153,8 @@ by 60. Validation reads the file without saving it. Native commands use `.runtim
 unless `STEGOLAB_DATA_DIRECTORY` selects another location; this is separate from
 the Docker volume. Experimental `train`, `evaluate`, `export_models`, and
 `inspect_checkpoint` commands use the model workflow's explicit requests and
-output directories. Public `encode` and `decode` commands remain unavailable.
+output directories. There are no `stegolab encode` or `decode` commands; each installed package
+ships `runtime.py encode|decode`.
 
 The protocol demonstration uses packaged public fixtures and accepts no secret
 inputs. Image commands return safe metadata; preparation refuses existing output

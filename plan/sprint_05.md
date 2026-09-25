@@ -110,8 +110,9 @@ Review: [draft PR #7](https://github.com/DanielGordon-ml/StegoLab/pull/7).
 
 - The later paid readiness drill consumes the existing two-hour setup allocation.
 - Near-duplicate review and remaining experiment support precede the full pilot.
-- COCO release data, critic work, 4K, GUI integration, detection resistance and
-  model-quality targets remain open. Dataset `pilot_ready` remains false.
+- COCO release data, 4K, detection resistance and model-quality targets remain
+  open. Sprint 6 delivered the GUI integration and built the critic as code
+  without running it. Dataset `pilot_ready` remains false.
 - User-owned planning drafts and the prepared source datasets are preserved.
 
 Guides: [pilot commands](../docs/pilot_training.md),

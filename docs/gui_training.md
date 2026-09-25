@@ -1,8 +1,8 @@
 # Train and review in the browser
 
 The Train tab connects the existing experimental CPU tools to durable background
-jobs. It does not qualify a model for Encode or Decode. Those tabs explain their
-missing model requirement; public message capacity remains zero.
+jobs. It does not qualify a model for Encode or Decode; those tabs work once a
+pair is installed from Train → Model exports, and the model stays experimental.
 
 ## Start the workspace
 
@@ -138,7 +138,8 @@ curl --request POST "http://127.0.0.1:8080/api/v1/images?purpose=cover" \
 The answer names the image by an opaque reference, describes the preparation
 (source and prepared sizes, colour handling, warnings), and gives the expiry
 time. Uploads are limited to 16 MiB and to sides between 512 and 4096 pixels.
-They are deleted after 24 hours or when local image storage reaches 512 MiB. The
+They are deleted after 24 hours; while stored uploads and results would pass
+512 MiB, new uploads are refused until older ones expire. The
 prepared file can be downloaded unchanged from `GET /api/v1/artifacts/<image
 reference>`.
 

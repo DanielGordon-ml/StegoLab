@@ -16,8 +16,9 @@ model/quantization code, `train`, `evaluate`, `inspect_checkpoint`, and
 `export_models`, full-state checkpoints, and persistent proof time accounting.
 Use [the model guide](../docs/model_training.md) and Sprint 4's acceptance record
 for the actual measured result. That CLI delivery alone did not complete
-model-quality, GPU, worker/API, or GUI gates. Public inference remains unavailable and
-usable payload capacity remains zero.
+model-quality, GPU, worker/API, or GUI gates. Public inference and payload
+capacity arrived with Sprint 6's explicitly installed experimental models;
+release quality is still unproven.
 
 [Sprint 5](sprint_05.md) prepares the first GPU readiness test without launching
 EC2: a versioned pilot CLI, lazy full-UHD loading, exact resume, explicit device
@@ -36,12 +37,14 @@ transfers, expanded training controls, GPU execution, qualified inference, and
 model-quality acceptance remain open. No new research result is implied by GUI
 delivery, and the 24-hour GPU allocation is unchanged.
 
-Sprint 6 — planned 2026-09-25: experimental Encode and Decode in the browser with
-the Sprint 4 export installed by explicit promotion, secret-safe inference jobs,
-and the critic/fork code built but not run. No paid GPU session; the readiness
-drill and the 14-hour baseline move to Sprint 7 with recorded decisions. See the
-[Sprint 6 draft](sprints/sprint6.md). This does not change model quality, release
-gates, or the 24-hour GPU allocation.
+Sprint 6 — delivered 2026-09-25: experimental Encode and Decode in the browser
+with the Sprint 4 export installed by explicit promotion, secret-safe inference
+jobs, the critic/fork code and the ledger records built but not run on a GPU.
+Measured evidence is in the [Sprint 6 record](sprint_06.md); the
+[Sprint 6 draft](sprints/sprint6.md) keeps the owner decisions for Sprint 7:
+the readiness drill inside the remaining 3,571 setup seconds (the 2026-09-24
+hour is charged to setup), the 14-hour baseline, and the host fixes. This does
+not change model quality, release gates, or the 24-hour GPU allocation.
 
 ## 1. Deliverables and shared decisions
 
