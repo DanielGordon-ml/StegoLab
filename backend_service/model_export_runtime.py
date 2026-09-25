@@ -225,14 +225,12 @@ def main(command_arguments: list[str] | None = None) -> int:
             if arguments.output is not None or arguments.payload is not None:
                 raise export_failure()
             secrets = _secrets("decode")
-            sys.stdout.write(
-                decode_png(
-                    directory,
-                    arguments.image,
-                    secrets["password"],
-                    device=arguments.device,
-                )
+            text = decode_png(
+                directory, arguments.image, secrets["password"], device=arguments.device
             )
+            # Write UTF-8 bytes directly so the caller's locale cannot alter them.
+            sys.stdout.buffer.write(text.encode("utf-8"))
+            sys.stdout.buffer.flush()
         return 0
     except ApplicationFailure as failure:
         print(failure.message, file=sys.stderr)

@@ -6,10 +6,19 @@ import sqlite3
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
+from typing import Annotated
+
+from pydantic import Field, TypeAdapter
 
 from backend_service.failures import ApplicationFailure, StorageFailure
+from schemas.inference_jobs import InferenceJobRecord
 from schemas.jobs import JobEvent, JobSnapshot
 from schemas.workflows import WorkflowRequest
+
+StoredRequest = WorkflowRequest | InferenceJobRecord
+REQUEST_ADAPTER: TypeAdapter[StoredRequest] = TypeAdapter(
+    Annotated[StoredRequest, Field(discriminator="operation")]
+)
 
 
 class WorkflowStore:
@@ -83,15 +92,15 @@ class WorkflowStore:
             raise ApplicationFailure("job_not_found", "No saved job was found.", 404)
         return JobSnapshot.model_validate_json(row[0])
 
-    def request(self, identifier: str) -> WorkflowRequest:
-        """Restore the frozen public request for a registered job."""
+    def request(self, identifier: str) -> StoredRequest:
+        """Restore the frozen public request or inference record for a job."""
         with self.connection() as connection:
             row = connection.execute(
                 "SELECT request FROM workflow_jobs WHERE identifier=?", (identifier,)
             ).fetchone()
         if row is None:
             raise ApplicationFailure("job_not_found", "No saved job was found.", 404)
-        return WorkflowRequest.model_validate_json(row[0])
+        return REQUEST_ADAPTER.validate_json(row[0])
 
     def list_jobs(self) -> list[JobSnapshot]:
         """Return stable creation order for both queue and browser history."""
@@ -106,7 +115,7 @@ class WorkflowStore:
         self,
         snapshot: JobSnapshot,
         *,
-        request: WorkflowRequest | None = None,
+        request: StoredRequest | None = None,
         mutation: tuple[str, str] | None = None,
     ) -> JobSnapshot:
         """Publish state, its event, and optional accepted mutation atomically."""

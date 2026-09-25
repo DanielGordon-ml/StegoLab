@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Describe a published, decoder-verified PNG without any message content.",
+  "properties": {
+    "artifact_identifier": {
+      "pattern": "^encoded_[0-9a-f]{32}$",
+      "title": "Artifact Identifier",
+      "type": "string"
+    },
+    "filename": {
+      "pattern": "^stegolab-encoded-[0-9a-f]{8}\\.png$",
+      "title": "Filename",
+      "type": "string"
+    },
+    "height": {
+      "maximum": 1024,
+      "minimum": 512,
+      "title": "Height",
+      "type": "integer"
+    },
+    "message_byte_count": {
+      "maximum": 1024,
+      "minimum": 0,
+      "title": "Message Byte Count",
+      "type": "integer"
+    },
+    "png_bytes": {
+      "minimum": 1,
+      "title": "Png Bytes",
+      "type": "integer"
+    },
+    "verified": {
+      "const": true,
+      "default": true,
+      "title": "Verified",
+      "type": "boolean"
+    },
+    "width": {
+      "maximum": 1024,
+      "minimum": 512,
+      "title": "Width",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "artifact_identifier",
+    "filename",
+    "width",
+    "height",
+    "png_bytes",
+    "message_byte_count",
+    "verified"
+  ],
+  "title": "EncodingJobResult",
+  "type": "object"
+}

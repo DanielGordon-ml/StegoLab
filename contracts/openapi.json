@@ -304,6 +304,126 @@
         "title": "ConfigurationUpdate",
         "type": "object"
       },
+      "DecodedText": {
+        "additionalProperties": false,
+        "description": "Return recovered text once per request; it is never written to disk.",
+        "properties": {
+          "byte_count": {
+            "maximum": 1024.0,
+            "minimum": 0.0,
+            "title": "Byte Count",
+            "type": "integer"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "job_identifier": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Job Identifier",
+            "type": "string"
+          },
+          "text": {
+            "maxLength": 1024,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "job_identifier",
+          "text",
+          "byte_count",
+          "expires_at"
+        ],
+        "title": "DecodedText",
+        "type": "object"
+      },
+      "DecodingJobRequest": {
+        "additionalProperties": false,
+        "description": "Transport-only decode request; the password is never stored.",
+        "properties": {
+          "client_request_identifier": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+            "title": "Client Request Identifier",
+            "type": "string"
+          },
+          "image_reference": {
+            "pattern": "^image_[0-9a-f]{32}$",
+            "title": "Image Reference",
+            "type": "string"
+          },
+          "model_identifier": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$",
+            "title": "Model Identifier",
+            "type": "string"
+          },
+          "password": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "title": "Password",
+            "type": "string"
+          }
+        },
+        "required": [
+          "client_request_identifier",
+          "image_reference",
+          "model_identifier",
+          "password"
+        ],
+        "title": "DecodingJobRequest",
+        "type": "object"
+      },
+      "EncodingJobRequest": {
+        "additionalProperties": false,
+        "description": "Transport-only encode request; the message and password are never stored.",
+        "properties": {
+          "client_request_identifier": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+            "title": "Client Request Identifier",
+            "type": "string"
+          },
+          "image_reference": {
+            "pattern": "^image_[0-9a-f]{32}$",
+            "title": "Image Reference",
+            "type": "string"
+          },
+          "message": {
+            "maxLength": 1024,
+            "title": "Message",
+            "type": "string"
+          },
+          "model_identifier": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$",
+            "title": "Model Identifier",
+            "type": "string"
+          },
+          "password": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "title": "Password",
+            "type": "string"
+          }
+        },
+        "required": [
+          "client_request_identifier",
+          "image_reference",
+          "model_identifier",
+          "message",
+          "password"
+        ],
+        "title": "EncodingJobRequest",
+        "type": "object"
+      },
       "ErrorEnvelope": {
         "additionalProperties": false,
         "description": "Keep all application errors in one predictable response envelope.",
@@ -1565,7 +1685,7 @@
   "paths": {
     "/api/v1/artifacts/{artifact_identifier}": {
       "get": {
-        "description": "Return exact bytes of a verified package archive or a stored image.",
+        "description": "Return exact bytes of a package archive, an upload, or an encoded result.",
         "operationId": "download_workspace_artifact",
         "parameters": [
           {
@@ -2071,6 +2191,164 @@
           }
         },
         "summary": "Dataset"
+      }
+    },
+    "/api/v1/decoding_jobs": {
+      "post": {
+        "description": "Queue one decode of an uploaded encoded PNG; the password stays in memory.",
+        "operationId": "submit_decoding_job",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecodingJobRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobSnapshot"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Decoding"
+      }
+    },
+    "/api/v1/encoding_jobs": {
+      "post": {
+        "description": "Queue one encode of an uploaded cover; the secrets stay in memory.",
+        "operationId": "submit_encoding_job",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EncodingJobRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobSnapshot"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Encoding"
       }
     },
     "/api/v1/evaluation_jobs": {
@@ -2706,6 +2984,157 @@
           }
         },
         "summary": "Action"
+      }
+    },
+    "/api/v1/jobs/{job_identifier}/decoded_text": {
+      "delete": {
+        "description": "Forget recovered text as soon as the reader is done, safe to repeat.",
+        "operationId": "discard_decoded_text",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_identifier",
+            "required": true,
+            "schema": {
+              "title": "Job Identifier",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Discard Decoded Text"
+      },
+      "get": {
+        "description": "Return recovered text from memory while it is still available.",
+        "operationId": "read_decoded_text",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_identifier",
+            "required": true,
+            "schema": {
+              "title": "Job Identifier",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecodedText"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Read Decoded Text"
       }
     },
     "/api/v1/models": {
