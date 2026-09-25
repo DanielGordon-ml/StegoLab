@@ -18,6 +18,7 @@ from backend_service.pilot_runtime import configure_pilot, pilot_experiment_lock
 from backend_service.pilot_training import train_pilot
 from backend_service.pilot_training_state import (
     PilotTrainingSession,
+    StepLosses,
     create_pilot_session,
     pilot_training_step,
     save_pilot_session,
@@ -99,7 +100,7 @@ def test_smoke_signal_saves_complete_step_without_quality_selection(
     original = request(tmp_path)
     previous = signal.getsignal(signal.SIGTERM)
 
-    def interrupted_step(session: PilotTrainingSession) -> tuple[float, float, float]:
+    def interrupted_step(session: PilotTrainingSession) -> StepLosses:
         """Signal during one update while allowing its accumulation to finish."""
         signal.raise_signal(signal.SIGTERM)
         return pilot_training_step(session)
@@ -192,7 +193,7 @@ def test_expired_work_deadline_saves_the_last_complete_step(
         """Provide one controlled work deadline without sleeping or GPU accounting."""
         yield 101.0
 
-    def completing_step(active: PilotTrainingSession) -> tuple[float, float, float]:
+    def completing_step(active: PilotTrainingSession) -> StepLosses:
         """Expire the work allowance immediately after a real committed update."""
         losses = pilot_training_step(active)
         clock[0] = 102.0

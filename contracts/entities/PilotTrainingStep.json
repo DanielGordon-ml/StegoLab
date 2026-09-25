@@ -8,6 +8,18 @@
       "title": "Bit Loss",
       "type": "number"
     },
+    "critic_loss": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Critic Loss"
+    },
     "elapsed_seconds": {
       "minimum": 0,
       "title": "Elapsed Seconds",
@@ -35,6 +47,7 @@
     "bit_loss",
     "image_loss",
     "image_loss_weight",
+    "critic_loss",
     "elapsed_seconds"
   ],
   "title": "PilotTrainingStep",

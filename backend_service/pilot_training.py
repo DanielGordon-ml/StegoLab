@@ -48,6 +48,7 @@ def _train_locked(
         and directory.exists()
         and any(directory.iterdir())
     ):
+        # A fork also needs a new experiment; only resume may reuse saved state.
         raise ApplicationFailure(
             "pilot_resume_required",
             "This experiment already has saved state. "
@@ -77,15 +78,16 @@ def _train_locked(
             if time.monotonic() >= deadline:
                 status = "budget_exhausted"
                 break
-            bit_loss, image_loss, weight = pilot_training_step(session)
+            losses = pilot_training_step(session)
             synchronize_device(session.device)
             append_record(
                 logs / "steps.jsonl",
                 PilotTrainingStep(
                     global_step=session.global_step,
-                    bit_loss=bit_loss,
-                    image_loss=image_loss,
-                    image_loss_weight=weight,
+                    bit_loss=losses.bit_loss,
+                    image_loss=losses.image_loss,
+                    image_loss_weight=losses.image_loss_weight,
+                    critic_loss=losses.critic_loss,
                     elapsed_seconds=time.monotonic() - started,
                 ),
             )

@@ -83,7 +83,12 @@ def safe_state(value: Any) -> None:
 def load_state(path: Path) -> dict[str, Any]:
     """Load only the safe Torch subset; never enable arbitrary pickle execution."""
     value = torch.load(path, map_location="cpu", weights_only=True)
-    if not isinstance(value, dict) or set(value) != {
+    if not isinstance(value, dict):
+        raise ValueError("Checkpoint state fields are invalid.")
+    version = value.get("schema_version")
+    if type(version) is not int or version not in (1, 2):
+        raise ValueError("Checkpoint state version is unsupported.")
+    fields = {
         "schema_version",
         "encoder",
         "decoder",
@@ -93,10 +98,12 @@ def load_state(path: Path) -> dict[str, Any]:
         "sampler_state",
         "configuration",
         "identities",
-    }:
+    }
+    if version == 2:
+        # Version two adds auxiliary state such as an optional critic.
+        fields.add("auxiliary")
+    if set(value) != fields:
         raise ValueError("Checkpoint state fields are invalid.")
-    if type(value["schema_version"]) is not int or value["schema_version"] != 1:
-        raise ValueError("Checkpoint state version is unsupported.")
     if type(value["global_step"]) is not int or value["global_step"] < 0:
         raise ValueError("Checkpoint optimizer step is invalid.")
     if not all(
