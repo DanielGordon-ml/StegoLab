@@ -20,6 +20,7 @@ from schemas.pilot_budget import (
     PilotBudgetSummary,
     PilotSession,
     PilotStage,
+    PilotStageTotal,
 )
 
 
@@ -33,6 +34,24 @@ def consumed_seconds(
         for session in ledger.sessions
         if stage is None or session.stage == stage
     )
+
+
+def stage_totals(
+    ledger: PilotBudgetLedger, observed_at: float
+) -> list[PilotStageTotal]:
+    """Break spending down per stage against the allocations after transfers."""
+    totals: list[PilotStageTotal] = []
+    for stage, allocated in ledger.effective_allocations().items():
+        spent = consumed_seconds(ledger, observed_at, stage)
+        totals.append(
+            PilotStageTotal(
+                stage=stage,
+                allocated_seconds=allocated,
+                consumed_seconds=spent,
+                remaining_seconds=max(0.0, allocated - spent),
+            )
+        )
+    return totals
 
 
 def inspect_budget(directory: Path) -> PilotBudgetSummary:
@@ -61,6 +80,7 @@ def inspect_budget(directory: Path) -> PilotBudgetSummary:
             consumed_seconds=spent,
             remaining_seconds=max(0.0, ledger.maximum_total_seconds - spent),
             active_session_identifier=active,
+            stage_totals=stage_totals(ledger, time.time()),
         )
     except (OSError, ValueError):
         raise budget_failure(
@@ -106,7 +126,8 @@ def start_session(
             )
         remaining = min(
             ledger.maximum_total_seconds - consumed_seconds(ledger, now),
-            STAGE_SECONDS[stage] - consumed_seconds(ledger, now, stage),
+            ledger.effective_allocations()[stage]
+            - consumed_seconds(ledger, now, stage),
         )
         allowance = remaining if requested_seconds is None else requested_seconds
         if not math.isfinite(allowance) or not 300 < allowance <= remaining:

@@ -8,6 +8,32 @@ from schemas.base import StrictRecord
 from schemas.evaluation import PngEvaluationTrial
 
 
+class PilotCriticConfiguration(StrictRecord):
+    """Optional adversarial critic; off by default and never part of an export."""
+
+    enabled: bool = False
+    weight: float = Field(default=1.0, ge=0.0, le=100.0)
+    learning_rate: float = Field(default=0.0001, ge=0.00001, le=0.001)
+    weight_clip: float = Field(default=0.1, ge=0.001, le=1.0)
+    hidden_channels: Literal[32] = 32
+
+    @field_validator("enabled", mode="before")
+    @classmethod
+    def require_boolean(cls, value: object) -> object:
+        """Reject numbers that would compare equal to a boolean."""
+        if type(value) is not bool:
+            raise ValueError("The critic switch must be true or false.")
+        return value
+
+    @field_validator("hidden_channels", mode="before")
+    @classmethod
+    def require_integer_channels(cls, value: object) -> object:
+        """Prevent booleans and decimal lookalikes from matching the fixed width."""
+        if type(value) is not int:
+            raise ValueError("The critic width requires a whole number.")
+        return value
+
+
 class PilotTrainingConfiguration(StrictRecord):
     """Freeze the numerical profile before the first optimizer update."""
 
@@ -24,6 +50,7 @@ class PilotTrainingConfiguration(StrictRecord):
     checkpoint_interval_seconds: Literal[300] = 300
     validation_interval_steps: int = Field(default=100, ge=1, le=100_000)
     cpu_threads: int = Field(default=4, ge=1, le=16)
+    critic: PilotCriticConfiguration = Field(default_factory=PilotCriticConfiguration)
 
     @field_validator(
         "crop_size",
@@ -81,11 +108,16 @@ class PilotTrainingRequest(PilotRequest):
     dataset_directory: str = Field(min_length=1, max_length=4096)
     configuration: PilotTrainingConfiguration
     resume_checkpoint: str | None = Field(default=None, min_length=1, max_length=4096)
+    fork_from_checkpoint: str | None = Field(
+        default=None, min_length=1, max_length=4096
+    )
     stop_after_step: int | None = Field(default=None, ge=1, le=100_000_000)
 
     @model_validator(mode="after")
     def validate_execution(self) -> "PilotTrainingRequest":
         """Keep smoke training below ten absolute updates and prohibit fallback."""
+        if self.resume_checkpoint is not None and self.fork_from_checkpoint is not None:
+            raise ValueError("Choose either resume or fork, not both.")
         target = self.stop_after_step or self.configuration.planned_optimizer_steps
         if target > self.configuration.planned_optimizer_steps:
             raise ValueError("The stop step exceeds the frozen training schedule.")
@@ -155,6 +187,7 @@ class PilotTrainingStep(StrictRecord):
     bit_loss: float = Field(ge=0)
     image_loss: float = Field(ge=0)
     image_loss_weight: float = Field(ge=0, le=100)
+    critic_loss: float | None = None
     elapsed_seconds: float = Field(ge=0)
 
 

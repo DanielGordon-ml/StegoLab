@@ -76,8 +76,15 @@ def run_guard(directory: Path, session_identifier: str, actions: StopActions) ->
                 deadlines.stop if checkpoint_requested else deadlines.checkpoint
             )
             time.sleep(min(interval, max(0.0, next_action - time.monotonic())))
-    except (ApplicationFailure, OSError, ValueError):
-        # An uncertain ledger/clock must not keep a paid instance running.
+    except (ApplicationFailure, OSError, ValueError) as failure:
+        # An uncertain ledger/clock must not keep a paid instance running, and the
+        # host journal should say why the guard stopped early.
+        reason = (
+            failure.message
+            if isinstance(failure, ApplicationFailure)
+            else type(failure).__name__
+        )
+        print(f"pilot_guard_stopping_early: {reason}", flush=True)
         if not checkpoint_requested:
             try:
                 actions.request_checkpoint()

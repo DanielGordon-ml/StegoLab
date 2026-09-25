@@ -107,10 +107,38 @@ commands still read secrets from protected stdin and use authenticated recovery.
 An encoder package needs no decoder weights; application download verification
 requires the matching separate decoder.
 
+## Optional critic and forking (built, not yet run)
+
+Sprint 6 adds two tools for the later GPU ablation. Neither has been used in a
+real training run yet, and neither changes the exported packages.
+
+- **Critic.** `configuration.critic` is off by default. With
+  `{"enabled": true, "weight": 1.0}` a small realism critic (three convolution
+  stages, one score per image) trains alongside the pair: it learns to score
+  original covers above encoded images, and the encoder receives an extra loss
+  term that pushes its images towards "real". The critic uses one encoder
+  forward per batch, its own Adam optimizer (`learning_rate`, default 0.0001)
+  and weight clipping (`weight_clip`, default 0.1). A weight of zero leaves the
+  encoder and decoder bit-identical to a run without the critic. Every step
+  record then carries `critic_loss`. Checkpoints with a critic use state layout
+  version two. The loader still reads layout version one, so earlier
+  checkpoints still evaluate and export; resume and fork also require the code
+  identity to match, so pilot checkpoints saved before this change can only be
+  evaluated and exported, not continued.
+- **Fork.** `fork_from_checkpoint` copies the complete training state of an
+  existing pilot checkpoint (weights, optimizer, sampler position and random
+  state) into a **new** experiment identifier, so an ablation can start from
+  the baseline's pinned checkpoint. The dataset, selection, environment, code
+  and frozen settings must match; only the critic block may differ. The new
+  checkpoints record `forked_from` as `<experiment>:<checkpoint identifier>`.
+  A fork cannot reuse the source experiment's identifier, and a request cannot
+  resume and fork at the same time.
+
 ## Evidence boundaries
 
 The readiness report keeps `passed_locally`, `failed`, and `not_run` distinct.
 The [data guide](pilot_data.md) records exact selection and loading measurements.
 The [Sprint 5 record](../plan/sprint_05.md) records acceptance and remaining gates.
-No COCO benchmark, near-duplicate review, critic, 4K, GUI model operation or new
-model-quality experiment is included in this sprint.
+No COCO benchmark, near-duplicate review, critic training run, 4K, GUI model
+operation or new model-quality experiment is included in this sprint; the critic
+and fork exist as code only.

@@ -1,4 +1,53 @@
 {
+  "$defs": {
+    "PilotCriticConfiguration": {
+      "additionalProperties": false,
+      "description": "Optional adversarial critic; off by default and never part of an export.",
+      "properties": {
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "hidden_channels": {
+          "const": 32,
+          "default": 32,
+          "title": "Hidden Channels",
+          "type": "integer"
+        },
+        "learning_rate": {
+          "default": 0.0001,
+          "maximum": 0.001,
+          "minimum": 1e-05,
+          "title": "Learning Rate",
+          "type": "number"
+        },
+        "weight": {
+          "default": 1.0,
+          "maximum": 100.0,
+          "minimum": 0.0,
+          "title": "Weight",
+          "type": "number"
+        },
+        "weight_clip": {
+          "default": 0.1,
+          "maximum": 1.0,
+          "minimum": 0.001,
+          "title": "Weight Clip",
+          "type": "number"
+        }
+      },
+      "required": [
+        "enabled",
+        "weight",
+        "learning_rate",
+        "weight_clip",
+        "hidden_channels"
+      ],
+      "title": "PilotCriticConfiguration",
+      "type": "object"
+    }
+  },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "description": "Freeze the numerical profile before the first optimizer update.",
@@ -21,6 +70,9 @@
       "minimum": 1,
       "title": "Cpu Threads",
       "type": "integer"
+    },
+    "critic": {
+      "$ref": "#/$defs/PilotCriticConfiguration"
     },
     "crop_size": {
       "const": 256,
@@ -106,7 +158,8 @@
     "maximum_image_loss_weight",
     "checkpoint_interval_seconds",
     "validation_interval_steps",
-    "cpu_threads"
+    "cpu_threads",
+    "critic"
   ],
   "title": "PilotTrainingConfiguration",
   "type": "object"

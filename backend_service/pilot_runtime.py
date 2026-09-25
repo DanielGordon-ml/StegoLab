@@ -147,6 +147,7 @@ def pilot_source_identity() -> str:
     root = Path(__file__).resolve().parents[1]
     names = {
         "backend_service/model_networks.py",
+        "backend_service/model_critic.py",
         "backend_service/model_export_devices.py",
         "backend_service/pilot_runtime.py",
         "backend_service/pilot_data.py",

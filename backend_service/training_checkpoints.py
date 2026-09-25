@@ -38,6 +38,7 @@ class LoadedCheckpoint:
     summary: CheckpointSummary
     sampler_state: dict[str, object]
     configuration: dict[str, object]
+    auxiliary: dict[str, Any]
 
 
 def _index(directory: Path) -> CheckpointIndex:
@@ -125,8 +126,13 @@ def save_checkpoint(
     identities: dict[str, str],
     metrics: CheckpointMetrics | None = None,
     pinned: bool = False,
+    auxiliary: dict[str, Any] | None = None,
 ) -> CheckpointSummary:
-    """Publish a verified full state before changing pointers or pruning old files."""
+    """Publish a verified full state before changing pointers or pruning old files.
+
+    Auxiliary state, such as an optional critic, is written with the version-two
+    layout; without it the version-one layout stays byte-compatible with older code.
+    """
     stage: Path | None = None
     try:
         with checkpoint_lock(directory):
@@ -145,6 +151,9 @@ def save_checkpoint(
                 "configuration": configuration,
                 "identities": identities,
             }
+            if auxiliary:
+                state["schema_version"] = 2
+                state["auxiliary"] = auxiliary
             safe_state(state)
             with (stage / "state.pt").open("xb") as stream:
                 torch.save(state, cast(BinaryIO, ReservedWriter(stream, directory)))
@@ -213,6 +222,11 @@ def load_checkpoint(
         decoder.load_state_dict(state["decoder"], strict=True)
         optimizer.load_state_dict(state["optimizer"])
         restore_random_state(state["random_state"])
-        return LoadedCheckpoint(summary, state["sampler_state"], state["configuration"])
+        return LoadedCheckpoint(
+            summary,
+            state["sampler_state"],
+            state["configuration"],
+            state.get("auxiliary", {}),
+        )
     except Exception:
         raise checkpoint_failure() from None
