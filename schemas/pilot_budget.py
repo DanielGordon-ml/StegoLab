@@ -15,14 +15,21 @@ STAGE_SECONDS: dict[PilotStage, int] = {
 }
 Seconds = Annotated[float, Field(ge=0, allow_inf_nan=False)]
 SessionIdentifier = Annotated[str, Field(pattern=r"^[a-z][a-z0-9_]{0,63}$")]
+MAXIMUM_TRANSFER_SECONDS = 3600
 
 
 class PilotSession(StrictRecord):
-    """Count one instance session from requested startup until confirmed stop."""
+    """Count one instance session from requested startup until confirmed stop.
+
+    An observed session is opened before work and closed by the operator. An
+    attested session records instance time that ran without a ledger session,
+    from independent evidence, and is closed the moment it is written.
+    """
 
     session_identifier: SessionIdentifier
     instance_identifier: str = Field(pattern=r"^i-[0-9a-f]{8,17}$")
     stage: PilotStage
+    record_kind: Literal["observed", "attested"] = "observed"
     started_at: Seconds
     deadline_at: Seconds
     checkpoint_at: Seconds
@@ -30,19 +37,30 @@ class PilotSession(StrictRecord):
     last_observed_at: Seconds
     stopped_at: Seconds | None = None
     stop_confirmation: str | None = Field(default=None, min_length=1, max_length=256)
+    evidence: str | None = Field(default=None, min_length=1, max_length=1024)
 
     @model_validator(mode="after")
     def consistent_times(self) -> Self:
         """Reject impossible clocks and sessions with incomplete stop evidence."""
-        if (
+        if self.record_kind == "attested":
+            if self.evidence is None or self.stopped_at is None:
+                raise ValueError("Attested sessions need evidence and a stop time.")
+            if not self.started_at < self.stopped_at == self.deadline_at:
+                raise ValueError("An attested session ends at its recorded stop.")
+            if self.last_observed_at != self.stopped_at:
+                raise ValueError("An attested session is observed at its stop.")
+        elif self.evidence is not None:
+            raise ValueError("Only attested sessions carry evidence.")
+        elif (
             not self.started_at
             < self.checkpoint_at
             < self.poweroff_at
             < self.deadline_at
         ):
             raise ValueError("Session deadlines must follow startup.")
-        if self.deadline_at - self.started_at > STAGE_SECONDS[self.stage]:
-            raise ValueError("The session exceeds its stage allocation.")
+        # The ledger checks allowances against allocations after transfers.
+        if self.deadline_at - self.started_at > 86400:
+            raise ValueError("The session exceeds the whole project allocation.")
         if self.last_observed_at < self.started_at:
             raise ValueError("Observed time precedes startup.")
         if (self.stopped_at is None) != (self.stop_confirmation is None):
@@ -50,6 +68,32 @@ class PilotSession(StrictRecord):
         if self.stopped_at is not None and self.stopped_at < self.last_observed_at:
             raise ValueError("Confirmed stop cannot erase observed instance time.")
         return self
+
+
+class StageTransfer(StrictRecord):
+    """Move part of one stage's allocation to another stage, with a reason."""
+
+    from_stage: PilotStage
+    to_stage: PilotStage
+    seconds: float = Field(gt=0, le=MAXIMUM_TRANSFER_SECONDS, allow_inf_nan=False)
+    reason: str = Field(min_length=1, max_length=256)
+    recorded_at: Seconds
+
+    @model_validator(mode="after")
+    def distinct_stages(self) -> Self:
+        """Require two different stages so a transfer changes ownership."""
+        if self.from_stage == self.to_stage:
+            raise ValueError("Choose two different stages for a transfer.")
+        return self
+
+
+class PilotStageTotal(StrictRecord):
+    """Report one stage's allocation after transfers, its spending, and its rest."""
+
+    stage: PilotStage
+    allocated_seconds: Seconds
+    consumed_seconds: Seconds
+    remaining_seconds: Seconds
 
 
 class PilotBudgetLedger(StrictRecord):
@@ -60,6 +104,17 @@ class PilotBudgetLedger(StrictRecord):
     checkpoint_reserve_seconds: Literal[300] = 300
     shutdown_reserve_seconds: Literal[120] = 120
     sessions: list[PilotSession] = Field(default_factory=list, max_length=256)
+    stage_transfers: list[StageTransfer] = Field(default_factory=list, max_length=64)
+
+    def effective_allocations(self) -> dict[PilotStage, float]:
+        """Return each stage's allocation after every recorded transfer."""
+        allocations: dict[PilotStage, float] = {
+            stage: float(seconds) for stage, seconds in STAGE_SECONDS.items()
+        }
+        for transfer in self.stage_transfers:
+            allocations[transfer.from_stage] -= transfer.seconds
+            allocations[transfer.to_stage] += transfer.seconds
+        return allocations
 
     @model_validator(mode="before")
     @classmethod
@@ -82,6 +137,9 @@ class PilotBudgetLedger(StrictRecord):
         names = [session.session_identifier for session in self.sessions]
         if len(names) != len(set(names)):
             raise ValueError("Session identifiers must be unique.")
+        allocations = self.effective_allocations()
+        if any(value < 0 for value in allocations.values()):
+            raise ValueError("Transfers cannot take a stage below zero seconds.")
         previous_stop = 0.0
         spent = 0.0
         stage_spent: dict[PilotStage, float] = {stage: 0.0 for stage in STAGE_SECONDS}
@@ -91,11 +149,14 @@ class PilotBudgetLedger(StrictRecord):
             if session.stopped_at is None and index != len(self.sessions) - 1:
                 raise ValueError("Confirm the previous instance stopped first.")
             allowance = session.deadline_at - session.started_at
+            # A closed session is charged what it used; an open one its allowance.
+            if session.stopped_at is not None:
+                allowance = min(allowance, session.stopped_at - session.started_at)
             if (
                 allowance
                 > min(
                     self.maximum_total_seconds - spent,
-                    STAGE_SECONDS[session.stage] - stage_spent[session.stage],
+                    allocations[session.stage] - stage_spent[session.stage],
                 )
                 + 1e-6
             ):
@@ -126,3 +187,4 @@ class PilotBudgetSummary(StrictRecord):
     consumed_seconds: Seconds
     remaining_seconds: Seconds
     active_session_identifier: SessionIdentifier | None = None
+    stage_totals: list[PilotStageTotal] = Field(default_factory=list, max_length=4)

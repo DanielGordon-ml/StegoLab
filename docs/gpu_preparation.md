@@ -74,8 +74,12 @@ maximum remains 86,400 seconds across every session.
 ```sh
 uv run --locked python -m scripts.pilot_budget --ledger state/gpu_pilot start \
   --session setup_first --instance i-REPLACE --stage setup \
-  --started-at REPLACE_WITH_LAUNCH_REQUEST_EPOCH --seconds 7200
+  --started-at REPLACE_WITH_LAUNCH_REQUEST_EPOCH
 ```
+
+Without `--seconds` the session receives the whole remaining stage allocation
+(after the attested lost hour, 3,571 seconds for setup); pass `--seconds` only
+to reserve less.
 
 The returned `checkpoint_at` is 300 seconds before the final `deadline_at`;
 `poweroff_at` is 120 seconds before it. This leaves 180 seconds for a safe save
@@ -89,8 +93,10 @@ the schedule is enabled, has no flexible time window, and targets the correct
 instance. Schedule execution is not an exact-second guarantee: retain the
 earlier host save guard and verify stopped state externally.
 
-Copy the complete active ledger to the mounted host before work, while the
-guard and model processes are stopped. Publish the new directory atomically;
+Before copying a ledger, update the host checkout to the same commit that
+wrote it: an older checkout rejects newer ledger fields and its guard then
+powers the instance off right after boot. Copy the complete active ledger to
+the mounted host before work, while the guard and model processes are stopped. Publish the new directory atomically;
 do not combine two ledgers or silently replace a different active session.
 On every restart, reuse its original deadline. A completed job does not close
 the session. A crash leaves the session active until an operator observes EC2
@@ -167,6 +173,40 @@ Use the observation time, even if it is later than physical shutdown. Archive
 the operator ledger, AWS state evidence and host logs together. The next launch
 uses this same ledger; transfer its new active-session version before model
 work. Missing/corrupt accounting requires restoration, not reinitialization.
+
+### Record instance time that ran without a session
+
+If an instance ran while no session was open (as on 2026-09-24, when the host
+ran 3,629 seconds during setup), charge that time from independent evidence
+such as CloudTrail `RunInstances` and `StopInstances` events. The record is
+closed the moment it is written, counts against the named stage, and keeps
+the evidence text:
+
+```sh
+uv run --locked python -m scripts.pilot_budget --ledger state/gpu_pilot attest-closed \
+  --session lost_hour_2026_09_24 --instance i-0ccaee67f0acaa574 --stage setup \
+  --started-at 1790283913 --stopped-at 1790287542 \
+  --evidence 'CloudTrail RunInstances 2026-09-24T21:05:13Z, StopInstances 22:05:42Z'
+```
+
+Attested times must lie in the past, must not overlap a recorded session, and
+must fit the stage's remaining allocation. No session may be open at the time.
+
+### Move allocation between stages
+
+Unused seconds can move between stages with a written reason, at most 3,600
+seconds per transfer. The 86,400-second total never changes, and a stage can
+only give away seconds it has not spent or reserved:
+
+```sh
+uv run --locked python -m scripts.pilot_budget --ledger state/gpu_pilot transfer \
+  --from-stage ablation --to-stage setup --seconds 3600 \
+  --reason 'Readiness drill retry after the lost hour'
+```
+
+`inspect` reports every stage's allocation after transfers, its consumed and
+its remaining seconds, next to the project totals. Failed commands print a
+reason code and a plain explanation instead of a fixed line.
 
 ## Backup, restore, and later acceptance
 
