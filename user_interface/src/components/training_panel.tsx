@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { useWorkspace } from '../hooks/use_workspace';
 import { is_active_job } from '../hooks/use_workspace';
+import { is_inference_job } from '../contracts/inference_service';
 import type { WorkspaceCheckpoint } from '../contracts/workspace';
 import type { JobSnapshot } from '../contracts/workflows';
 import { TrainingSetup } from './training_setup';
@@ -23,7 +24,9 @@ export function TrainingPanel({
   const [selected_run, set_selected_run] = useState('');
   const [selected_job, set_selected_job] = useState('');
   const workspace = state.workspace.data;
-  const jobs = state.jobs.data?.items ?? [];
+  const jobs = (state.jobs.data?.items ?? []).filter(
+    (item) => !is_inference_job(item),
+  );
   const active_job = jobs.find(is_active_job);
   const job =
     jobs.find((item) => item.job_identifier === selected_job) ??

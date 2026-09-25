@@ -10,6 +10,7 @@ from schemas.models import ModelIdentifier
 from schemas.protocol import PayloadCapacity
 
 ImageReference = Annotated[str, Field(pattern=r"^image_[0-9a-f]{32}$")]
+StoredReference = Annotated[str, Field(pattern=r"^(image|encoded)_[0-9a-f]{32}$")]
 ImagePurpose = Literal["cover", "encoded"]
 MAXIMUM_STORED_IMAGE_BYTES = 64 * 1024 * 1024
 RETENTION_SECONDS = 24 * 60 * 60
@@ -37,8 +38,9 @@ class UploadedImage(StrictRecord):
 
 
 class StoredImageRecord(UploadedImage):
-    """Persist an accepted upload with the size and checksum of its stored PNG."""
+    """Persist an upload or a published result with its stored PNG checksum."""
 
+    image_reference: StoredReference
     stored_bytes: int = Field(ge=1, le=MAXIMUM_STORED_IMAGE_BYTES)
     checksum: str = Field(pattern=r"^[0-9a-f]{64}$")
 

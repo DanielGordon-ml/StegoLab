@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 from backend_service.failures import ApplicationFailure
 from backend_service.workflow_execution import execute_command, public_result
 from backend_service.workflow_preflight import resolve_request
+from schemas.inference_jobs import InferenceJobRecord
 from schemas.training import TrainingStep
 
 if TYPE_CHECKING:
@@ -15,6 +16,11 @@ if TYPE_CHECKING:
 def run_job(self: "WorkspaceJobService", identifier: str) -> None:
     """Resolve frozen references, run a child, and verify its final publication."""
     request = self.store.request(identifier)
+    if isinstance(request, InferenceJobRecord):
+        from backend_service.inference_runner import run_inference
+
+        run_inference(self, identifier, request)
+        return
     if request.operation == "train":
         checked = self.preflight(request)
         if not checked.allowed:

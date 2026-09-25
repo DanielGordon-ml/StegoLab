@@ -4,6 +4,7 @@ import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from fastapi import FastAPI
 
@@ -12,6 +13,22 @@ from backend_service.event_logging import close_run_logger, create_run_logger
 from backend_service.failures import ApplicationFailure
 from backend_service.routes import router
 from backend_service.storage import StateStore
+
+if TYPE_CHECKING:
+    from backend_service.inference_jobs import InferenceServices
+
+
+def inference_services(application: FastAPI) -> "InferenceServices":
+    """Attach upload, model, secret, and text stores to the job supervisor."""
+    from backend_service.inference_jobs import InferenceServices
+    from backend_service.inference_secrets import DecodedTextStore, InferenceSecretStore
+
+    return InferenceServices(
+        files=application.state.inference_files,
+        installed=application.state.installed_models,
+        secrets=InferenceSecretStore(),
+        texts=DecodedTextStore(),
+    )
 
 
 def create_application(
@@ -66,6 +83,9 @@ def create_application(
                     application.state.workspace_catalog, selected_data_directory
                 )
                 application.state.workspace_jobs.logger = logger
+                application.state.workspace_jobs.inference = inference_services(
+                    application
+                )
                 application.state.workspace_jobs.start()
             except ApplicationFailure:
                 logger.error("application_startup_failed")
@@ -93,12 +113,14 @@ def create_application(
     )
     application.include_router(router)
     from backend_service.image_routes import image_router
+    from backend_service.inference_routes import inference_router
     from backend_service.model_routes import model_router
     from backend_service.workflow_routes import job_router
     from backend_service.workspace_routes import workspace_router
 
     application.include_router(model_router)
     application.include_router(image_router)
+    application.include_router(inference_router)
     application.include_router(workspace_router)
     application.include_router(job_router)
     install_error_handlers(application)

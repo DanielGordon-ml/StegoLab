@@ -5,7 +5,8 @@ import { ConfigurationPanel } from './components/configuration_panel';
 import { ErrorNotice } from './components/error_notice';
 import { Icon } from './components/icons';
 import { TrainingPanel } from './components/training_panel';
-import { InferencePanel } from './components/inference_panel';
+import { EncodePanel } from './components/encode_panel';
+import { DecodePanel } from './components/decode_panel';
 import { is_active_job, useWorkspace } from './hooks/use_workspace';
 
 const tabs = ['train', 'encode', 'decode', 'config'] as const;
@@ -35,6 +36,17 @@ export function Application() {
   const disconnected = health.isError || capabilities.isError;
   const connected = health.isSuccess && capabilities.isSuccess && !disconnected;
   const active_job = state.jobs.data?.items.find(is_active_job);
+  const active_job_label = active_job
+    ? active_job.operation === 'encode'
+      ? 'Encode job'
+      : active_job.operation === 'decode'
+        ? 'Decode job'
+        : active_job.experiment_identifier || active_job.operation || 'Job'
+    : '';
+  const active_job_tab: Tab =
+    active_job?.operation === 'encode' || active_job?.operation === 'decode'
+      ? active_job.operation
+      : 'train';
 
   /** Follow the horizontal tab pattern, including Home and End. */
   function navigate_tabs(
@@ -125,12 +137,12 @@ export function Application() {
           </div>
           <button
             className={`active_job_indicator ${active_job && !state.jobs.isError ? 'has_active_job' : ''}`}
-            onClick={() => set_active_tab('train')}
+            onClick={() => set_active_tab(active_job_tab)}
             aria-label={
               state.jobs.isError
                 ? 'Job status unavailable'
                 : active_job
-                  ? `View active job: ${active_job.experiment_identifier ?? active_job.operation}`
+                  ? `View active job: ${active_job_label}`
                   : 'View training workspace'
             }
           >
@@ -139,10 +151,10 @@ export function Application() {
             />
             {state.jobs.isError
               ? active_job
-                ? `${active_job.experiment_identifier || active_job.operation} · last known ${active_job.status}`
+                ? `${active_job_label} · last known ${active_job.status}`
                 : 'Job status unavailable'
               : active_job
-                ? `${active_job.experiment_identifier || active_job.operation} · ${active_job.status}`
+                ? `${active_job_label} · ${active_job.status}`
                 : 'No active jobs'}
           </button>
         </div>
@@ -175,9 +187,11 @@ export function Application() {
               <TrainingPanel state={state} />
             ) : tab === 'config' ? (
               <ConfigurationPanel />
-            ) : active_tab === tab ? (
-              <InferencePanel mode={tab} capabilities={capabilities.data} />
-            ) : null}
+            ) : active_tab !== tab ? null : tab === 'encode' ? (
+              <EncodePanel state={state} capabilities={capabilities.data} />
+            ) : (
+              <DecodePanel state={state} capabilities={capabilities.data} />
+            )}
           </section>
         ))}
         <section className="resource_strip" aria-label="Workspace resources">

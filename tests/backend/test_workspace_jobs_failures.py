@@ -2,6 +2,7 @@
 
 import threading
 from pathlib import Path
+from typing import cast
 
 import pytest
 
@@ -65,7 +66,7 @@ def test_failed_state_commit_halts_admission_and_hides_stale_state(
     with pytest.raises(StorageFailure):
         service.get_job(job.job_identifier)
     with pytest.raises(StorageFailure):
-        service.submit(service.store.request(job.job_identifier))
+        service.submit(cast(WorkflowRequest, service.store.request(job.job_identifier)))
     # The last committed record stays intact for startup reconciliation.
     assert service.store.get(job.job_identifier).status in ("queued", "running")
     service.close()

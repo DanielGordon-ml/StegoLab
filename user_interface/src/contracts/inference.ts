@@ -56,3 +56,46 @@ export interface CapacityResult {
   maximum_message_bytes: number;
   capacity: PayloadCapacity;
 }
+
+/** Encode request; the message and password travel once and are never stored. */
+export interface EncodingJobRequest {
+  client_request_identifier: string;
+  image_reference: string;
+  model_identifier: string;
+  message: string;
+  password: string;
+}
+
+/** Decode request; the password travels once and is never stored. */
+export interface DecodingJobRequest {
+  client_request_identifier: string;
+  image_reference: string;
+  model_identifier: string;
+  password: string;
+}
+
+/** Result of a completed encode job: a verified PNG artifact, no message content. */
+export interface EncodingJobResult {
+  artifact_identifier: string;
+  filename: string;
+  width: number;
+  height: number;
+  png_bytes: number;
+  message_byte_count: number;
+  verified: true;
+}
+
+/** Result of a completed decode job; the text itself is read separately. */
+export interface DecodingJobResult {
+  result_available: true;
+  text_byte_count: number;
+  expires_at: string;
+}
+
+/** Recovered text, available in memory for a short time only. */
+export interface DecodedText {
+  job_identifier: string;
+  text: string;
+  byte_count: number;
+  expires_at: string;
+}

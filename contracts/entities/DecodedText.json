@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Return recovered text once per request; it is never written to disk.",
+  "properties": {
+    "byte_count": {
+      "maximum": 1024,
+      "minimum": 0,
+      "title": "Byte Count",
+      "type": "integer"
+    },
+    "expires_at": {
+      "format": "date-time",
+      "title": "Expires At",
+      "type": "string"
+    },
+    "job_identifier": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Job Identifier",
+      "type": "string"
+    },
+    "text": {
+      "maxLength": 1024,
+      "title": "Text",
+      "type": "string"
+    }
+  },
+  "required": [
+    "job_identifier",
+    "text",
+    "byte_count",
+    "expires_at"
+  ],
+  "title": "DecodedText",
+  "type": "object"
+}

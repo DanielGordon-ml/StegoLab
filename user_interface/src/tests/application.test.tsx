@@ -41,7 +41,9 @@ describe('workspace', () => {
     await user.keyboard('{ArrowRight}');
     expect(screen.getByRole('tab', { name: 'Decode' })).toHaveFocus();
     expect(
-      screen.getByText('Image decoding is not available yet.'),
+      within(screen.getByRole('tabpanel', { name: 'Decode' })).getByText(
+        'No experimental model is installed.',
+      ),
     ).toBeVisible();
     await user.keyboard('{End}');
     expect(screen.getByRole('tab', { name: /Config/ })).toHaveFocus();
@@ -53,8 +55,8 @@ describe('workspace', () => {
     const user = render_application();
     await user.click(screen.getByRole('tab', { name: 'Encode' }));
     await user.type(screen.getByLabelText('Message'), 'é🙂');
-    expect(screen.getByText(/6 UTF-8 bytes/)).toBeVisible();
-    expect(screen.getByLabelText('Password')).toBeDisabled();
+    expect(screen.getByText(/^6 bytes/)).toBeVisible();
+    expect(screen.getByLabelText('Encoder model')).toBeDisabled();
     expect(
       screen.getByRole('button', { name: 'Encode and verify' }),
     ).toBeDisabled();

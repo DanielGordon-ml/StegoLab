@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Announce recovered text held in memory for a short time, never its content.",
+  "properties": {
+    "expires_at": {
+      "format": "date-time",
+      "title": "Expires At",
+      "type": "string"
+    },
+    "result_available": {
+      "const": true,
+      "default": true,
+      "title": "Result Available",
+      "type": "boolean"
+    },
+    "text_byte_count": {
+      "maximum": 1024,
+      "minimum": 0,
+      "title": "Text Byte Count",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "result_available",
+    "text_byte_count",
+    "expires_at"
+  ],
+  "title": "DecodingJobResult",
+  "type": "object"
+}

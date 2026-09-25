@@ -112,12 +112,11 @@ body names the export reference shown in the workspace and a retry identifier:
 {"client_request_identifier": "install-001v", "export_reference": "<export identifier>"}
 ```
 
-Send it to `POST /api/v1/models/install`. Remove a model with
+Send it to `POST /api/v1/models/install`, or use **Install as experimental
+model** in the Train tab's Model exports card. Remove a model with
 `DELETE /api/v1/models/<model identifier>`; removal is refused while a queued or
 running Encode or Decode job still uses it. Installed models stay experimental:
-image quality is visibly reduced and recovery is not guaranteed. The browser
-controls for installation, encoding, and decoding arrive with the Sprint 6
-interface work.
+image quality is visibly reduced and recovery is not guaranteed.
 
 ## Upload an image and check its message limit
 
@@ -147,6 +146,58 @@ reference>`.
 reports how many message bytes that image can carry with one installed model.
 Images outside the model's side range (512 to 1024 pixels for the experimental
 model) are refused before any model process starts.
+
+## Encode and decode in the browser
+
+Open Train → Model exports and choose **Install as experimental model** next to
+an exported pair. The Encode and Decode tabs then show the installed model with
+a persistent note: the model is experimental, encoded images are visibly reduced
+in quality, and recovery is not guaranteed.
+
+- **Encode:** choose or drop a cover image (PNG or JPEG up to 16 MiB), pick the
+  model, write the message and watch the counter ("X of Y bytes used" counts
+  UTF-8 bytes against the image's capacity), enter a password, and choose
+  **Encode and verify**. The password field clears as soon as the job is sent.
+  The status shows Queued, Processing, Verifying, then Ready. **Download
+  verified PNG** saves the file that passed recovery with the matching decoder;
+  keep it unchanged when sharing.
+- **Decode:** choose the unchanged encoded PNG, the matching model and the
+  password, then **Authenticate and decode**. The recovered text appears in a
+  read-only box with Copy and Clear. It is forgotten after five minutes, when
+  you clear it, or when you leave the Decode tab. A wrong password or a changed
+  file shows "No valid hidden message could be recovered. Check the password,
+  model, and image."
+
+## Encode and decode through the API
+
+Encode and decode run as background jobs on the same local queue as training,
+one at a time. The message and password travel once in the request body and are
+kept in memory until the job runs; they are never written to a database, a
+sidecar, a log, or a job record.
+
+- `POST /api/v1/encoding_jobs` with `{"client_request_identifier", "image_reference"
+  (a cover upload), "model_identifier", "message", "password"}` answers `202`
+  with the job. The job encodes, then proves recovery with the matching decoder
+  before publishing anything. Its result names the artifact to download from
+  `GET /api/v1/artifacts/<artifact identifier>`; the file name is
+  `stegolab-encoded-<8 characters>.png`. If the decoder cannot recover the
+  message, nothing is published and the job fails with a plain explanation.
+  This happens with covers the experimental model was not trained for, such
+  as random noise or flat colour; ordinary photographs and smooth images work.
+- `POST /api/v1/decoding_jobs` with `{"client_request_identifier", "image_reference"
+  (an encoded upload), "model_identifier", "password"}` answers `202`. When the
+  job completes, `GET /api/v1/jobs/<job identifier>/decoded_text` returns the
+  text from memory until it expires after five minutes or `DELETE` on the same
+  address forgets it earlier. A wrong password or a changed
+  file fails with "No valid hidden message could be recovered. Check the
+  password, model, and image." and never returns partial text.
+- At most eight encode or decode jobs wait or run at once. A queued job can be
+  cancelled, which also forgets its secrets. If the application restarts before
+  a job finished, the job is marked interrupted with the error `inputs_lost`:
+  start it again with the message and password.
+- Messages are limited by the image's capacity (`POST /api/v1/capacity`), up
+  to 1,024 bytes of UTF-8 text; passwords are 1 to 1,024 bytes. Each model
+  process has a two-minute limit.
 
 ## Delivery boundaries
 

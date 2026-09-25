@@ -3,6 +3,10 @@ import {
   validate_capabilities,
   validate_capacity_result,
   validate_configuration,
+  validate_decoded_text,
+  validate_decoding_request,
+  validate_encoding_request,
+  validate_encoding_result,
   validate_error,
   validate_health,
   validate_update,
@@ -11,6 +15,9 @@ import {
 import {
   capabilities,
   capacity_result,
+  decoded_text,
+  encoding_request,
+  encoding_result,
   saved_configuration,
   uploaded_image,
 } from './fixtures';
@@ -95,6 +102,34 @@ describe('backend JSON Schemas', () => {
     expect(validate_capacity_result({ ...capacity_result, width: 2048 })).toBe(
       false,
     );
+  });
+  it('checks job requests, results, and recovered text against the shared schemas', () => {
+    expect(validate_encoding_request(encoding_request)).toBe(true);
+    expect(
+      validate_encoding_request({ ...encoding_request, password: '' }),
+    ).toBe(false);
+    expect(
+      validate_encoding_request({
+        ...encoding_request,
+        message: 'm'.repeat(1025),
+      }),
+    ).toBe(false);
+    const decoding_request = {
+      client_request_identifier: encoding_request.client_request_identifier,
+      image_reference: encoding_request.image_reference,
+      model_identifier: encoding_request.model_identifier,
+      password: encoding_request.password,
+    };
+    expect(validate_decoding_request(decoding_request)).toBe(true);
+    expect(validate_decoding_request(encoding_request)).toBe(false);
+    expect(validate_encoding_result(encoding_result)).toBe(true);
+    expect(
+      validate_encoding_result({ ...encoding_result, verified: false }),
+    ).toBe(false);
+    expect(validate_decoded_text(decoded_text)).toBe(true);
+    expect(
+      validate_decoded_text({ ...decoded_text, text: 'x'.repeat(1025) }),
+    ).toBe(false);
   });
   it('never exposes an untrusted response body in an error', async () => {
     vi.stubGlobal(

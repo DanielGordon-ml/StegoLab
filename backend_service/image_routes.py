@@ -6,7 +6,8 @@ from fastapi import APIRouter, Query, Request
 from starlette.concurrency import run_in_threadpool
 
 from backend_service.inference_admission import check_model_range
-from backend_service.inference_files import InferenceFileStore, upload_failure
+from backend_service.inference_files import InferenceFileStore
+from backend_service.inference_storage import upload_failure
 from backend_service.model_installation import InstalledModelStore
 from backend_service.payload_capacity import calculate_capacity
 from schemas.capabilities import MAXIMUM_UPLOAD_BYTES

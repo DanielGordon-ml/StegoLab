@@ -92,10 +92,10 @@ development commands, browser tests, and troubleshooting.
   instance-time accounting. Local checks spend zero GPU hours. Start with the
   [pilot guide](docs/pilot_training.md) and [Sprint 5 evidence](plan/sprint_05.md).
 
-- Sprint 6 (in progress) adds explicit installation of an exported encoder and
-  decoder pair as an **experimental** model, bounded image uploads that expire
-  after one day, and a per-image message limit, so that Encode and Decode can
-  follow. See the [GUI guide](docs/gui_training.md).
+- Sprint 6 (in progress) makes Encode and Decode work in the browser with an
+  explicitly installed **experimental** model: bounded uploads, a per-image
+  message limit, decoder-verified downloads, and recovered text that lives in
+  memory only. See the [GUI guide](docs/gui_training.md).
 
 The GUI connects local dataset preparation, experimental CPU training, checkpoint
 review, evaluation, and exports through background jobs. Read the
