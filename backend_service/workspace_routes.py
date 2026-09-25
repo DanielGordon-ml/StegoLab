@@ -31,8 +31,8 @@ def read_workspace(request: Request) -> Workspace:
     "/artifacts/{artifact_identifier}", operation_id="download_workspace_artifact"
 )
 def download_artifact(artifact_identifier: str, request: Request) -> Response:
-    """Return exact bytes of a verified package archive or a stored image."""
-    if artifact_identifier.startswith("image_"):
+    """Return exact bytes of a package archive, an upload, or an encoded result."""
+    if artifact_identifier.startswith(("image_", "encoded_")):
         store = cast(InferenceFileStore, request.app.state.inference_files)
         content, filename = store.read_image(artifact_identifier)
         media_type = "image/png"

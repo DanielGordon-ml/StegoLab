@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 from uuid import uuid4
 
 from backend_service.failures import ApplicationFailure, StorageFailure
+from backend_service.inference_jobs import InferenceServices, interruption_error
 from backend_service.workflow_preflight import resolve_request, training_preflight
 from backend_service.workflow_store import WorkflowStore
 from backend_service.workflow_supervision import close_supervisor, run_scheduler
@@ -38,6 +39,7 @@ class WorkspaceJobService:
         self.ownership: int | None = None
         self.logger: logging.Logger | None = None
         self.persistence_failed = False
+        self.inference: InferenceServices | None = None
 
     def start(self) -> None:
         """Reconcile unfinished metadata and start an empty, single-worker scheduler."""
@@ -57,12 +59,7 @@ class WorkspaceJobService:
                 ) from None
             for job in self.store.list_jobs():
                 if job.status in ("queued", "running"):
-                    self._change(
-                        job,
-                        status="interrupted",
-                        phase="interrupted",
-                        available_actions=[],
-                    )
+                    self.interrupt(job)
             self.thread = threading.Thread(
                 target=run_scheduler, args=(self,), daemon=True
             )
@@ -189,11 +186,24 @@ class WorkspaceJobService:
                     "This action is not supported for this job.",
                     409,
                 )
-            return self._change(
+            changed = self._change(
                 job,
                 mutation=(request.client_request_identifier, fingerprint),
                 **changes,
             )
+            if changed.status == "cancelled" and self.inference is not None:
+                self.inference.secrets.discard(identifier)
+            return changed
+
+    def interrupt(self, job: JobSnapshot) -> JobSnapshot:
+        """Mark an unfinished job interrupted; inference jobs also lose inputs."""
+        return self._change(
+            job,
+            status="interrupted",
+            phase="interrupted",
+            available_actions=[],
+            error=interruption_error(job),
+        )
 
     def _change(
         self,

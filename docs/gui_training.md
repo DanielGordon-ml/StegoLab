@@ -148,6 +148,37 @@ reports how many message bytes that image can carry with one installed model.
 Images outside the model's side range (512 to 1024 pixels for the experimental
 model) are refused before any model process starts.
 
+## Encode and decode through the API
+
+Encode and decode run as background jobs on the same local queue as training,
+one at a time. The message and password travel once in the request body and are
+kept in memory until the job runs; they are never written to a database, a
+sidecar, a log, or a job record.
+
+- `POST /api/v1/encoding_jobs` with `{"client_request_identifier", "image_reference"
+  (a cover upload), "model_identifier", "message", "password"}` answers `202`
+  with the job. The job encodes, then proves recovery with the matching decoder
+  before publishing anything. Its result names the artifact to download from
+  `GET /api/v1/artifacts/<artifact identifier>`; the file name is
+  `stegolab-encoded-<8 characters>.png`. If the decoder cannot recover the
+  message, nothing is published and the job fails with a plain explanation.
+  This happens with covers the experimental model was not trained for, such
+  as random noise or flat colour; ordinary photographs and smooth images work.
+- `POST /api/v1/decoding_jobs` with `{"client_request_identifier", "image_reference"
+  (an encoded upload), "model_identifier", "password"}` answers `202`. When the
+  job completes, `GET /api/v1/jobs/<job identifier>/decoded_text` returns the
+  text from memory until it expires after five minutes or `DELETE` on the same
+  address forgets it earlier. A wrong password or a changed
+  file fails with "No valid hidden message could be recovered. Check the
+  password, model, and image." and never returns partial text.
+- At most eight encode or decode jobs wait or run at once. A queued job can be
+  cancelled, which also forgets its secrets. If the application restarts before
+  a job finished, the job is marked interrupted with the error `inputs_lost`:
+  start it again with the message and password.
+- Messages are limited by the image's capacity (`POST /api/v1/capacity`), up
+  to 1,024 bytes of UTF-8 text; passwords are 1 to 1,024 bytes. Each model
+  process has a two-minute limit.
+
 ## Delivery boundaries
 
 Local dataset preparation, bounded CPU experiments, review, and export form the

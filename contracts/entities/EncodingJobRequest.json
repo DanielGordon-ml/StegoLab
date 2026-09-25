@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Transport-only encode request; the message and password are never stored.",
+  "properties": {
+    "client_request_identifier": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+      "title": "Client Request Identifier",
+      "type": "string"
+    },
+    "image_reference": {
+      "pattern": "^image_[0-9a-f]{32}$",
+      "title": "Image Reference",
+      "type": "string"
+    },
+    "message": {
+      "maxLength": 1024,
+      "title": "Message",
+      "type": "string"
+    },
+    "model_identifier": {
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$",
+      "title": "Model Identifier",
+      "type": "string"
+    },
+    "password": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "title": "Password",
+      "type": "string"
+    }
+  },
+  "required": [
+    "client_request_identifier",
+    "image_reference",
+    "model_identifier",
+    "message",
+    "password"
+  ],
+  "title": "EncodingJobRequest",
+  "type": "object"
+}

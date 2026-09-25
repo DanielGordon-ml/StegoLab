@@ -24,6 +24,13 @@ from schemas.evaluation import EvaluationReport
 from schemas.export_recovery import ExportRecoveryReport
 from schemas.images import ImageSummary
 from schemas.inference import CapacityRequest, CapacityResult, UploadedImage
+from schemas.inference_jobs import (
+    DecodedText,
+    DecodingJobRequest,
+    DecodingJobResult,
+    EncodingJobRequest,
+    EncodingJobResult,
+)
 from schemas.jobs import JobEvent, JobList, JobSnapshot
 from schemas.model_exports import (
     ExportVerification,
@@ -120,6 +127,11 @@ ENTITY_MODELS = (
     UploadedImage,
     CapacityRequest,
     CapacityResult,
+    EncodingJobRequest,
+    DecodingJobRequest,
+    EncodingJobResult,
+    DecodingJobResult,
+    DecodedText,
     ConfigurationProfile,
     ConfigurationUpdate,
     ConfigurationReset,

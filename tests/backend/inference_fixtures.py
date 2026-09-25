@@ -1,5 +1,6 @@
 """Shared helpers for upload, capacity, and inference tests over the HTTP API."""
 
+import time
 from io import BytesIO
 from typing import Literal, cast
 
@@ -8,6 +9,7 @@ from fastapi.testclient import TestClient
 from PIL import Image
 
 from backend_service.model_fixture_channel import FIXTURE_PACKAGE_NAME
+from schemas.jobs import JobSnapshot
 
 PREFIX = "/api/v1"
 
@@ -64,3 +66,25 @@ def install_fixture_model(client: TestClient) -> str:
     )
     assert response.status_code == 201, response.text
     return str(response.json()["model_identifier"])
+
+
+def wait_for_job(
+    client: TestClient, identifier: str, seconds: float = 120
+) -> JobSnapshot:
+    """Wait a bounded time for a real package process to publish its final record."""
+    deadline = time.monotonic() + seconds
+    while time.monotonic() < deadline:
+        response = client.get(f"{PREFIX}/jobs/{identifier}")
+        assert response.status_code == 200, response.text
+        snapshot = JobSnapshot.model_validate_json(response.text)
+        if snapshot.status not in ("queued", "running"):
+            return snapshot
+        time.sleep(0.1)
+    raise AssertionError("The inference job did not finish in time.")
+
+
+def submit(
+    client: TestClient, operation: str, body: dict[str, object]
+) -> httpx.Response:
+    """Send one encode or decode job request."""
+    return cast(httpx.Response, client.post(f"{PREFIX}/{operation}_jobs", json=body))

@@ -67,6 +67,31 @@ export const capacity_result = {
   },
 };
 
+export const encoding_request = {
+  client_request_identifier: 'encode-1',
+  image_reference: uploaded_image.image_reference,
+  model_identifier: '001V_2026-09-24',
+  message: 'hello',
+  password: 'example-password',
+};
+
+export const encoding_result = {
+  artifact_identifier: 'encoded_0123456789abcdef0123456789abcdef',
+  filename: 'stegolab-encoded-01234567.png',
+  width: 1024,
+  height: 768,
+  png_bytes: 2359296,
+  message_byte_count: 5,
+  verified: true,
+};
+
+export const decoded_text = {
+  job_identifier: 'job_0123456789abcdef',
+  text: 'hello',
+  byte_count: 5,
+  expires_at: '2026-09-25T10:05:00+00:00',
+};
+
 /** Serve real contract-shaped reads, delegating mutation behavior to each test. */
 export function mock_backend(
   mutate?: (options: RequestInit) => Promise<Response>,

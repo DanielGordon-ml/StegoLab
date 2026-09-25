@@ -1,9 +1,7 @@
 """Verify independent package execution in isolated CPU subprocesses."""
 
 import copy
-import os
 import subprocess
-import sys
 import tempfile
 import time
 from pathlib import Path
@@ -20,8 +18,12 @@ from backend_service.model_export_io import (
     verify_package,
     write_tensor,
 )
+from backend_service.model_export_process import (
+    classify_package_failure,
+    package_command,
+    package_environment,
+)
 from backend_service.model_exports import check_export_deadline
-from backend_service.protocol_failures import RECOVERY_MESSAGE, recovery_failure
 from schemas.model_exports import ExportVerification
 
 EXPORT_SHAPES = ((512, 512), (513, 517), (1024, 1024))
@@ -37,32 +39,14 @@ def run_export_process(
 ) -> bytes:
     """Run a bundled entry point with no repository path or inherited Python path."""
     check_export_deadline(deadline)
-    environment = os.environ.copy()
-    environment.pop("PYTHONPATH", None)
-    environment.pop("PYTHONHOME", None)
-    environment["PYTHONDONTWRITEBYTECODE"] = "1"
-    environment["OMP_NUM_THREADS"] = "1"
-    bootstrap = (
-        "import runpy,sys; package=sys.argv.pop(1); "
-        "sys.path.insert(0,package); "
-        "runpy.run_path(package+'/runtime.py',run_name='__main__')"
-    )
     timeout = 120.0 if deadline is None else min(120.0, deadline - time.monotonic())
     if timeout <= 0:
         check_export_deadline(deadline)
     try:
         result = subprocess.run(
-            [
-                sys.executable,
-                "-I",
-                "-B",
-                "-c",
-                bootstrap,
-                str(package.resolve()),
-                *arguments,
-            ],
+            package_command(package, arguments),
             cwd=directory,
-            env=environment,
+            env=package_environment(),
             input=secret_input,
             capture_output=True,
             check=False,
@@ -75,9 +59,7 @@ def run_export_process(
             422,
         ) from None
     if result.returncode:
-        if result.stderr == (RECOVERY_MESSAGE + "\n").encode("utf-8"):
-            raise recovery_failure()
-        raise export_failure()
+        raise classify_package_failure(result.stderr)
     check_export_deadline(deadline)
     return result.stdout
 
