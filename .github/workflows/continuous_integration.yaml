@@ -46,6 +46,8 @@ jobs:
           npm --prefix user_interface run lint
           npm --prefix user_interface test
           npm --prefix user_interface run build
+      - name: Build the labelled fixture model package for browser tests
+        run: uv run python scripts/build_fixture_package.py
       - name: Build and start CPU containers
         run: |
           sh infrastructure/setup_local_workspace.sh
@@ -64,7 +66,7 @@ jobs:
           else
             npx playwright install --with-deps chromium
           fi
-      - name: Check browser settings and restart recovery
+      - name: Check browser settings, encode and decode, and restart recovery
         env:
           STEGOLAB_BASE_URL: http://127.0.0.1:8080
           STEGOLAB_RESTART_BACKEND: "1"

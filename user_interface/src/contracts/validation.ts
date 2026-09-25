@@ -12,6 +12,8 @@ import decoding_job_request from '../../../contracts/entities/DecodingJobRequest
 import encoding_job_result from '../../../contracts/entities/EncodingJobResult.json';
 import decoding_job_result from '../../../contracts/entities/DecodingJobResult.json';
 import decoded_text from '../../../contracts/entities/DecodedText.json';
+import model_list from '../../../contracts/entities/ModelList.json';
+import installed_model from '../../../contracts/entities/InstalledModel.json';
 import type {
   ConfigurationProfile,
   ConfigurationReset,
@@ -19,6 +21,7 @@ import type {
 } from './configuration';
 import type { Capabilities, HealthStatus } from './capabilities';
 import type { ErrorEnvelope } from './errors';
+import type { InstalledModel, ModelList } from './models';
 import type {
   CapacityResult,
   DecodedText,
@@ -70,3 +73,6 @@ export const validate_decoding_result =
   create_validator<DecodingJobResult>(decoding_job_result);
 export const validate_decoded_text =
   create_validator<DecodedText>(decoded_text);
+export const validate_model_list = create_validator<ModelList>(model_list);
+export const validate_installed_model =
+  create_validator<InstalledModel>(installed_model);

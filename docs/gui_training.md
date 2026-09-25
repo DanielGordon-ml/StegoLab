@@ -112,12 +112,11 @@ body names the export reference shown in the workspace and a retry identifier:
 {"client_request_identifier": "install-001v", "export_reference": "<export identifier>"}
 ```
 
-Send it to `POST /api/v1/models/install`. Remove a model with
+Send it to `POST /api/v1/models/install`, or use **Install as experimental
+model** in the Train tab's Model exports card. Remove a model with
 `DELETE /api/v1/models/<model identifier>`; removal is refused while a queued or
 running Encode or Decode job still uses it. Installed models stay experimental:
-image quality is visibly reduced and recovery is not guaranteed. The browser
-controls for installation, encoding, and decoding arrive with the Sprint 6
-interface work.
+image quality is visibly reduced and recovery is not guaranteed.
 
 ## Upload an image and check its message limit
 
@@ -147,6 +146,27 @@ reference>`.
 reports how many message bytes that image can carry with one installed model.
 Images outside the model's side range (512 to 1024 pixels for the experimental
 model) are refused before any model process starts.
+
+## Encode and decode in the browser
+
+Open Train → Model exports and choose **Install as experimental model** next to
+an exported pair. The Encode and Decode tabs then show the installed model with
+a persistent note: the model is experimental, encoded images are visibly reduced
+in quality, and recovery is not guaranteed.
+
+- **Encode:** choose or drop a cover image (PNG or JPEG up to 16 MiB), pick the
+  model, write the message and watch the counter ("X of Y bytes used" counts
+  UTF-8 bytes against the image's capacity), enter a password, and choose
+  **Encode and verify**. The password field clears as soon as the job is sent.
+  The status shows Queued, Processing, Verifying, then Ready. **Download
+  verified PNG** saves the file that passed recovery with the matching decoder;
+  keep it unchanged when sharing.
+- **Decode:** choose the unchanged encoded PNG, the matching model and the
+  password, then **Authenticate and decode**. The recovered text appears in a
+  read-only box with Copy and Clear. It is forgotten after five minutes, when
+  you clear it, or when you leave the Decode tab. A wrong password or a changed
+  file shows "No valid hidden message could be recovered. Check the password,
+  model, and image."
 
 ## Encode and decode through the API
 

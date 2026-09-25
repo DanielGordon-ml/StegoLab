@@ -89,7 +89,7 @@ export const decoded_text = {
   job_identifier: 'job_0123456789abcdef',
   text: 'hello',
   byte_count: 5,
-  expires_at: '2026-09-25T10:05:00+00:00',
+  expires_at: '2099-01-01T00:05:00+00:00',
 };
 
 /** Serve real contract-shaped reads, delegating mutation behavior to each test. */

@@ -3,6 +3,7 @@ import type { Workspace, WorkspaceCheckpoint } from '../contracts/workspace';
 import type { JobSnapshot } from '../contracts/workflows';
 import { useWorkflow } from '../hooks/use_workflow';
 import { ErrorNotice } from './error_notice';
+import { InstallModelButton } from './model_installation';
 import { format_metric } from './quality_review';
 
 /** Review registered checkpoints and export independent experimental packages. */
@@ -175,13 +176,18 @@ export function SavedAssets({
                   <strong>{item.name}</strong>
                   <span>{item.kind} package · experimental</span>
                 </div>
-                <a
-                  className="button secondary"
-                  href={`/api/v1/artifacts/${encodeURIComponent(item.artifact_identifier)}`}
-                  download
-                >
-                  Download {item.kind}
-                </a>
+                <div className="asset_actions">
+                  {item.kind === 'encoder' && (
+                    <InstallModelButton export_item={item} />
+                  )}
+                  <a
+                    className="button secondary"
+                    href={`/api/v1/artifacts/${encodeURIComponent(item.artifact_identifier)}`}
+                    download
+                  >
+                    Download {item.kind}
+                  </a>
+                </div>
               </li>
             ))}
           </ul>
