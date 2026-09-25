@@ -46,6 +46,16 @@ the readiness drill inside the remaining 3,571 setup seconds (the 2026-09-24
 hour is charged to setup), the 14-hour baseline, and the host fixes. This does
 not change model quality, release gates, or the 24-hour GPU allocation.
 
+Sprint 7 — planned 2026-09-26: the dataset-adapter sprint that closes Step 3.
+The [Sprint 7 draft](sprints/sprint7.md) fixes the owner decisions: Hugging Face,
+HTTPS-archive and browser-upload sources with revision pins, raw files saved
+under `data/<source_name>/`, a shared download cache, address and redirect
+checks, safe extraction, byte progress with pause and cancel, `/api/v1/datasets`
+routes and Train forms, the frozen release-benchmark identities and a
+near-duplicate audit report that preflight reads. The GPU readiness drill and
+the 14-hour baseline move to Sprint 8 with the Sprint 6 decisions unchanged.
+Zero GPU seconds; `pilot_ready` stays false; no model-quality claim.
+
 ## 1. Deliverables and shared decisions
 
 - The initial planning deliverable was four Markdown files: backend.md, frontend.md, infrastructure.md, and execution_order.md under plan/. Sprint plans and acceptance records extend those plans as delivery progresses.
