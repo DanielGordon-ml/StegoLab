@@ -23,6 +23,7 @@ from schemas.errors import ApplicationError, ErrorEnvelope
 from schemas.evaluation import EvaluationReport
 from schemas.export_recovery import ExportRecoveryReport
 from schemas.images import ImageSummary
+from schemas.inference import CapacityRequest, CapacityResult, UploadedImage
 from schemas.jobs import JobEvent, JobList, JobSnapshot
 from schemas.model_exports import (
     ExportVerification,
@@ -116,6 +117,9 @@ ENTITY_MODELS = (
     ModelList,
     InstalledModel,
     ModelInstallRequest,
+    UploadedImage,
+    CapacityRequest,
+    CapacityResult,
     ConfigurationProfile,
     ConfigurationUpdate,
     ConfigurationReset,

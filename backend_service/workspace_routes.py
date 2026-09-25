@@ -4,6 +4,7 @@ from typing import cast
 
 from fastapi import APIRouter, Request, Response
 
+from backend_service.inference_files import InferenceFileStore
 from backend_service.workspace_catalog import WorkspaceCatalog
 from schemas.errors import ErrorEnvelope
 from schemas.workspace import Workspace
@@ -30,12 +31,18 @@ def read_workspace(request: Request) -> Workspace:
     "/artifacts/{artifact_identifier}", operation_id="download_workspace_artifact"
 )
 def download_artifact(artifact_identifier: str, request: Request) -> Response:
-    """Return exact verified package members as one browser-downloadable archive."""
-    catalog = cast(WorkspaceCatalog, request.app.state.workspace_catalog)
-    content, filename = catalog.download_export(artifact_identifier)
+    """Return exact bytes of a verified package archive or a stored image."""
+    if artifact_identifier.startswith("image_"):
+        store = cast(InferenceFileStore, request.app.state.inference_files)
+        content, filename = store.read_image(artifact_identifier)
+        media_type = "image/png"
+    else:
+        catalog = cast(WorkspaceCatalog, request.app.state.workspace_catalog)
+        content, filename = catalog.download_export(artifact_identifier)
+        media_type = "application/zip"
     return Response(
         content,
-        media_type="application/zip",
+        media_type=media_type,
         headers={
             "Content-Disposition": f'attachment; filename="{filename}"',
             "Cache-Control": "no-store",

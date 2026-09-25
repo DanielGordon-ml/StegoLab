@@ -6,8 +6,6 @@ from pathlib import Path
 from typing import cast
 
 import httpx
-import pytest
-import torch
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
@@ -15,27 +13,12 @@ from backend_service.application import create_application
 from backend_service.model_fixture_channel import (
     FIXTURE_PACKAGE_NAME,
     FIXTURE_SOURCE_IDENTIFIER,
-    build_fixture_package,
 )
 from schemas.configuration import ConfigurationProfile
 from schemas.jobs import JobSnapshot
 from schemas.workflows import WorkflowRequest
 
 PREFIX = "/api/v1"
-
-
-@pytest.fixture(scope="module")
-def fixture_workspace(tmp_path_factory: pytest.TempPathFactory) -> Path:
-    """Export the labelled fixture pair once into an isolated workspace root."""
-    original_threads = torch.get_num_threads()
-    torch.set_num_threads(1)
-    try:
-        root = tmp_path_factory.mktemp("installation-workspace")
-        (root / "models").mkdir()
-        build_fixture_package(root / "models" / FIXTURE_PACKAGE_NAME)
-        return root
-    finally:
-        torch.set_num_threads(original_threads)
 
 
 def application_for(tmp_path: Path, workspace: Path) -> FastAPI:

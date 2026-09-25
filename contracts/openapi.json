@@ -138,6 +138,86 @@
         "title": "Capabilities",
         "type": "object"
       },
+      "CapacityRequest": {
+        "additionalProperties": false,
+        "description": "Ask how many message bytes one uploaded image can carry with one model.",
+        "properties": {
+          "image_reference": {
+            "pattern": "^image_[0-9a-f]{32}$",
+            "title": "Image Reference",
+            "type": "string"
+          },
+          "model_identifier": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$",
+            "title": "Model Identifier",
+            "type": "string"
+          }
+        },
+        "required": [
+          "image_reference",
+          "model_identifier"
+        ],
+        "title": "CapacityRequest",
+        "type": "object"
+      },
+      "CapacityResult": {
+        "additionalProperties": false,
+        "description": "Report the message limit for one image and model inside the model range.",
+        "properties": {
+          "capacity": {
+            "$ref": "#/components/schemas/PayloadCapacity"
+          },
+          "height": {
+            "maximum": 1024.0,
+            "minimum": 512.0,
+            "title": "Height",
+            "type": "integer"
+          },
+          "image_reference": {
+            "pattern": "^image_[0-9a-f]{32}$",
+            "title": "Image Reference",
+            "type": "string"
+          },
+          "maximum_message_bytes": {
+            "maximum": 1024.0,
+            "minimum": 256.0,
+            "title": "Maximum Message Bytes",
+            "type": "integer"
+          },
+          "model_identifier": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$",
+            "title": "Model Identifier",
+            "type": "string"
+          },
+          "profile_identifier": {
+            "const": "test_only_v1",
+            "default": "test_only_v1",
+            "title": "Profile Identifier",
+            "type": "string"
+          },
+          "width": {
+            "maximum": 1024.0,
+            "minimum": 512.0,
+            "title": "Width",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "image_reference",
+          "model_identifier",
+          "profile_identifier",
+          "width",
+          "height",
+          "maximum_message_bytes",
+          "capacity"
+        ],
+        "title": "CapacityResult",
+        "type": "object"
+      },
       "ConfigurationProfile-Input": {
         "additionalProperties": false,
         "description": "Store the checkpoint frequency as a whole number of minutes in seconds.",
@@ -260,6 +340,87 @@
           "application_version"
         ],
         "title": "HealthStatus",
+        "type": "object"
+      },
+      "ImageSummary": {
+        "additionalProperties": false,
+        "description": "Describe image handling without paths or source metadata.",
+        "properties": {
+          "color_policy": {
+            "enum": [
+              "icc_to_srgb",
+              "declared_srgb",
+              "assumed_srgb"
+            ],
+            "title": "Color Policy",
+            "type": "string"
+          },
+          "input_size_bytes": {
+            "maximum": 52428800.0,
+            "minimum": 1.0,
+            "title": "Input Size Bytes",
+            "type": "integer"
+          },
+          "mode": {
+            "enum": [
+              "RGB",
+              "RGBA"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "orientation": {
+            "maximum": 8.0,
+            "minimum": 1.0,
+            "title": "Orientation",
+            "type": "integer"
+          },
+          "pixel_policy": {
+            "enum": [
+              "prepare_srgb",
+              "preserve_stored"
+            ],
+            "title": "Pixel Policy",
+            "type": "string"
+          },
+          "prepared_height": {
+            "title": "Prepared Height",
+            "type": "integer"
+          },
+          "prepared_width": {
+            "title": "Prepared Width",
+            "type": "integer"
+          },
+          "source_format": {
+            "enum": [
+              "JPEG",
+              "PNG"
+            ],
+            "title": "Source Format",
+            "type": "string"
+          },
+          "source_height": {
+            "title": "Source Height",
+            "type": "integer"
+          },
+          "source_width": {
+            "title": "Source Width",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "source_format",
+          "mode",
+          "pixel_policy",
+          "source_width",
+          "source_height",
+          "prepared_width",
+          "prepared_height",
+          "input_size_bytes",
+          "orientation",
+          "color_policy"
+        ],
+        "title": "ImageSummary",
         "type": "object"
       },
       "InstalledModel": {
@@ -614,6 +775,111 @@
         "title": "ModelList",
         "type": "object"
       },
+      "PayloadCapacity": {
+        "additionalProperties": false,
+        "description": "Distinguish layout capacity from an available trained model.",
+        "properties": {
+          "additional_repetitions": {
+            "minimum": 0.0,
+            "title": "Additional Repetitions",
+            "type": "integer"
+          },
+          "authentication_bytes": {
+            "const": 16,
+            "default": 16,
+            "title": "Authentication Bytes",
+            "type": "integer"
+          },
+          "block_count": {
+            "maximum": 5.0,
+            "minimum": 2.0,
+            "title": "Block Count",
+            "type": "integer"
+          },
+          "correction_bytes": {
+            "maximum": 160.0,
+            "minimum": 64.0,
+            "title": "Correction Bytes",
+            "type": "integer"
+          },
+          "frame_bytes": {
+            "maximum": 1115.0,
+            "minimum": 446.0,
+            "title": "Frame Bytes",
+            "type": "integer"
+          },
+          "header_bytes": {
+            "const": 45,
+            "default": 45,
+            "title": "Header Bytes",
+            "type": "integer"
+          },
+          "maximum_message_bytes": {
+            "maximum": 1024.0,
+            "minimum": 256.0,
+            "title": "Maximum Message Bytes",
+            "type": "integer"
+          },
+          "message_length_bytes": {
+            "const": 2,
+            "default": 2,
+            "title": "Message Length Bytes",
+            "type": "integer"
+          },
+          "minimum_repetitions": {
+            "minimum": 1.0,
+            "title": "Minimum Repetitions",
+            "type": "integer"
+          },
+          "padding_bytes_at_capacity": {
+            "exclusiveMaximum": 223.0,
+            "minimum": 0.0,
+            "title": "Padding Bytes At Capacity",
+            "type": "integer"
+          },
+          "payload_map_bits": {
+            "maximum": 8850000.0,
+            "minimum": 262144.0,
+            "title": "Payload Map Bits",
+            "type": "integer"
+          },
+          "profile_identifier": {
+            "const": "test_only_v1",
+            "default": "test_only_v1",
+            "title": "Profile Identifier",
+            "type": "string"
+          },
+          "protected_bits": {
+            "maximum": 10200.0,
+            "minimum": 4080.0,
+            "title": "Protected Bits",
+            "type": "integer"
+          },
+          "repeated_bits": {
+            "minimum": 0.0,
+            "title": "Repeated Bits",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "profile_identifier",
+          "maximum_message_bytes",
+          "header_bytes",
+          "message_length_bytes",
+          "authentication_bytes",
+          "padding_bytes_at_capacity",
+          "block_count",
+          "frame_bytes",
+          "correction_bytes",
+          "protected_bits",
+          "payload_map_bits",
+          "repeated_bits",
+          "minimum_repetitions",
+          "additional_repetitions"
+        ],
+        "title": "PayloadCapacity",
+        "type": "object"
+      },
       "TrainingPreflight": {
         "additionalProperties": false,
         "description": "Explain eligibility without creating files or reserving experiment time.",
@@ -663,6 +929,56 @@
           "remaining_experiment_slots"
         ],
         "title": "TrainingPreflight",
+        "type": "object"
+      },
+      "UploadedImage": {
+        "additionalProperties": false,
+        "description": "Describe one accepted upload without its file name, path, or bytes.",
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "image_reference": {
+            "pattern": "^image_[0-9a-f]{32}$",
+            "title": "Image Reference",
+            "type": "string"
+          },
+          "purpose": {
+            "enum": [
+              "cover",
+              "encoded"
+            ],
+            "title": "Purpose",
+            "type": "string"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ImageSummary"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 4,
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "image_reference",
+          "purpose",
+          "summary",
+          "warnings",
+          "created_at",
+          "expires_at"
+        ],
+        "title": "UploadedImage",
         "type": "object"
       },
       "WorkflowActionRequest": {
@@ -1249,7 +1565,7 @@
   "paths": {
     "/api/v1/artifacts/{artifact_identifier}": {
       "get": {
-        "description": "Return exact verified package members as one browser-downloadable archive.",
+        "description": "Return exact bytes of a verified package archive or a stored image.",
         "operationId": "download_workspace_artifact",
         "parameters": [
           {
@@ -1372,6 +1688,85 @@
           }
         },
         "summary": "Read Capabilities"
+      }
+    },
+    "/api/v1/capacity": {
+      "post": {
+        "description": "Report how many message bytes one uploaded image carries with one model.",
+        "operationId": "read_capacity",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CapacityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CapacityResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unsupported Media Type"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Read Capacity"
       }
     },
     "/api/v1/configuration": {
@@ -1970,6 +2365,108 @@
           }
         },
         "summary": "Read Health"
+      }
+    },
+    "/api/v1/images": {
+      "post": {
+        "description": "Store one raw image body for encoding (cover) or decoding (encoded).",
+        "operationId": "upload_image",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "purpose",
+            "required": true,
+            "schema": {
+              "enum": [
+                "cover",
+                "encoded"
+              ],
+              "title": "Purpose",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "image/jpeg": {
+              "schema": {
+                "format": "binary",
+                "type": "string"
+              }
+            },
+            "image/png": {
+              "schema": {
+                "format": "binary",
+                "type": "string"
+              }
+            }
+          },
+          "description": "The image file itself, at most 16 MiB.",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadedImage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unsupported Media Type"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Upload Image"
       }
     },
     "/api/v1/jobs": {
