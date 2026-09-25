@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
-  "description": "Separate experimental training from qualified inference support.",
+  "description": "Advertise installed experimental models separately from release quality.",
   "properties": {
     "application_version": {
       "const": "0.1.0",
@@ -24,37 +24,65 @@
     },
     "available_models": {
       "items": {
+        "maxLength": 64,
+        "minLength": 1,
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$",
         "type": "string"
       },
-      "maxItems": 0,
+      "maxItems": 8,
       "title": "Available Models",
       "type": "array"
     },
     "available_profiles": {
       "items": {
+        "const": "test_only_v1",
         "type": "string"
       },
-      "maxItems": 0,
+      "maxItems": 1,
       "title": "Available Profiles",
       "type": "array"
     },
     "decoding_available": {
-      "const": false,
       "default": false,
       "title": "Decoding Available",
       "type": "boolean"
     },
     "encoding_available": {
-      "const": false,
       "default": false,
       "title": "Encoding Available",
       "type": "boolean"
     },
+    "experimental_models_only": {
+      "const": true,
+      "default": true,
+      "title": "Experimental Models Only",
+      "type": "boolean"
+    },
+    "maximum_image_side": {
+      "default": 0,
+      "maximum": 4096,
+      "minimum": 0,
+      "title": "Maximum Image Side",
+      "type": "integer"
+    },
     "maximum_payload_bytes": {
       "default": 0,
-      "maximum": 0,
+      "maximum": 1024,
       "minimum": 0,
       "title": "Maximum Payload Bytes",
+      "type": "integer"
+    },
+    "maximum_upload_bytes": {
+      "const": 16777216,
+      "default": 16777216,
+      "title": "Maximum Upload Bytes",
+      "type": "integer"
+    },
+    "minimum_image_side": {
+      "default": 0,
+      "maximum": 4096,
+      "minimum": 0,
+      "title": "Minimum Image Side",
       "type": "integer"
     },
     "training_available": {
@@ -71,7 +99,11 @@
     "encoding_available",
     "decoding_available",
     "training_available",
-    "maximum_payload_bytes"
+    "experimental_models_only",
+    "maximum_payload_bytes",
+    "minimum_image_side",
+    "maximum_image_side",
+    "maximum_upload_bytes"
   ],
   "title": "Capabilities",
   "type": "object"

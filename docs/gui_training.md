@@ -101,6 +101,24 @@ registered artifacts from the workspace; arbitrary server paths are not download
 addresses. No experimental export is automatically installed as a qualified
 application model.
 
+## Install an experimental model for Encode and Decode
+
+Exports are never installed automatically. An explicit installation request
+verifies both packages and the pair's verification record, then advertises the
+model through `GET /api/v1/capabilities` and `GET /api/v1/models`. The request
+body names the export reference shown in the workspace and a retry identifier:
+
+```json
+{"client_request_identifier": "install-001v", "export_reference": "<export identifier>"}
+```
+
+Send it to `POST /api/v1/models/install`. Remove a model with
+`DELETE /api/v1/models/<model identifier>`; removal is refused while a queued or
+running Encode or Decode job still uses it. Installed models stay experimental:
+image quality is visibly reduced and recovery is not guaranteed. The browser
+controls for installation, encoding, and decoding arrive with the Sprint 6
+interface work.
+
 ## Delivery boundaries
 
 Local dataset preparation, bounded CPU experiments, review, and export form the

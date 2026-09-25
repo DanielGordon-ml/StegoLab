@@ -36,7 +36,11 @@ def test_initial_capabilities_and_empty_lists(client: TestClient) -> None:
         "encoding_available": False,
         "decoding_available": False,
         "training_available": True,
+        "experimental_models_only": True,
         "maximum_payload_bytes": 0,
+        "minimum_image_side": 0,
+        "maximum_image_side": 0,
+        "maximum_upload_bytes": 16_777_216,
     }
     for collection in ("models", "jobs"):
         assert client.get(f"{PREFIX}/{collection}").json() == {"items": []}

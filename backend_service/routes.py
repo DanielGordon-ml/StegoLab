@@ -5,9 +5,10 @@ from typing import cast
 from fastapi import APIRouter, Request
 
 from backend_service.failures import ApplicationFailure
+from backend_service.model_installation import InstalledModelStore
 from backend_service.storage import StateStore
 from backend_service.workspace_jobs import WorkspaceJobService
-from schemas.capabilities import Capabilities, HealthStatus, ModelList
+from schemas.capabilities import Capabilities, HealthStatus
 from schemas.configuration import (
     ConfigurationProfile,
     ConfigurationReset,
@@ -47,9 +48,9 @@ def read_health() -> HealthStatus:
 @router.get(
     "/capabilities", response_model=Capabilities, operation_id="read_capabilities"
 )
-def read_capabilities() -> Capabilities:
-    """Advertise local training separately from qualified image inference."""
-    return Capabilities()
+def read_capabilities(request: Request) -> Capabilities:
+    """Advertise experimental inference only for explicitly installed models."""
+    return cast(InstalledModelStore, request.app.state.installed_models).capabilities()
 
 
 @router.get(
@@ -92,12 +93,6 @@ def reset_configuration(
     )
     request.app.state.event_logger.info("configuration_reset_completed")
     return result
-
-
-@router.get("/models", response_model=ModelList, operation_id="list_models")
-def list_models() -> ModelList:
-    """Report no installed model packages in this release."""
-    return ModelList()
 
 
 @router.get("/jobs", response_model=JobList, operation_id="list_jobs")

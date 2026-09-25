@@ -29,6 +29,7 @@ from schemas.model_exports import (
     ModelExportManifest,
     ModelExportSummary,
 )
+from schemas.models import InstalledModel, ModelInstallRequest
 from schemas.pilot_budget import PilotBudgetSummary
 from schemas.pilot_data import PilotSelection
 from schemas.pilot_loading import PilotLoadingReport
@@ -113,6 +114,8 @@ ENTITY_MODELS = (
     Capabilities,
     HealthStatus,
     ModelList,
+    InstalledModel,
+    ModelInstallRequest,
     ConfigurationProfile,
     ConfigurationUpdate,
     ConfigurationReset,

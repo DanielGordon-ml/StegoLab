@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Identify one explicit installation so that network retries are safe.",
+  "properties": {
+    "client_request_identifier": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+      "title": "Client Request Identifier",
+      "type": "string"
+    },
+    "export_reference": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Export Reference",
+      "type": "string"
+    }
+  },
+  "required": [
+    "client_request_identifier",
+    "export_reference"
+  ],
+  "title": "ModelInstallRequest",
+  "type": "object"
+}

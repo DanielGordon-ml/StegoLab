@@ -75,7 +75,7 @@ export function Application() {
           </span>
           <span>
             {connected
-              ? `${capabilities.data.available_models.length} ready models`
+              ? `${capabilities.data.available_models.length} installed models · experimental`
               : 'Models unknown'}
           </span>
         </div>

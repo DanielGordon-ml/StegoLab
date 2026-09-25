@@ -7,7 +7,11 @@ export interface Capabilities {
   encoding_available: boolean;
   decoding_available: boolean;
   training_available: boolean;
+  experimental_models_only: true;
   maximum_payload_bytes: number;
+  minimum_image_side: number;
+  maximum_image_side: number;
+  maximum_upload_bytes: number;
 }
 
 /** Backend readiness, separate from model availability. */

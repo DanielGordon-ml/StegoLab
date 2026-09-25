@@ -31,7 +31,7 @@
       },
       "Capabilities": {
         "additionalProperties": false,
-        "description": "Separate experimental training from qualified inference support.",
+        "description": "Advertise installed experimental models separately from release quality.",
         "properties": {
           "application_version": {
             "const": "0.1.0",
@@ -54,37 +54,65 @@
           },
           "available_models": {
             "items": {
+              "maxLength": 64,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$",
               "type": "string"
             },
-            "maxItems": 0,
+            "maxItems": 8,
             "title": "Available Models",
             "type": "array"
           },
           "available_profiles": {
             "items": {
+              "const": "test_only_v1",
               "type": "string"
             },
-            "maxItems": 0,
+            "maxItems": 1,
             "title": "Available Profiles",
             "type": "array"
           },
           "decoding_available": {
-            "const": false,
             "default": false,
             "title": "Decoding Available",
             "type": "boolean"
           },
           "encoding_available": {
-            "const": false,
             "default": false,
             "title": "Encoding Available",
             "type": "boolean"
           },
+          "experimental_models_only": {
+            "const": true,
+            "default": true,
+            "title": "Experimental Models Only",
+            "type": "boolean"
+          },
+          "maximum_image_side": {
+            "default": 0,
+            "maximum": 4096.0,
+            "minimum": 0.0,
+            "title": "Maximum Image Side",
+            "type": "integer"
+          },
           "maximum_payload_bytes": {
             "default": 0,
-            "maximum": 0.0,
+            "maximum": 1024.0,
             "minimum": 0.0,
             "title": "Maximum Payload Bytes",
+            "type": "integer"
+          },
+          "maximum_upload_bytes": {
+            "const": 16777216,
+            "default": 16777216,
+            "title": "Maximum Upload Bytes",
+            "type": "integer"
+          },
+          "minimum_image_side": {
+            "default": 0,
+            "maximum": 4096.0,
+            "minimum": 0.0,
+            "title": "Minimum Image Side",
             "type": "integer"
           },
           "training_available": {
@@ -101,7 +129,11 @@
           "encoding_available",
           "decoding_available",
           "training_available",
-          "maximum_payload_bytes"
+          "experimental_models_only",
+          "maximum_payload_bytes",
+          "minimum_image_side",
+          "maximum_image_side",
+          "maximum_upload_bytes"
         ],
         "title": "Capabilities",
         "type": "object"
@@ -228,6 +260,94 @@
           "application_version"
         ],
         "title": "HealthStatus",
+        "type": "object"
+      },
+      "InstalledModel": {
+        "additionalProperties": false,
+        "description": "Describe one installed encoder/decoder pair without exposing its path.",
+        "properties": {
+          "compatibility_identifier": {
+            "pattern": "^dense_v1_[0-9a-f]{64}$",
+            "title": "Compatibility Identifier",
+            "type": "string"
+          },
+          "export_reference": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Export Reference",
+            "type": "string"
+          },
+          "format_version": {
+            "enum": [
+              1,
+              2
+            ],
+            "title": "Format Version",
+            "type": "integer"
+          },
+          "installed_at": {
+            "format": "date-time",
+            "title": "Installed At",
+            "type": "string"
+          },
+          "maximum_payload_bytes": {
+            "const": 1024,
+            "default": 1024,
+            "title": "Maximum Payload Bytes",
+            "type": "integer"
+          },
+          "maximum_side": {
+            "const": 1024,
+            "default": 1024,
+            "title": "Maximum Side",
+            "type": "integer"
+          },
+          "minimum_side": {
+            "const": 512,
+            "default": 512,
+            "title": "Minimum Side",
+            "type": "integer"
+          },
+          "model_identifier": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$",
+            "title": "Model Identifier",
+            "type": "string"
+          },
+          "profile_identifier": {
+            "const": "test_only_v1",
+            "default": "test_only_v1",
+            "title": "Profile Identifier",
+            "type": "string"
+          },
+          "source_identifier": {
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "Source Identifier",
+            "type": "string"
+          },
+          "status": {
+            "const": "experimental",
+            "default": "experimental",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "model_identifier",
+          "compatibility_identifier",
+          "source_identifier",
+          "profile_identifier",
+          "status",
+          "format_version",
+          "minimum_side",
+          "maximum_side",
+          "maximum_payload_bytes",
+          "installed_at",
+          "export_reference"
+        ],
+        "title": "InstalledModel",
         "type": "object"
       },
       "JobList": {
@@ -450,15 +570,40 @@
         "title": "JobSnapshot",
         "type": "object"
       },
+      "ModelInstallRequest": {
+        "additionalProperties": false,
+        "description": "Identify one explicit installation so that network retries are safe.",
+        "properties": {
+          "client_request_identifier": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+            "title": "Client Request Identifier",
+            "type": "string"
+          },
+          "export_reference": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Export Reference",
+            "type": "string"
+          }
+        },
+        "required": [
+          "client_request_identifier",
+          "export_reference"
+        ],
+        "title": "ModelInstallRequest",
+        "type": "object"
+      },
       "ModelList": {
         "additionalProperties": false,
-        "description": "Return an empty installed-model list until model support is available.",
+        "description": "List explicitly installed experimental models.",
         "properties": {
           "items": {
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/InstalledModel"
             },
-            "maxItems": 0,
+            "maxItems": 8,
             "title": "Items",
             "type": "array"
           }
@@ -1162,7 +1307,7 @@
     },
     "/api/v1/capabilities": {
       "get": {
-        "description": "Advertise local training separately from qualified image inference.",
+        "description": "Advertise experimental inference only for explicitly installed models.",
         "operationId": "read_capabilities",
         "responses": {
           "200": {
@@ -2068,7 +2213,7 @@
     },
     "/api/v1/models": {
       "get": {
-        "description": "Report no installed model packages in this release.",
+        "description": "List explicitly installed experimental model pairs.",
         "operationId": "list_models",
         "responses": {
           "200": {
@@ -2111,16 +2256,6 @@
             },
             "description": "Unprocessable Entity"
           },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            },
-            "description": "Internal Server Error"
-          },
           "503": {
             "content": {
               "application/json": {
@@ -2133,6 +2268,141 @@
           }
         },
         "summary": "List Models"
+      }
+    },
+    "/api/v1/models/install": {
+      "post": {
+        "description": "Verify a registered export pair and record it as an experimental model.",
+        "operationId": "install_model",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModelInstallRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstalledModel"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Install Model"
+      }
+    },
+    "/api/v1/models/{model_identifier}": {
+      "delete": {
+        "description": "Forget an installed model unless an inference job still needs it.",
+        "operationId": "remove_model",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "model_identifier",
+            "required": true,
+            "schema": {
+              "maxLength": 64,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$",
+              "title": "Model Identifier",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Remove Model"
       }
     },
     "/api/v1/training_jobs": {
