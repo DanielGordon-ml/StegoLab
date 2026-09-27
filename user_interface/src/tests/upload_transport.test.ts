@@ -2,35 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { RequestFailure } from '../contracts/errors';
 import { upload_image } from '../contracts/upload';
 import { uploaded_image } from './fixtures';
-
-/** Stand in for the browser request so each outcome can be driven by hand. */
-class FakeRequest {
-  static current: FakeRequest;
-  status = 0;
-  responseText = '';
-  timeout = 0;
-  responseType = '';
-  headers: Record<string, string> = {};
-  upload = { onprogress: null as ((event: ProgressEvent) => void) | null };
-  onload: (() => void) | null = null;
-  onerror: (() => void) | null = null;
-  ontimeout: (() => void) | null = null;
-  onabort: (() => void) | null = null;
-  sent: unknown = null;
-  url = '';
-  constructor() {
-    FakeRequest.current = this;
-  }
-  open(_method: string, url: string) {
-    this.url = url;
-  }
-  setRequestHeader(name: string, value: string) {
-    this.headers[name] = value;
-  }
-  send(body: unknown) {
-    this.sent = body;
-  }
-}
+import { FakeRequest } from './fake_request';
 
 const file = new File(['png'], 'cover.png', { type: 'image/png' });
 afterEach(() => vi.unstubAllGlobals());

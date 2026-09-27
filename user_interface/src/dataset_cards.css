@@ -1,0 +1,130 @@
+/* Job monitor transfer bar, dataset download summary and Config-tab storage card.
+   Source selector, inspection rows and upload notes live in datasets.css. */
+
+/* Byte transfer progress inside the job monitor. */
+.transfer_progress > progress {
+  width: 100%;
+}
+.activity_indicator {
+  appearance: none;
+  -webkit-appearance: none;
+}
+.activity_indicator:indeterminate {
+  background: repeating-linear-gradient(
+    90deg,
+    #bfdbd5 0 14px,
+    #e6eef0 14px 28px
+  );
+  animation: activity_stripe 1.4s linear infinite;
+}
+.activity_indicator:indeterminate::-webkit-progress-bar {
+  background: transparent;
+}
+.activity_indicator:indeterminate::-moz-progress-bar {
+  background: transparent;
+}
+@keyframes activity_stripe {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 56px 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .activity_indicator:indeterminate {
+    animation: none;
+  }
+}
+
+/* Result of a finished dataset download. */
+.summary_card {
+  margin: 22px 26px;
+  padding-top: 20px;
+  border-top: 1px solid #e5ebee;
+}
+.summary_card h3 {
+  margin: 8px 0 6px;
+  font-size: 16px;
+  font-weight: 500;
+}
+.summary_headline {
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: #244457;
+}
+.summary_card .detail_list ul {
+  margin: 0;
+  padding-left: 16px;
+  font-weight: 400;
+}
+.summary_warnings {
+  margin: 0 0 12px;
+  padding-left: 18px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #725528;
+}
+.summary_card > .help_text {
+  margin: 4px 0 0;
+}
+
+/* Dataset storage card in the Config tab. */
+.storage_card {
+  padding-bottom: 20px;
+}
+.storage_card > p,
+.storage_card > dl,
+.storage_card > div:not(.card_title_row) {
+  margin-left: 26px;
+  margin-right: 26px;
+}
+.storage_rows {
+  margin-top: 0;
+  margin-bottom: 16px;
+  padding: 0;
+  font-size: 13px;
+}
+.storage_rows > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid #e5ebee;
+}
+.storage_rows dt {
+  color: #56687b;
+  font-size: 12px;
+}
+.storage_rows dd {
+  margin: 0;
+  font-weight: 500;
+  color: #244457;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.storage_card > .form_actions {
+  margin-top: 12px;
+}
+.storage_card > .help_text {
+  margin-bottom: 0;
+}
+
+@media (max-width: 720px) {
+  .storage_rows > div {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .storage_rows dd {
+    text-align: left;
+  }
+  .storage_card > p,
+  .storage_card > dl,
+  .storage_card > div:not(.card_title_row) {
+    margin-left: 18px;
+    margin-right: 18px;
+  }
+  .summary_card {
+    margin: 18px;
+  }
+}

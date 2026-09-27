@@ -12,6 +12,7 @@ import {
   save_configuration,
 } from '../contracts/service';
 import { ConfigurationTransfer } from './configuration_transfer';
+import { DatasetStorageCard } from './dataset_storage_card';
 import { FixedProfile } from './fixed_profile';
 import { ErrorNotice } from './error_notice';
 
@@ -58,6 +59,7 @@ export function ConfigurationPanel() {
       {configuration.data && (
         <ConfigurationForm initial_configuration={configuration.data} />
       )}
+      <DatasetStorageCard />
     </div>
   );
 }

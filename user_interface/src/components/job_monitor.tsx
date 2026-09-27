@@ -3,8 +3,46 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { JobActionRequest, JobSnapshot } from '../contracts/workflows';
 import { act_on_job } from '../contracts/workflow_service';
 import { RequestFailure } from '../contracts/errors';
+import { DatasetSummaryCard } from './dataset_summary_card';
 import { EvaluationResultCard } from './evaluation_result';
 import { ErrorNotice } from './error_notice';
+import { phase_label, TransferProgress } from './job_transfer';
+
+type ActionKind = JobActionRequest['action'];
+const TRAINING_LABELS: Record<ActionKind, string> = {
+  stop: 'Stop and save',
+  cancel: 'Cancel job',
+  pause: 'Pause and save',
+  resume: 'Resume job',
+};
+const DOWNLOAD_LABELS: Record<ActionKind, string> = {
+  stop: 'Stop download',
+  cancel: 'Cancel job',
+  pause: 'Pause download',
+  resume: 'Resume download',
+};
+
+/** Explain a pending action in words that match the kind of job. */
+function requested_action_text(job: JobSnapshot, fetch_job: boolean) {
+  if (fetch_job)
+    return job.requested_action === 'cancel'
+      ? 'Cancelling and cleaning up. Waiting for the backend to confirm.'
+      : job.requested_action === 'pause'
+        ? 'Pausing the download. Waiting for the backend to confirm.'
+        : 'Action requested. Waiting for the backend to confirm.';
+  return job.requested_action === 'stop' || job.requested_action === 'pause'
+    ? 'Saving progress before stopping. Wait for the saved result.'
+    : 'Action requested. Waiting for the worker.';
+}
+
+/** Count extracted files against the total when the backend knows it. */
+function file_progress_text(metrics: Record<string, number>) {
+  const completed: number | undefined = metrics.files_completed;
+  const total: number | undefined = metrics.files_total;
+  if (total != null) return `${completed ?? 0} of ${total}`;
+  if (completed) return `${completed} so far`;
+  return 'Not counted yet';
+}
 
 /** Monitor durable work and request only actions the server currently allows. */
 export function JobMonitor({
@@ -31,16 +69,20 @@ export function JobMonitor({
     action.isError &&
     action.error instanceof RequestFailure &&
     action.error.uncertain;
-  const labels = {
-    stop: 'Stop and save',
-    cancel: 'Cancel job',
-    pause: 'Pause and save',
-    resume: 'Resume job',
-  };
+  const fetch_job = job.operation === 'fetch_dataset';
+  const labels = fetch_job ? DOWNLOAD_LABELS : TRAINING_LABELS;
   const running = job.status === 'queued' || job.status === 'running';
+  const pending_action = running && Boolean(job.requested_action);
   const global_step = job.metrics?.global_step;
+  const connection_text = !confirmed
+    ? 'Job status unavailable. Showing the last saved snapshot.'
+    : stream_connected
+      ? 'Live updates connected'
+      : running
+        ? 'Checking saved status every 5 seconds'
+        : 'Saved job status';
   /** Keep action identity stable when a network failure leaves the result unknown. */
-  function request_action(kind: JobActionRequest['action']) {
+  function request_action(kind: ActionKind) {
     const request = {
       client_request_identifier: crypto.randomUUID(),
       action: kind,
@@ -57,9 +99,11 @@ export function JobMonitor({
         <div>
           <span className="eyebrow">JOB MONITOR</span>
           <h2 id="monitor_heading">
-            {job.experiment_identifier ||
-              job.operation?.replaceAll('_', ' ') ||
-              'Saved job'}
+            {fetch_job
+              ? 'Dataset download'
+              : job.experiment_identifier ||
+                job.operation?.replaceAll('_', ' ') ||
+                'Saved job'}
           </h2>
         </div>
         <span className={`status_pill ${job.status}`}>
@@ -67,30 +111,32 @@ export function JobMonitor({
           {job.status.replaceAll('_', ' ')}
         </span>
       </div>
-      <p className="phase_text">{job.phase.replaceAll('_', ' ')}</p>
-      <progress
-        aria-label="Job progress"
-        max={1}
-        value={job.progress ?? undefined}
-      />
-      <div className="progress_labels">
-        <span>
-          {global_step == null
-            ? job.progress == null
-              ? 'Waiting for progress'
-              : `${Math.round(job.progress * 100)}% complete`
-            : `Step ${global_step}`}
-        </span>
-        <span>
-          {!confirmed
-            ? 'Job status unavailable. Showing the last saved snapshot.'
-            : stream_connected
-              ? 'Live updates connected'
-              : running
-                ? 'Checking saved status every 5 seconds'
-                : 'Saved job status'}
-        </span>
-      </div>
+      <p className="phase_text">
+        {fetch_job ? phase_label(job.phase) : job.phase.replaceAll('_', ' ')}
+      </p>
+      {fetch_job ? (
+        <TransferProgress job={job}>
+          <span>{connection_text}</span>
+        </TransferProgress>
+      ) : (
+        <>
+          <progress
+            aria-label="Job progress"
+            max={1}
+            value={job.progress ?? undefined}
+          />
+          <div className="progress_labels">
+            <span>
+              {global_step == null
+                ? job.progress == null
+                  ? 'Waiting for progress'
+                  : `${Math.round(job.progress * 100)}% complete`
+                : `Step ${global_step}`}
+            </span>
+            <span>{connection_text}</span>
+          </div>
+        </>
+      )}
       <div className="monitor_details">
         <div>
           <span>Last update</span>
@@ -102,6 +148,12 @@ export function JobMonitor({
             <strong>Every 5 minutes</strong>
           </div>
         )}
+        {fetch_job && (
+          <div>
+            <span>Files</span>
+            <strong>{file_progress_text(job.metrics)}</strong>
+          </div>
+        )}
         <div>
           <span>Time remaining</span>
           <strong>
@@ -111,11 +163,9 @@ export function JobMonitor({
           </strong>
         </div>
       </div>
-      {job.requested_action && running && confirmed && (
+      {pending_action && confirmed && (
         <p className="notice" role="status">
-          {job.requested_action === 'stop' || job.requested_action === 'pause'
-            ? 'Saving progress before stopping. Wait for the saved result.'
-            : 'Action requested. Waiting for the worker.'}
+          {requested_action_text(job, fetch_job)}
         </p>
       )}
       {job.error && (
@@ -124,7 +174,7 @@ export function JobMonitor({
             'This job could not finish. Check the saved result before retrying.'}
         </div>
       )}
-      {job.status === 'completed' && (
+      {job.status === 'completed' && !fetch_job && (
         <p className="help_text">
           Work finished. This does not mean the model is approved for Encode or
           Decode.
@@ -137,6 +187,7 @@ export function JobMonitor({
         </p>
       )}
       <EvaluationResultCard job={job} />
+      <DatasetSummaryCard job={job} />
       <ErrorNotice error={action.error} />
       <div className="form_actions">
         {uncertain && attempt ? (
@@ -149,18 +200,13 @@ export function JobMonitor({
           </button>
         ) : (
           job.available_actions
-            .filter(
-              (kind): kind is JobActionRequest['action'] => kind in labels,
-            )
+            .filter((kind): kind is ActionKind => kind in labels)
+            .filter(() => !(fetch_job && pending_action))
             .map((kind) => (
               <button
                 key={kind}
                 className={`button ${kind === 'stop' ? 'primary' : 'secondary'}`}
-                disabled={
-                  !confirmed ||
-                  action.isPending ||
-                  (running && Boolean(job.requested_action))
-                }
+                disabled={!confirmed || action.isPending || pending_action}
                 onClick={() => request_action(kind)}
               >
                 {labels[kind]}
@@ -169,7 +215,9 @@ export function JobMonitor({
         )}
       </div>
       <p className="help_text">
-        Training keeps running when you switch tabs or close this page.
+        {fetch_job
+          ? 'The download keeps running when you switch tabs or close this page.'
+          : 'Training keeps running when you switch tabs or close this page.'}
       </p>
     </section>
   );
