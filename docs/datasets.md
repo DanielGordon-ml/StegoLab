@@ -143,6 +143,39 @@ Exact matching does not detect every resized or recompressed duplicate. Therefor
 review is required before the research pilot. UHD-IQA does not replace the COCO
 benchmark in the backend plan.
 
+## Fetch remote sources from the command line
+
+Sprint 7 adds two commands that download a source, save its raw files under
+`data/<source_name>/` (next to any folder you place there yourself), and then
+prepare a revision under `datasets/` exactly like a local folder:
+
+```sh
+uv run --locked stegolab inspect_source docs/examples/inspect_imagenet.json
+uv run --locked stegolab fetch_dataset docs/examples/fetch_div2k_validation.json
+uv run --locked stegolab fetch_dataset docs/examples/fetch_coco_validation.json
+uv run --locked stegolab fetch_dataset docs/examples/fetch_wikitext.json
+```
+
+- Sources are Hugging Face repositories (pinned to a commit), plain https
+  archives, or archives uploaded through the browser. Only https is accepted;
+  private, local and metadata addresses are refused, on every redirect too.
+- Inspection resolves the revision and reports sizes, access and pause support
+  without downloading. A gated repository needs `HF_ACCESS_TOKEN` (or
+  `HF_TOKEN`) in the backend environment; the command then explains this and
+  downloads nothing.
+- Downloaded archives are kept, checksum-verified, under
+  `.cache/stegolab/datasets/`. A second run of the same request downloads
+  nothing and reuses the raw folder and the prepared revision.
+- Archive members are extracted only when their paths are safe, their bytes
+  match their declared type and size, and the limits hold; everything else is
+  recorded as a rejection. `archive_splits` maps member folders to splits, and
+  `training_intended: false` allows evaluation-only revisions such as COCO
+  validation. Text sources such as wikitext are saved as `.txt` files and are
+  not prepared as images.
+- Ctrl-C or a termination signal keeps the partial download for a later resume
+  and removes only the run's staging folders. A near-duplicate audit is still a
+  separate step; fetching never makes a dataset pilot-ready.
+
 ## Storage and recovery
 
 - One process imports into a given output root at a time. A second writer fails

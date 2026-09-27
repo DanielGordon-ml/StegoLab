@@ -17,6 +17,7 @@ from schemas.dataset_common import (
 from schemas.dataset_manifest import DatasetSummary
 from schemas.dataset_sources import (
     MAXIMUM_DOWNLOAD_BYTES,
+    MAXIMUM_IMAGES,
     DatasetSourceSpec,
     HuggingFaceSourceSpec,
     SourceName,
@@ -36,7 +37,7 @@ class DatasetFetchRequest(StrictRecord):
     source: DatasetSourceSpec
     source_name: SourceName
     dataset_name: DatasetName
-    maximum_images: int = Field(default=200_000, ge=1, le=200_000)
+    maximum_images: int = Field(default=MAXIMUM_IMAGES, ge=1, le=MAXIMUM_IMAGES)
     training_intended: bool = True
     prepare: bool = True
 
@@ -63,7 +64,7 @@ class DatasetFetchDocument(DatasetVersionedRecord):
     data_root: str = Field(min_length=1, max_length=4096)
     cache_root: str = Field(min_length=1, max_length=4096)
     output_root: str = Field(min_length=1, max_length=4096)
-    maximum_images: int = Field(default=200_000, ge=1, le=200_000)
+    maximum_images: int = Field(default=MAXIMUM_IMAGES, ge=1, le=MAXIMUM_IMAGES)
     training_intended: bool = True
     prepare: bool = True
     seed: int = Field(default=0, ge=0, le=2**63 - 1)

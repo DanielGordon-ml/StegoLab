@@ -53,12 +53,17 @@ class DatasetCacheEntrySummary(StrictRecord):
 
 
 class DatasetCacheSummary(StrictRecord):
-    """Summarize cache usage without exposing filesystem paths."""
+    """Summarize cache usage without exposing filesystem paths.
+
+    The byte and entry totals cover the whole cache; ``entries`` lists at most
+    a thousand of them and ``unlisted_entries`` says how many were left out.
+    """
 
     root_available: bool
     entries: list[DatasetCacheEntrySummary] = Field(
         default_factory=list, max_length=1000
     )
+    unlisted_entries: int = Field(default=0, ge=0)
     total_bytes: int = Field(default=0, ge=0)
     unused_bytes: int = Field(default=0, ge=0)
     unused_entries: int = Field(default=0, ge=0)

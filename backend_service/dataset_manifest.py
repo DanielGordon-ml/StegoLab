@@ -17,7 +17,7 @@ from backend_service.dataset_serialization import (
     canonical_json,
     checksum,
 )
-from schemas.dataset_common import DATASET_SPLITS, SPLIT_MAPPING
+from schemas.dataset_common import DATASET_SPLITS, SPLIT_MAPPING, DatasetSplit
 from schemas.datasets import (
     DatasetImageRecord,
     DatasetManifest,
@@ -78,6 +78,15 @@ def record_counts(
     }
 
 
+def effective_split_mapping(
+    request: DatasetPreparationRequest, has_metadata: bool
+) -> dict[str, DatasetSplit]:
+    """Freeze the label mapping used to read metadata; without metadata it is empty."""
+    if not has_metadata:
+        return {}
+    return dict(request.split_mapping or SPLIT_MAPPING)
+
+
 def manifest_revision(value: dict[str, object]) -> str:
     """Hash all frozen manifest fields except the revision itself."""
     return checksum(
@@ -101,7 +110,16 @@ def write_manifest(
     selected_by_split: dict[str, int] | None = None,
 ) -> DatasetManifest:
     """Write canonical metadata only after grouping and deriving all counts."""
-    grouped = assign_groups(records, request.source_kind, request.seed)
+    split_mapping = effective_split_mapping(request, metadata_checksum is not None)
+    grouped = assign_groups(
+        records,
+        request.source_kind,
+        request.seed,
+        training_intended=request.training_intended,
+        split_mapping=split_mapping,
+    )
+    provenance = dict(source_provenance or runtime_provenance())
+    provenance.setdefault("training_intended", str(request.training_intended).lower())
     rejected = sorted(rejections, key=lambda record: record.source_path)
     paths = [record.source_path for record in grouped + rejected]
     if len(set(paths)) != len(paths):
@@ -134,9 +152,9 @@ def write_manifest(
         "source_kind": request.source_kind,
         "source_url": request.source_url,
         "terms_reference": request.terms_reference,
-        "source_provenance": source_provenance or runtime_provenance(),
+        "source_provenance": provenance,
         "metadata_checksum": metadata_checksum,
-        "split_mapping": SPLIT_MAPPING if request.source_kind == "uhd_iqa" else {},
+        "split_mapping": split_mapping,
         "seed": request.seed,
         "selection_name": request.selection_name,
         "selection": sorted(request.selection)

@@ -1,6 +1,7 @@
 """Strict source requests and prepared image provenance."""
 
-from typing import Literal, Self
+import re
+from typing import Annotated, Literal, Self
 
 from pydantic import Field, model_validator
 
@@ -8,6 +9,7 @@ from schemas.base import StrictRecord
 from schemas.dataset_common import (
     REMOTE_SOURCE_KINDS,
     SHA256,
+    SPLIT_MAPPING,
     DatasetName,
     DatasetSplit,
     DatasetVersionedRecord,
@@ -16,6 +18,8 @@ from schemas.dataset_common import (
 )
 
 SOURCE_URL = "https://database.mmsp-kn.de/uhd-iqa-benchmark-database.html"
+UPSTREAM_LABEL_PATTERN = r"^[a-z][a-z0-9_]{0,63}$"
+UpstreamLabel = Annotated[str, Field(pattern=UPSTREAM_LABEL_PATTERN)]
 
 
 class DatasetPreparationRequest(DatasetVersionedRecord):
@@ -34,6 +38,7 @@ class DatasetPreparationRequest(DatasetVersionedRecord):
     source_url: str = Field(default=SOURCE_URL, max_length=4096)
     terms_reference: str = Field(default=SOURCE_URL, max_length=4096)
     training_intended: bool = True
+    split_mapping: dict[str, DatasetSplit] | None = Field(default=None, max_length=64)
 
     @model_validator(mode="before")
     @classmethod
@@ -43,6 +48,7 @@ class DatasetPreparationRequest(DatasetVersionedRecord):
             value = dict(value)
             value.setdefault("source_url", "local")
             value.setdefault("terms_reference", "not_reviewed")
+            value.setdefault("metadata_file", None)
         if isinstance(value, dict) and value.get("source_kind") in REMOTE_SOURCE_KINDS:
             value = dict(value)
             value.setdefault("metadata_file", None)
@@ -63,6 +69,20 @@ class DatasetPreparationRequest(DatasetVersionedRecord):
             raise ValueError("Selection paths must be nonempty and unique.")
         return self
 
+    @model_validator(mode="after")
+    def validate_split_mapping(self) -> Self:
+        """Keep declared split labels safe and consistent with the source kind."""
+        mapping = self.split_mapping
+        if mapping is not None and any(
+            re.fullmatch(UPSTREAM_LABEL_PATTERN, label) is None for label in mapping
+        ):
+            raise ValueError("Split mapping labels must be safe lowercase names.")
+        if self.source_kind == "uhd_iqa" and mapping not in (None, SPLIT_MAPPING):
+            raise ValueError("UHD-IQA preparation uses its fixed split mapping.")
+        if self.source_kind == "local" and (mapping or self.metadata_file is not None):
+            raise ValueError("Local sources use generated splits without metadata.")
+        return self
+
 
 class DatasetImageRecord(StrictRecord):
     """Describe original bytes and the immutable prepared pixels."""
@@ -70,7 +90,7 @@ class DatasetImageRecord(StrictRecord):
     source_path: RelativePath
     prepared_path: RelativePath
     source_identity: str | None = Field(default=None, min_length=1, max_length=4096)
-    upstream_split: Literal["training", "validation", "test"] | None = None
+    upstream_split: UpstreamLabel | None = None
     subset: str | None = Field(default=None, max_length=4096)
     assigned_split: DatasetSplit | None = None
     duplicate_group: str = Field(default="", pattern=r"^([a-f0-9]{64})?$")
@@ -119,6 +139,6 @@ class DatasetRejection(StrictRecord):
 
     source_path: RelativePath
     source_checksum: SHA256 | None = None
-    upstream_split: Literal["training", "validation", "test"] | None = None
+    upstream_split: UpstreamLabel | None = None
     reason: str = Field(pattern=r"^[a-z][a-z0-9_]{0,63}$")
     source_bytes: int = Field(default=0, ge=0, le=100 * 1024**3)

@@ -24,7 +24,7 @@ class Response:
     body: bytes = b""
     chunked: bool = False
     slow_chunks: list[tuple[bytes, float]] = field(default_factory=list)
-    lie_content_length: int | None = None
+    lie_content_length: int | str | None = None
     ranges: bool = False
     etag: str | None = None
 

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "run_label": "div2k_validation",
+  "source": {
+    "source_kind": "https_archive",
+    "url": "https://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_HR.zip",
+    "archive_splits": {"DIV2K_valid_HR": "held_out"},
+    "terms_reference": "https://data.vision.ee.ethz.ch/cvl/DIV2K/"
+  },
+  "source_name": "div2k",
+  "dataset_name": "div2k_validation",
+  "data_root": "data",
+  "cache_root": ".cache/stegolab/datasets",
+  "output_root": "datasets",
+  "training_intended": false,
+  "prepare": true
+}

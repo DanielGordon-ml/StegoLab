@@ -3,6 +3,7 @@
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from backend_service.dataset_sources.source_marker import preparation_document
 from backend_service.failures import ApplicationFailure
 from backend_service.training_budget_records import BudgetLedger
 from backend_service.training_checkpoint_files import read_json
@@ -160,15 +161,9 @@ def resolve_request(
         source = catalog.resolve_source(
             request.source_identifier, request.source_subdirectory
         )
-        return "prepare_dataset", {
-            "schema_version": 1,
-            "source_kind": "local",
-            "metadata_file": None,
-            "source_directory": str(source),
-            "output_root": str(catalog.root / "datasets"),
-            "dataset_name": request.dataset_name,
-            "seed": 0,
-        }
+        return "prepare_dataset", preparation_document(
+            source, request.dataset_name, catalog.root / "datasets"
+        )
     ledger = read_budget(catalog.root)
     if request.operation != "train" and not any(
         item.experiment_identifier == request.experiment_identifier

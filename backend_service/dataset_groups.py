@@ -6,6 +6,7 @@ from backend_service.dataset_serialization import canonical_json, checksum
 from backend_service.failures import ApplicationFailure
 from schemas.dataset_common import (
     DATASET_SPLITS,
+    REMOTE_SOURCE_KINDS,
     SPLIT_MAPPING,
     DatasetSplit,
     SourceKind,
@@ -17,6 +18,9 @@ def assign_groups(
     records: list[DatasetImageRecord],
     source_kind: SourceKind,
     seed: int = 0,
+    *,
+    training_intended: bool = True,
+    split_mapping: dict[str, DatasetSplit] = SPLIT_MAPPING,
 ) -> list[DatasetImageRecord]:
     """Group related sources before assigning splits and duplicate representatives."""
     if not records:
@@ -26,22 +30,45 @@ def assign_groups(
             422,
         )
     try:
-        return _assign(records, source_kind, seed)
+        return _assign(records, source_kind, seed, training_intended, split_mapping)
     except ValueError:
         raise ApplicationFailure(
             "dataset_groups", "Dataset split or duplicate declarations conflict.", 422
         ) from None
 
 
+def _check_declarations(
+    records: list[DatasetImageRecord], source_kind: SourceKind
+) -> None:
+    """Apply each source kind's rule for declared splits and identities."""
+    declared = [record for record in records if record.upstream_split is not None]
+    if source_kind == "local" and declared:
+        raise ValueError("Local dataset records require generated splits.")
+    if source_kind == "uhd_iqa" and (
+        len(declared) != len(records)
+        or any(record.source_identity is None for record in records)
+    ):
+        raise ValueError("UHD-IQA records require source identities and splits.")
+    if source_kind in REMOTE_SOURCE_KINDS and (
+        declared and len(declared) != len(records)
+    ):
+        raise ValueError("Remote records declare splits for all images or none.")
+    if any(record.source_identity is None for record in declared):
+        raise ValueError("Declared splits require source identities.")
+
+
 def _assign(
     records: list[DatasetImageRecord],
     source_kind: SourceKind,
     seed: int,
+    training_intended: bool,
+    split_mapping: dict[str, DatasetSplit],
 ) -> list[DatasetImageRecord]:
     """Use union-find so linked identities and RGB duplicates cannot leak."""
     ordered = sorted(records, key=lambda record: record.source_path)
     if not ordered or len({record.source_path for record in ordered}) != len(ordered):
         raise ValueError("Dataset source paths must be nonempty and unique.")
+    _check_declarations(ordered, source_kind)
     parents = list(range(len(ordered)))
 
     def find(index: int) -> int:
@@ -54,12 +81,6 @@ def _assign(
     tokens: dict[str, int] = {}
     representatives: dict[str, str] = {}
     for index, record in enumerate(ordered):
-        if source_kind == "local" and record.upstream_split is not None:
-            raise ValueError("Local dataset records require generated splits.")
-        if source_kind == "uhd_iqa" and (
-            record.source_identity is None or record.upstream_split is None
-        ):
-            raise ValueError("UHD-IQA records require source identities and splits.")
         representatives.setdefault(record.rgb_checksum, record.source_path)
         keys = ["rgb:" + record.rgb_checksum]
         if record.source_identity is not None:
@@ -81,11 +102,14 @@ def _assign(
             if record.source_identity is not None
         )
         group_id = checksum(canonical_json(sorted(identifiers)))
-        declared = {
-            SPLIT_MAPPING[record.upstream_split]
+        labels = {
+            record.upstream_split
             for record in group
             if record.upstream_split is not None
         }
+        if any(label not in split_mapping for label in labels):
+            raise ValueError("A declared split label has no assigned split.")
+        declared = {split_mapping[label] for label in labels}
         if len(declared) > 1:
             raise ValueError("A linked group has conflicting official splits.")
         if declared:
@@ -107,7 +131,7 @@ def _assign(
         )
         for record in ordered
     ]
-    if not any(
+    if training_intended and not any(
         record.eligible
         and record.assigned_split == "train"
         and record.representative_source_path == record.source_path

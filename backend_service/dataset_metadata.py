@@ -1,11 +1,10 @@
-"""Strict local UHD-IQA metadata parsing and source-split preservation."""
+"""Strict source metadata parsing that preserves declared upstream splits."""
 
 import csv
 import hashlib
 import io
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal, cast
 
 from backend_service.dataset_files import (
     dataset_failure,
@@ -15,7 +14,7 @@ from backend_service.dataset_files import (
 from backend_service.dataset_scan import SourceInventory
 from schemas.dataset_common import SPLIT_MAPPING, DatasetSplit
 
-UpstreamSplit = Literal["training", "validation", "test"]
+MAXIMUM_IDENTITY_LENGTH = 4096
 
 
 @dataclass(frozen=True)
@@ -23,7 +22,7 @@ class UhdMetadataRow:
     """Retain the upstream image identity and its declared split/subset."""
 
     image_name: str
-    upstream_split: UpstreamSplit
+    upstream_split: str
     subset: str
     assigned_split: DatasetSplit
     upstream_identity: str
@@ -38,7 +37,12 @@ class UhdMetadata:
 
 
 def read_uhd_metadata(
-    root: Path, metadata_relative_path: str, inventory: SourceInventory
+    root: Path,
+    metadata_relative_path: str,
+    inventory: SourceInventory,
+    *,
+    split_mapping: dict[str, DatasetSplit] = SPLIT_MAPPING,
+    identity_prefix: str = "uhd_iqa",
 ) -> UhdMetadata:
     """Validate complete CSV metadata before joining exact image basenames."""
     relative_parts(metadata_relative_path)
@@ -60,6 +64,7 @@ def read_uhd_metadata(
             raise dataset_failure("dataset_metadata")
         for raw in reader:
             name, split, subset = raw["image_name"], raw["set"], raw["subset"]
+            identity = raw.get("identity") or None
             if (
                 None in raw
                 or name is None
@@ -69,16 +74,17 @@ def read_uhd_metadata(
                 or len(subset) > 255
                 or len(relative_parts(name)) != 1
                 or name in rows
-                or split not in SPLIT_MAPPING
+                or split not in split_mapping
                 or len(rows) >= 200_000
+                or (identity is not None and len(identity) > MAXIMUM_IDENTITY_LENGTH)
             ):
                 raise dataset_failure("dataset_metadata")
             rows[name] = UhdMetadataRow(
                 name,
-                cast(UpstreamSplit, split),
+                split,
                 subset,
-                SPLIT_MAPPING[split],
-                f"uhd_iqa:{name}",
+                split_mapping[split],
+                identity or f"{identity_prefix}:{name}",
             )
     except (UnicodeError, csv.Error, KeyError, TypeError):
         raise dataset_failure("dataset_metadata") from None

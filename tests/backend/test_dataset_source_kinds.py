@@ -158,6 +158,9 @@ def test_token_presence_is_reported_without_its_value(
     assert not hugging_face_token_configured()
     monkeypatch.setenv("HF_TOKEN", "   ")
     assert not hugging_face_token_configured()
+    monkeypatch.setenv("HF_ACCESS_TOKEN", "hf_owner_variable_sentinel")
+    assert hugging_face_token_configured()
+    monkeypatch.delenv("HF_ACCESS_TOKEN")
     token_file = tmp_path / "token"
     token_file.write_text("hf_private_sentinel\n")
     monkeypatch.setenv("HF_TOKEN_FILE", str(token_file))
