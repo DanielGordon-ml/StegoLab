@@ -134,7 +134,15 @@ def validated_records(
     ):
         raise ValueError("Dataset paths are inconsistent or duplicated.")
     _validate_prepared_paths(directory, records)
-    if assign_groups(records, manifest.source_kind, manifest.seed) != records:
+    regrouped = assign_groups(
+        records,
+        manifest.source_kind,
+        manifest.seed,
+        training_intended=manifest.source_provenance.get("training_intended", "true")
+        == "true",
+        split_mapping=manifest.split_mapping,
+    )
+    if regrouped != records:
         raise ValueError("Frozen duplicate groups or splits are inconsistent.")
     values = manifest.model_dump(mode="json")
     if any(
@@ -222,8 +230,11 @@ def _validate_coverage(
             raise ValueError("UHD-IQA provenance or split mapping is missing.")
         if manifest.expected_images is None:
             raise ValueError("UHD-IQA metadata coverage must be declared.")
-    elif manifest.split_mapping:
-        raise ValueError("Local sources use the frozen generated split policy.")
+    elif manifest.source_kind == "local":
+        if manifest.split_mapping:
+            raise ValueError("Local sources use the frozen generated split policy.")
+    elif bool(manifest.split_mapping) != (manifest.metadata_checksum is not None):
+        raise ValueError("Remote split mappings must come with source metadata.")
     if manifest.selected_images != len(all_paths):
         raise ValueError("Selected count disagrees with the source records.")
     if manifest.discovered_images < manifest.selected_images:
@@ -250,7 +261,10 @@ def _validate_coverage(
             if record.upstream_split is not None
         ]
     )
-    if manifest.source_kind == "uhd_iqa" and dict(actual) != manifest.selected_by_split:
+    if (
+        manifest.metadata_checksum is not None
+        and dict(actual) != manifest.selected_by_split
+    ):
         raise ValueError("Selected source split coverage is inconsistent.")
     if any(
         count > manifest.selected_by_split.get(split or "", 0)

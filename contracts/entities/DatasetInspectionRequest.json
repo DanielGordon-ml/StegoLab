@@ -298,8 +298,15 @@
   },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
-  "description": "Ask what a source contains before any bytes are downloaded.",
+  "description": "Ask what a source contains before any bytes are downloaded.\n\n``maximum_images`` should match the cap the fetch will use, because the\ncap is part of the raw folder identity that decides whether an earlier\nfetch can be reused.",
   "properties": {
+    "maximum_images": {
+      "default": 200000,
+      "maximum": 200000,
+      "minimum": 1,
+      "title": "Maximum Images",
+      "type": "integer"
+    },
     "source": {
       "discriminator": {
         "mapping": {
@@ -338,7 +345,8 @@
   },
   "required": [
     "source",
-    "source_name"
+    "source_name",
+    "maximum_images"
   ],
   "title": "DatasetInspectionRequest",
   "type": "object"

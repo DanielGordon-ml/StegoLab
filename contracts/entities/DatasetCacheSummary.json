@@ -70,7 +70,7 @@
   },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
-  "description": "Summarize cache usage without exposing filesystem paths.",
+  "description": "Summarize cache usage without exposing filesystem paths.\n\nThe byte and entry totals cover the whole cache; ``entries`` lists at most\na thousand of them and ``unlisted_entries`` says how many were left out.",
   "properties": {
     "entries": {
       "items": {
@@ -102,6 +102,12 @@
       "title": "Total Bytes",
       "type": "integer"
     },
+    "unlisted_entries": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Unlisted Entries",
+      "type": "integer"
+    },
     "unused_bytes": {
       "default": 0,
       "minimum": 0,
@@ -118,6 +124,7 @@
   "required": [
     "root_available",
     "entries",
+    "unlisted_entries",
     "total_bytes",
     "unused_bytes",
     "unused_entries",

@@ -7,7 +7,7 @@ MAXIMUM_TOKEN_BYTES = 4096
 
 
 def read_hugging_face_token() -> str | None:
-    """Read the token from HF_TOKEN_FILE, then HF_TOKEN; blanks count as absent."""
+    """Read HF_TOKEN_FILE, then HF_TOKEN or HF_ACCESS_TOKEN; blanks are absent."""
     file_name = os.environ.get("HF_TOKEN_FILE", "")
     if file_name:
         try:
@@ -17,9 +17,10 @@ def read_hugging_face_token() -> str | None:
             value = ""
         if value and len(value) <= MAXIMUM_TOKEN_BYTES:
             return value
-    value = os.environ.get("HF_TOKEN", "").strip()
-    if value and len(value) <= MAXIMUM_TOKEN_BYTES:
-        return value
+    for variable in ("HF_TOKEN", "HF_ACCESS_TOKEN"):
+        value = os.environ.get(variable, "").strip()
+        if value and len(value) <= MAXIMUM_TOKEN_BYTES:
+            return value
     return None
 
 

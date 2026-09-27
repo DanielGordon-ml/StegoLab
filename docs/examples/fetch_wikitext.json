@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "run_label": "wikitext_2_raw",
+  "source": {
+    "source_kind": "hugging_face",
+    "repository": "Salesforce/wikitext",
+    "revision": "b08601e04326c79dfdd32d625aee71d232d685c3",
+    "content": "text",
+    "path_prefix": "wikitext-2-raw-v1",
+    "text_column": "text",
+    "terms_reference": "https://huggingface.co/datasets/Salesforce/wikitext"
+  },
+  "source_name": "wikitext",
+  "dataset_name": "wikitext_text",
+  "data_root": "data",
+  "cache_root": ".cache/stegolab/datasets",
+  "output_root": "datasets",
+  "prepare": false
+}

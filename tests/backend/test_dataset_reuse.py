@@ -10,7 +10,7 @@ from backend_service.dataset_preparation import prepare_dataset
 from backend_service.dataset_reuse import find_reusable_dataset
 from backend_service.dataset_validation import load_manifest
 from backend_service.failures import ApplicationFailure
-from schemas.datasets import DatasetPreparationRequest
+from schemas.datasets import DatasetManifest, DatasetPreparationRequest
 
 
 @pytest.fixture
@@ -67,6 +67,29 @@ def test_changed_source_or_tooling_disables_reuse(
     assert (
         find_reusable_dataset(request, inventory_dataset(request), provenance) is None
     )
+
+
+def test_revision_without_training_intended_key_still_reuses(
+    prepared_request: tuple[DatasetPreparationRequest, Path, dict[str, str]],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A revision prepared before the key existed matches its default of true."""
+    request, directory, provenance = prepared_request
+    assert provenance["training_intended"] == "true"
+
+    def without_key(candidate: Path) -> DatasetManifest:
+        """Load the manifest the way an earlier release wrote its provenance."""
+        manifest = load_manifest(candidate)
+        older = dict(manifest.source_provenance)
+        del older["training_intended"]
+        return manifest.model_copy(update={"source_provenance": older})
+
+    monkeypatch.setattr("backend_service.dataset_reuse.load_manifest", without_key)
+    result = find_reusable_dataset(request, inventory_dataset(request), provenance)
+    assert result is not None and result.reused and result.revision == directory.name
+    evaluation_only = provenance | {"training_intended": "false"}
+    inventory = inventory_dataset(request)
+    assert find_reusable_dataset(request, inventory, evaluation_only) is None
 
 
 def test_missing_current_checksum_disables_reuse(

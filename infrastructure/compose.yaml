@@ -12,6 +12,10 @@ services:
       STEGOLAB_DATA_DIRECTORY: /data/state
       STEGOLAB_LOG_DIRECTORY: /data/logs
       STEGOLAB_WORKSPACE_ROOT: /workspace
+    env_file:
+      # Optional owner secrets such as HF_ACCESS_TOKEN; never committed.
+      - path: ../.env
+        required: false
     volumes:
       - application_data:/data
       - ../datasets:/workspace/datasets

@@ -71,6 +71,11 @@ qualified model availability are read-only.
   you place there yourself, and downloaded archives are kept under
   `.cache/stegolab/datasets/`. Both folders are mounted read-write into the
   backend container and are ignored by Git.
+- Gated Hugging Face datasets need a read token on the server. Put
+  `HF_ACCESS_TOKEN=...` (or `HF_TOKEN=...`) in the repository's root `.env`,
+  which Compose loads into the backend container only; for native commands
+  export it in the shell first (`set -a; . ./.env; set +a`). The browser never
+  sends or receives the token; the interface only shows whether one is set.
 - Docker output is limited to three 10 MiB files per service. Request access
   logs are disabled so request values do not enter proxy logs.
 - Stop containers while keeping saved data:

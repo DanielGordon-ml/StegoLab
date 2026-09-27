@@ -42,7 +42,13 @@ class DownloadStopped(Exception):
 
 @dataclass(frozen=True)
 class RemoteAsset:
-    """What is known about one remote file before it is fetched."""
+    """What is known about one remote file before it is fetched.
+
+    ``resumable`` means the server accepts byte ranges and the address always
+    serves the same bytes: either the ``etag`` pins them and is sent as
+    ``If-Range``, or the address itself names an immutable version, such as a
+    Hugging Face file at a commit, and the checksum verifies the result.
+    """
 
     url: str
     basename: str
@@ -131,7 +137,7 @@ def download_asset(
     """
     offset = partial.open_for_append()
     try:
-        if offset and not (asset.resumable and asset.etag is not None):
+        if offset and not asset.resumable:
             partial.truncate()
             offset = 0
         byte_range = (offset, None) if offset else None
@@ -143,8 +149,10 @@ def download_asset(
             digest = hashlib.sha256()
             for existing in partial.iter_existing(offset):
                 digest.update(existing)
-            length = response.headers.get("content-length", "")
-            total = int(length) + offset if length.isdigit() else asset.expected_size
+            length = response.headers.get("content-length", "").strip()
+            total = int(length) + offset if _plain_number(length) else None
+            if total is None:
+                total = asset.expected_size
             if total is not None and total > maximum_bytes:
                 raise transfer_failure("download_too_large")
             response.set_read_timeout(stall_timeout)
@@ -181,6 +189,11 @@ def download_asset(
     return DownloadOutcome(size=received, sha256=checksum, resumed_from=offset)
 
 
+def _plain_number(text: str) -> bool:
+    """Accept only ASCII digits, which ``int`` parses without surprises."""
+    return text.isascii() and text.isdecimal()
+
+
 def _accept_response(
     response: TransportResponse, partial: PartialFile, offset: int
 ) -> int:
@@ -188,7 +201,7 @@ def _accept_response(
     if response.status == 206 and offset:
         unit, _, span = response.headers.get("content-range", "").partition(" ")
         start = span.split("-", 1)[0]
-        if unit == "bytes" and start.isdigit() and int(start) == offset:
+        if unit == "bytes" and _plain_number(start) and int(start) == offset:
             return offset
     elif response.status == 200:
         if offset:

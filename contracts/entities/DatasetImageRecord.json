@@ -175,11 +175,7 @@
     "upstream_split": {
       "anyOf": [
         {
-          "enum": [
-            "training",
-            "validation",
-            "test"
-          ],
+          "pattern": "^[a-z][a-z0-9_]{0,63}$",
           "type": "string"
         },
         {

@@ -101,10 +101,15 @@ def _same_request(
     inventory: DatasetInventory,
     provenance: dict[str, str],
 ) -> bool:
-    """Match every frozen setting and current source-coverage declaration."""
+    """Match every frozen setting and current source-coverage declaration.
+
+    Revisions prepared before ``training_intended`` was recorded carry no
+    such key; they are read as ``"true"``, the same default validation uses.
+    """
     metadata = inventory.metadata
     expected = len(metadata.rows) if metadata is not None else None
     selected = sorted(request.selection) if request.selection is not None else None
+    recorded = {"training_intended": "true", **manifest.source_provenance}
     return (
         manifest.dataset_name == request.dataset_name
         and manifest.policy_version == request.policy_version
@@ -114,7 +119,7 @@ def _same_request(
         and manifest.selection == selected
         and manifest.source_url == request.source_url
         and manifest.terms_reference == request.terms_reference
-        and manifest.source_provenance == provenance
+        and recorded == provenance
         and manifest.metadata_checksum == (metadata.sha256 if metadata else None)
         and manifest.expected_images == expected
         and manifest.expected_by_split == inventory.expected_by_split

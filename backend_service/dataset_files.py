@@ -31,8 +31,8 @@ def dataset_failure(code: str = "dataset_access") -> ApplicationFailure:
             "A source file changed during preparation. Retry with a stable source."
         ),
         "dataset_metadata": (
-            "UHD-IQA metadata is missing, ambiguous, or invalid. "
-            "Check names and splits."
+            "The source metadata file is missing, ambiguous, or invalid. "
+            "Check the image names, splits, and identities."
         ),
         "dataset_storage": (
             "Dataset output could not be saved. Check access and free space."

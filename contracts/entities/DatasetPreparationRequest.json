@@ -100,6 +100,27 @@
       "title": "Source Url",
       "type": "string"
     },
+    "split_mapping": {
+      "anyOf": [
+        {
+          "additionalProperties": {
+            "enum": [
+              "train",
+              "tuning",
+              "held_out"
+            ],
+            "type": "string"
+          },
+          "maxProperties": 64,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Split Mapping"
+    },
     "terms_reference": {
       "default": "https://database.mmsp-kn.de/uhd-iqa-benchmark-database.html",
       "maxLength": 4096,
@@ -125,7 +146,8 @@
     "selection",
     "source_url",
     "terms_reference",
-    "training_intended"
+    "training_intended",
+    "split_mapping"
   ],
   "title": "DatasetPreparationRequest",
   "type": "object"

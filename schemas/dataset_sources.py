@@ -30,6 +30,7 @@ SourceAccess = Literal["available", "access_required", "not_found", "unsupported
 RawFolderState = Literal["available", "reusable", "conflict"]
 MAXIMUM_DOWNLOAD_BYTES = 100 * 1024**3
 DEFAULT_DOWNLOAD_BYTES = 25 * 1024**3
+MAXIMUM_IMAGES = 200_000
 
 
 def https_url(value: str) -> str:
@@ -119,10 +120,16 @@ DatasetSourceSpec = Annotated[
 
 
 class DatasetInspectionRequest(StrictRecord):
-    """Ask what a source contains before any bytes are downloaded."""
+    """Ask what a source contains before any bytes are downloaded.
+
+    ``maximum_images`` should match the cap the fetch will use, because the
+    cap is part of the raw folder identity that decides whether an earlier
+    fetch can be reused.
+    """
 
     source: DatasetSourceSpec
     source_name: SourceName | None = None
+    maximum_images: int = Field(default=MAXIMUM_IMAGES, ge=1, le=MAXIMUM_IMAGES)
 
 
 class PlannedAssetRecord(StrictRecord):

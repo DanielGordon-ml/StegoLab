@@ -1,6 +1,7 @@
 """Bounded, resumable and verified downloads into a partial file."""
 
 import hashlib
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -236,3 +237,33 @@ def test_progress_reports_increasing_counts(
     assert counts == sorted(set(counts))
     assert counts[-1] == len(BODY)
     assert {total for _, total in progress.updates} == {len(BODY)}
+
+
+def test_resume_without_an_etag_when_the_address_is_pinned(tmp_path: Path) -> None:
+    """An immutable address resumes with a Range request and no If-Range header."""
+    routes = {("GET", "/file.bin"): Response(body=BODY, ranges=True)}
+    partial = PartialFile(tmp_path / "file.bin.part")
+    partial.path.write_bytes(BODY[:5000])
+    with LoopbackServer(routes) as server:
+        pinned = replace(asset(server.url("/file.bin"), etag=None), resumable=True)
+        outcome = download_asset(
+            transport_for(server), pinned, partial, maximum_bytes=len(BODY)
+        )
+        headers = server.requests[0].headers
+    assert headers["range"] == "bytes=5000-" and "if-range" not in headers
+    assert outcome == DownloadOutcome(size=len(BODY), sha256=DIGEST, resumed_from=5000)
+    assert partial.path.read_bytes() == BODY
+
+
+def test_content_length_that_is_not_plain_digits_is_ignored(tmp_path: Path) -> None:
+    """A Content-Length of non-ASCII digits falls back to the expected size."""
+    routes = {("GET", "/file.bin"): Response(body=BODY, lie_content_length="²")}
+    partial = PartialFile(tmp_path / "file.bin.part")
+    with LoopbackServer(routes) as server:
+        outcome = download_asset(
+            transport_for(server),
+            asset(server.url("/file.bin")),
+            partial,
+            maximum_bytes=len(BODY),
+        )
+    assert outcome == DownloadOutcome(size=len(BODY), sha256=DIGEST, resumed_from=0)

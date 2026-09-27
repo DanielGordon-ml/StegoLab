@@ -18,6 +18,7 @@ from backend_service.dataset_import import import_images
 from backend_service.dataset_inventory import DatasetInventory, inventory_dataset
 from backend_service.dataset_manifest import write_manifest
 from backend_service.dataset_reuse import find_reusable_dataset
+from backend_service.dataset_sources.source_marker import marker_provenance
 from backend_service.dataset_storage import DatasetWriter
 from backend_service.dataset_validation import validate_dataset
 from schemas.datasets import DatasetPreparationRequest, DatasetSummary
@@ -106,7 +107,12 @@ def prepare_dataset(
     ) as writer:
         report_progress("dataset_inventory_started")
         inventory = inventory_dataset(request)
-        existing_summary = find_reusable_dataset(request, inventory, _provenance())
+        provenance = {
+            **_provenance(),
+            "training_intended": str(request.training_intended).lower(),
+            **marker_provenance(request),
+        }
+        existing_summary = find_reusable_dataset(request, inventory, provenance)
         if existing_summary is not None:
             _record_run(existing_summary, inventory, started, 0)
             report_progress("dataset_revision_reused")
@@ -137,7 +143,7 @@ def prepare_dataset(
             discovered_images=sum(
                 item.kind != "sidecar" for item in inventory.source.files
             ),
-            source_provenance=_provenance(),
+            source_provenance=provenance,
             expected_by_split=inventory.expected_by_split,
             discovered_by_split=inventory.discovered_by_split,
             selected_by_split=selected_by_split if metadata is not None else None,

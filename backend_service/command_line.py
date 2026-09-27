@@ -57,6 +57,14 @@ def build_parser() -> argparse.ArgumentParser:
         ),
         ("inspect_dataset", "Read a dataset summary without checking image integrity."),
         ("validate_dataset", "Verify an offline dataset revision and its images."),
+        (
+            "fetch_dataset",
+            "Fetch a remote or uploaded source from request JSON (or - for stdin).",
+        ),
+        (
+            "inspect_source",
+            "Describe a remote source from JSON (or - for stdin) without downloading.",
+        ),
     ):
         dataset = commands.add_parser(name, help=help_text)
         dataset.add_argument("dataset_input")

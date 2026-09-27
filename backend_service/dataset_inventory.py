@@ -16,6 +16,7 @@ from backend_service.dataset_metadata import UhdMetadata, read_uhd_metadata
 from backend_service.dataset_scan import SourceInventory, scan_source
 from backend_service.failures import ApplicationFailure
 from backend_service.image_validation import SourceHeader
+from schemas.dataset_common import SPLIT_MAPPING
 from schemas.datasets import DatasetPreparationRequest, DatasetRejection
 
 
@@ -41,9 +42,14 @@ def inventory_dataset(request: DatasetPreparationRequest) -> DatasetInventory:
     expected: dict[str, int] = {}
     discovered: dict[str, int] = {}
     candidates = [item for item in source.files if item.kind != "sidecar"]
-    if request.source_kind == "uhd_iqa":
-        assert request.metadata_file is not None
-        metadata = read_uhd_metadata(root, request.metadata_file, source)
+    if request.metadata_file is not None:
+        metadata = read_uhd_metadata(
+            root,
+            request.metadata_file,
+            source,
+            split_mapping=request.split_mapping or SPLIT_MAPPING,
+            identity_prefix=request.source_kind,
+        )
         expected = dict(Counter(row.upstream_split for row in metadata.rows.values()))
         image_files = [item for item in candidates if item.kind == "image"]
         names = [Path(item.relative_path).name for item in image_files]
