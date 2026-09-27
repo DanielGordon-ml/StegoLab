@@ -11,11 +11,12 @@ from typing import Annotated
 from pydantic import Field, TypeAdapter
 
 from backend_service.failures import ApplicationFailure, StorageFailure
+from schemas.dataset_fetch import DatasetFetchRequest
 from schemas.inference_jobs import InferenceJobRecord
 from schemas.jobs import JobEvent, JobSnapshot
 from schemas.workflows import WorkflowRequest
 
-StoredRequest = WorkflowRequest | InferenceJobRecord
+StoredRequest = WorkflowRequest | InferenceJobRecord | DatasetFetchRequest
 REQUEST_ADAPTER: TypeAdapter[StoredRequest] = TypeAdapter(
     Annotated[StoredRequest, Field(discriminator="operation")]
 )

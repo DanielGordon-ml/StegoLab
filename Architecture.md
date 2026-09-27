@@ -17,7 +17,10 @@ The training-first GUI added CPU training, evaluation and export jobs on one
 scheduler lane with an ordered event stream, and Sprint 6 added explicit model
 installation, bounded uploads, secret-safe encode and decode jobs, and the
 Encode and Decode tabs; measured acceptance is in [Sprint 6](plan/sprint_06.md).
-Remote dataset downloads, GPU runtime, and cloud deployment remain planned.
+Sprint 7 adds dataset sources: Hugging Face repositories pinned to a commit,
+https archives and browser uploads fetched into `data/<source_name>/` with a
+verified download cache, progress, pause and cancel. GPU runtime and cloud
+deployment remain planned.
 
 See the [system diagram in the README](README.md#system-architecture) and the
 [interactive Archify map and delivery record](docs/architecture.md).
@@ -66,19 +69,20 @@ Kubernetes, a distributed scheduler, or a multi-user account service.
 
 | Boundary | Implemented today | Planned extension |
 |---|---|---|
-| Browser | React/TypeScript shell, working Config, Train jobs and charts, Encode/Decode with an installed experimental model, uploads, exact PNG download, temporary decoded text | Remote dataset jobs, GPU model selection |
-| Frontend container | Nginx serves bundled Vite assets, proxies `/api/v1` on the same origin, passes 16 MiB upload bodies through unbuffered, and streams events | Coordinated limits for larger transfers |
-| Backend container | One Uvicorn/FastAPI process with one scheduler thread, subprocess and isolated package-process workers, model installation, CLI and reusable CPU services | Spawned GPU and download workers |
+| Browser | React/TypeScript shell, working Config, Train jobs and charts, dataset source forms with inspection, chunked archive upload, byte progress, pause and cancel, Encode/Decode with an installed experimental model, uploads, exact PNG download, temporary decoded text | GPU model selection |
+| Frontend container | Nginx serves bundled Vite assets, proxies `/api/v1` on the same origin, passes 16 MiB image uploads and 16 MiB dataset upload parts through unbuffered, and streams events | Coordinated limits for larger transfers |
+| Backend container | One Uvicorn/FastAPI process with one scheduler thread, subprocess workers including the dataset fetch worker, isolated package-process workers, model installation, CLI and reusable CPU services | Spawned GPU workers |
 | Shared contracts | Strict Pydantic records for settings, datasets, training, checkpoints, evaluation, exports, installed models, uploads, capacity, jobs and decoded text; exported schemas; browser validation | Model-promotion records |
-| Persistent storage | SQLite settings, jobs, durable events and retry results; installed-model store; expiring uploads and results; structured run logs; prepared datasets; checkpoints, exports and ledgers | Shared download cache |
+| Persistent storage | SQLite settings, jobs, durable events and retry results; installed-model store; expiring uploads and results; structured run logs; raw source folders under `data/`; the verified download cache under `.cache/stegolab/datasets/`; prepared datasets; checkpoints, exports and ledgers | GPU host transfer |
 | Independent packages | Experimental separate CPU encoder/decoder packages, installed explicitly and run in isolated processes | Qualified CPU/GPU deployment packages |
-| External sources | Read-only local image folders, UHD-IQA metadata, and browser uploads | Hugging Face and controlled HTTPS downloads |
+| External sources | Local image folders, UHD-IQA metadata, Hugging Face repositories over the Hub REST interface, https archives, and uploaded archives | Gated datasets beyond a server-side token; benchmark annotation members |
 
 Current request flow is browser → frontend/proxy → API → scheduler and state
 stores. The browser reaches uploads, capacity, encode/decode jobs and decoded
 text over HTTP (section 3); the message protocol, local dataset preparation and
-the model services run inside the API process or its child processes. Remote
-dataset downloads and GPU workers have no HTTP path yet.
+the model services run inside the API process or its child processes. Dataset
+sources reach the API through inspection, fetch-job, storage and upload routes
+(section 3); GPU workers have no HTTP path yet.
 
 ### Repository map
 
@@ -127,7 +131,7 @@ schemas are exported without creating HTTP routes.
 | `GET`/`DELETE /jobs/{id}/decoded_text` | Recovered text from memory with `no-store`; forgotten on clear, leave or expiry |
 
 **Planned:** versioned configuration import/export, `needs_input` recovery for
-resumable GPU work, tiling above 1024 pixels, and remote dataset jobs. A request
+resumable GPU work and tiling above 1024 pixels. A request
 identifier makes uncertain mutation retries safe; inference retries bind the
 secrets through an in-memory key. Running jobs keep a frozen resolved
 configuration.
@@ -219,7 +223,7 @@ replays the event table by cursor. Installed models live in
 `installed_models.sqlite3`; uploads and results in `inference/` with JSON
 sidecars, expiring after 24 hours.
 
-**Planned:** GPU and download workers under the same supervisor, with progress,
+**Planned:** GPU workers under the same supervisor, with progress,
 heartbeats and results over bounded in-memory channels. Heavy work stays out of
 the HTTP event loop. One GPU operation runs at a time; inference queues behind
 training/evaluation. A lost heartbeat does not free that slot until the
@@ -237,7 +241,7 @@ paid training must never restart automatically.
 | `ProtocolContext`, `PayloadCapacity`, `ProtocolVerification`, `ImageSummary` | Implemented strict service records; no message/password fields |
 | Dataset manifests | Implemented strict records, software/source provenance, checksums, fixed splits, and coverage |
 | Model export manifests, checkpoint summaries, evaluation reports, installed models | Implemented experimental CPU records with compatibility, provenance, and checksums; installed models are registered explicitly |
-| Prepared datasets/cache | Implemented `datasets/<name>/<revision>/`; download cache remains planned |
+| Prepared datasets/cache | Implemented `datasets/<name>/<revision>/`, raw source folders `data/<source_name>/` with a provenance marker, and the verified download cache `.cache/stegolab/datasets/` |
 | Models/checkpoints | Separate experimental CLI export and checkpoint directories; pruning retains latest recovery, three best, and pinned states and never deletes exports |
 | CPU proof ledger | Persistent exclusive accounting across train/resume/evaluate/export; two experiments, four hours total, two hours each; crash reservations are charged conservatively |
 | Uploads/PNG results | Opaque `image_*` and `encoded_*` folders under the state directory with checksummed sidecars, expiring after 24 hours, with new files refused while stored files would pass 512 MiB; never arbitrary path downloads |
@@ -256,8 +260,8 @@ The CLI exposes `prepare_dataset`, `inspect_dataset`, and `validate_dataset`.
 The offline reader supplies eligible unique examples from one requested split.
 See [the dataset guide](docs/datasets.md) for contracts and failure behavior.
 
-Future adapters cover browser uploads, Hugging Face sources, and supported HTTPS
-files/archives. Imports must not execute remote scripts. Connection-time and redirect
+Adapters cover browser uploads, Hugging Face sources, and supported HTTPS
+archives. Imports never execute remote scripts. Connection-time and redirect
 checks block private/link-local/metadata destinations; extraction limits block
 traversal, escaping links, and decompression bombs. Pause depends on source
 support; cancel removes only that job's partial assets.

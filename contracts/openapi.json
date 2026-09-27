@@ -343,6 +343,626 @@
         "title": "ConfigurationUpdate",
         "type": "object"
       },
+      "DatasetFetchRequest": {
+        "additionalProperties": false,
+        "description": "Start a fetch that saves raw files under data/ and prepares a revision.",
+        "properties": {
+          "client_request_identifier": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+            "title": "Client Request Identifier",
+            "type": "string"
+          },
+          "dataset_name": {
+            "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+            "title": "Dataset Name",
+            "type": "string"
+          },
+          "maximum_images": {
+            "default": 200000,
+            "maximum": 200000.0,
+            "minimum": 1.0,
+            "title": "Maximum Images",
+            "type": "integer"
+          },
+          "operation": {
+            "const": "fetch_dataset",
+            "default": "fetch_dataset",
+            "title": "Operation",
+            "type": "string"
+          },
+          "prepare": {
+            "default": true,
+            "title": "Prepare",
+            "type": "boolean"
+          },
+          "source": {
+            "discriminator": {
+              "mapping": {
+                "https_archive": "#/components/schemas/HttpsArchiveSourceSpec",
+                "hugging_face": "#/components/schemas/HuggingFaceSourceSpec",
+                "upload": "#/components/schemas/UploadSourceSpec"
+              },
+              "propertyName": "source_kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/HuggingFaceSourceSpec"
+              },
+              {
+                "$ref": "#/components/schemas/HttpsArchiveSourceSpec"
+              },
+              {
+                "$ref": "#/components/schemas/UploadSourceSpec"
+              }
+            ],
+            "title": "Source"
+          },
+          "source_name": {
+            "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+            "title": "Source Name",
+            "type": "string"
+          },
+          "training_intended": {
+            "default": true,
+            "title": "Training Intended",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "client_request_identifier",
+          "source",
+          "source_name",
+          "dataset_name"
+        ],
+        "title": "DatasetFetchRequest",
+        "type": "object"
+      },
+      "DatasetInspection": {
+        "additionalProperties": false,
+        "description": "Report a resolved source honestly, including unknown sizes.",
+        "properties": {
+          "access": {
+            "enum": [
+              "available",
+              "access_required",
+              "not_found",
+              "unsupported"
+            ],
+            "title": "Access",
+            "type": "string"
+          },
+          "access_guidance": {
+            "anyOf": [
+              {
+                "maxLength": 1024,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Access Guidance"
+          },
+          "asset_count": {
+            "maximum": 10000.0,
+            "minimum": 0.0,
+            "title": "Asset Count",
+            "type": "integer"
+          },
+          "assets": {
+            "items": {
+              "$ref": "#/components/schemas/PlannedAssetRecord"
+            },
+            "maxItems": 200,
+            "title": "Assets",
+            "type": "array"
+          },
+          "cached_bytes": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Cached Bytes",
+            "type": "integer"
+          },
+          "content": {
+            "enum": [
+              "images",
+              "text"
+            ],
+            "title": "Content",
+            "type": "string"
+          },
+          "declared_splits": {
+            "title": "Declared Splits",
+            "type": "boolean"
+          },
+          "disk_sufficient": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Disk Sufficient"
+          },
+          "download_bytes": {
+            "anyOf": [
+              {
+                "maximum": 107374182400.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Download Bytes"
+          },
+          "free_disk_bytes": {
+            "minimum": 0.0,
+            "title": "Free Disk Bytes",
+            "type": "integer"
+          },
+          "materialization_identity": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Materialization Identity",
+            "type": "string"
+          },
+          "materialized_bytes": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Materialized Bytes"
+          },
+          "raw_folder": {
+            "anyOf": [
+              {
+                "enum": [
+                  "available",
+                  "reusable",
+                  "conflict"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Raw Folder"
+          },
+          "reference": {
+            "maxLength": 4096,
+            "minLength": 1,
+            "title": "Reference",
+            "type": "string"
+          },
+          "requested_revision": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested Revision"
+          },
+          "required_free_bytes": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Required Free Bytes"
+          },
+          "resolved_revision": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved Revision"
+          },
+          "server_token_configured": {
+            "title": "Server Token Configured",
+            "type": "boolean"
+          },
+          "source_kind": {
+            "enum": [
+              "uhd_iqa",
+              "local",
+              "hugging_face",
+              "https_archive",
+              "upload"
+            ],
+            "title": "Source Kind",
+            "type": "string"
+          },
+          "suggested_source_name": {
+            "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+            "title": "Suggested Source Name",
+            "type": "string"
+          },
+          "supports_pause": {
+            "title": "Supports Pause",
+            "type": "boolean"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 64,
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "source_kind",
+          "reference",
+          "requested_revision",
+          "resolved_revision",
+          "suggested_source_name",
+          "access",
+          "access_guidance",
+          "content",
+          "asset_count",
+          "assets",
+          "download_bytes",
+          "materialized_bytes",
+          "cached_bytes",
+          "supports_pause",
+          "declared_splits",
+          "materialization_identity",
+          "raw_folder",
+          "free_disk_bytes",
+          "required_free_bytes",
+          "disk_sufficient",
+          "server_token_configured",
+          "warnings"
+        ],
+        "title": "DatasetInspection",
+        "type": "object"
+      },
+      "DatasetInspectionRequest": {
+        "additionalProperties": false,
+        "description": "Ask what a source contains before any bytes are downloaded.\n\n``maximum_images`` should match the cap the fetch will use, because the\ncap is part of the raw folder identity that decides whether an earlier\nfetch can be reused.",
+        "properties": {
+          "maximum_images": {
+            "default": 200000,
+            "maximum": 200000.0,
+            "minimum": 1.0,
+            "title": "Maximum Images",
+            "type": "integer"
+          },
+          "source": {
+            "discriminator": {
+              "mapping": {
+                "https_archive": "#/components/schemas/HttpsArchiveSourceSpec",
+                "hugging_face": "#/components/schemas/HuggingFaceSourceSpec",
+                "upload": "#/components/schemas/UploadSourceSpec"
+              },
+              "propertyName": "source_kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/HuggingFaceSourceSpec"
+              },
+              {
+                "$ref": "#/components/schemas/HttpsArchiveSourceSpec"
+              },
+              {
+                "$ref": "#/components/schemas/UploadSourceSpec"
+              }
+            ],
+            "title": "Source"
+          },
+          "source_name": {
+            "anyOf": [
+              {
+                "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Name"
+          }
+        },
+        "required": [
+          "source"
+        ],
+        "title": "DatasetInspectionRequest",
+        "type": "object"
+      },
+      "DatasetStorageSummary": {
+        "additionalProperties": false,
+        "description": "Show where dataset bytes live and whether unused downloads can go.",
+        "properties": {
+          "active_fetch_jobs": {
+            "minimum": 0.0,
+            "title": "Active Fetch Jobs",
+            "type": "integer"
+          },
+          "cache_bytes": {
+            "minimum": 0.0,
+            "title": "Cache Bytes",
+            "type": "integer"
+          },
+          "cache_entries": {
+            "minimum": 0.0,
+            "title": "Cache Entries",
+            "type": "integer"
+          },
+          "cache_unused_bytes": {
+            "minimum": 0.0,
+            "title": "Cache Unused Bytes",
+            "type": "integer"
+          },
+          "cache_unused_entries": {
+            "minimum": 0.0,
+            "title": "Cache Unused Entries",
+            "type": "integer"
+          },
+          "cleanup_available": {
+            "title": "Cleanup Available",
+            "type": "boolean"
+          },
+          "free_disk_bytes": {
+            "minimum": 0.0,
+            "title": "Free Disk Bytes",
+            "type": "integer"
+          },
+          "minimum_free_bytes": {
+            "minimum": 0.0,
+            "title": "Minimum Free Bytes",
+            "type": "integer"
+          },
+          "prepared_bytes": {
+            "minimum": 0.0,
+            "title": "Prepared Bytes",
+            "type": "integer"
+          },
+          "prepared_revisions": {
+            "minimum": 0.0,
+            "title": "Prepared Revisions",
+            "type": "integer"
+          },
+          "raw_source_bytes": {
+            "minimum": 0.0,
+            "title": "Raw Source Bytes",
+            "type": "integer"
+          },
+          "raw_source_folders": {
+            "minimum": 0.0,
+            "title": "Raw Source Folders",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "cache_bytes",
+          "cache_entries",
+          "cache_unused_bytes",
+          "cache_unused_entries",
+          "raw_source_bytes",
+          "raw_source_folders",
+          "prepared_bytes",
+          "prepared_revisions",
+          "free_disk_bytes",
+          "minimum_free_bytes",
+          "active_fetch_jobs",
+          "cleanup_available"
+        ],
+        "title": "DatasetStorageSummary",
+        "type": "object"
+      },
+      "DatasetUploadChunk": {
+        "additionalProperties": false,
+        "description": "Acknowledge one received part with the digest the server computed.",
+        "properties": {
+          "bytes": {
+            "maximum": 16777216.0,
+            "minimum": 1.0,
+            "title": "Bytes",
+            "type": "integer"
+          },
+          "index": {
+            "exclusiveMaximum": 128.0,
+            "minimum": 0.0,
+            "title": "Index",
+            "type": "integer"
+          },
+          "received_chunks": {
+            "items": {
+              "type": "integer"
+            },
+            "maxItems": 128,
+            "title": "Received Chunks",
+            "type": "array"
+          },
+          "sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Sha256",
+            "type": "string"
+          },
+          "upload_identifier": {
+            "pattern": "^upload_[0-9a-f]{32}$",
+            "title": "Upload Identifier",
+            "type": "string"
+          }
+        },
+        "required": [
+          "upload_identifier",
+          "index",
+          "bytes",
+          "sha256",
+          "received_chunks"
+        ],
+        "title": "DatasetUploadChunk",
+        "type": "object"
+      },
+      "DatasetUploadCompleteRequest": {
+        "additionalProperties": false,
+        "description": "Ask the server to assemble and verify every received part.",
+        "properties": {
+          "client_request_identifier": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+            "title": "Client Request Identifier",
+            "type": "string"
+          }
+        },
+        "required": [
+          "client_request_identifier"
+        ],
+        "title": "DatasetUploadCompleteRequest",
+        "type": "object"
+      },
+      "DatasetUploadCreateRequest": {
+        "additionalProperties": false,
+        "description": "Open an upload session for one archive of a known total size.",
+        "properties": {
+          "client_request_identifier": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+            "title": "Client Request Identifier",
+            "type": "string"
+          },
+          "expected_sha256": {
+            "anyOf": [
+              {
+                "pattern": "^[a-f0-9]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Sha256"
+          },
+          "file_name": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9 ._-]{0,254}$",
+            "title": "File Name",
+            "type": "string"
+          },
+          "total_bytes": {
+            "maximum": 2147483648.0,
+            "minimum": 1.0,
+            "title": "Total Bytes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "client_request_identifier",
+          "file_name",
+          "total_bytes"
+        ],
+        "title": "DatasetUploadCreateRequest",
+        "type": "object"
+      },
+      "DatasetUploadSession": {
+        "additionalProperties": false,
+        "description": "Report which parts arrived so a reloaded browser can continue.",
+        "properties": {
+          "chunk_bytes": {
+            "const": 16777216,
+            "default": 16777216,
+            "title": "Chunk Bytes",
+            "type": "integer"
+          },
+          "chunk_count": {
+            "maximum": 128.0,
+            "minimum": 1.0,
+            "title": "Chunk Count",
+            "type": "integer"
+          },
+          "complete": {
+            "default": false,
+            "title": "Complete",
+            "type": "boolean"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "file_name": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9 ._-]{0,254}$",
+            "title": "File Name",
+            "type": "string"
+          },
+          "received_chunks": {
+            "items": {
+              "type": "integer"
+            },
+            "maxItems": 128,
+            "title": "Received Chunks",
+            "type": "array"
+          },
+          "sha256": {
+            "anyOf": [
+              {
+                "pattern": "^[a-f0-9]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sha256"
+          },
+          "total_bytes": {
+            "maximum": 2147483648.0,
+            "minimum": 1.0,
+            "title": "Total Bytes",
+            "type": "integer"
+          },
+          "upload_identifier": {
+            "pattern": "^upload_[0-9a-f]{32}$",
+            "title": "Upload Identifier",
+            "type": "string"
+          }
+        },
+        "required": [
+          "upload_identifier",
+          "file_name",
+          "total_bytes",
+          "chunk_bytes",
+          "chunk_count",
+          "received_chunks",
+          "complete",
+          "sha256",
+          "created_at",
+          "expires_at"
+        ],
+        "title": "DatasetUploadSession",
+        "type": "object"
+      },
       "DecodedText": {
         "additionalProperties": false,
         "description": "Return recovered text once per request; it is never written to disk.",
@@ -499,6 +1119,217 @@
           "application_version"
         ],
         "title": "HealthStatus",
+        "type": "object"
+      },
+      "HttpsArchiveSourceSpec": {
+        "additionalProperties": false,
+        "description": "Download one zip or tar archive from a plain https address.",
+        "properties": {
+          "archive_splits": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "enum": [
+                    "train",
+                    "tuning",
+                    "held_out"
+                  ],
+                  "type": "string"
+                },
+                "maxProperties": 64,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Archive Splits"
+          },
+          "expected_sha256": {
+            "anyOf": [
+              {
+                "pattern": "^[a-f0-9]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Sha256"
+          },
+          "maximum_download_bytes": {
+            "default": 26843545600,
+            "maximum": 107374182400.0,
+            "minimum": 1.0,
+            "title": "Maximum Download Bytes",
+            "type": "integer"
+          },
+          "source_kind": {
+            "const": "https_archive",
+            "default": "https_archive",
+            "title": "Source Kind",
+            "type": "string"
+          },
+          "terms_reference": {
+            "maxLength": 4096,
+            "minLength": 1,
+            "title": "Terms Reference",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "terms_reference",
+          "url"
+        ],
+        "title": "HttpsArchiveSourceSpec",
+        "type": "object"
+      },
+      "HuggingFaceSourceSpec": {
+        "additionalProperties": false,
+        "description": "Pin a Hugging Face dataset repository and select files inside it.",
+        "properties": {
+          "archive_splits": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "enum": [
+                    "train",
+                    "tuning",
+                    "held_out"
+                  ],
+                  "type": "string"
+                },
+                "maxProperties": 64,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Archive Splits"
+          },
+          "content": {
+            "default": "images",
+            "enum": [
+              "images",
+              "text"
+            ],
+            "title": "Content",
+            "type": "string"
+          },
+          "file_names": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 200,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Names"
+          },
+          "image_column": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Column"
+          },
+          "maximum_download_bytes": {
+            "default": 26843545600,
+            "maximum": 107374182400.0,
+            "minimum": 1.0,
+            "title": "Maximum Download Bytes",
+            "type": "integer"
+          },
+          "maximum_files": {
+            "default": 200,
+            "maximum": 10000.0,
+            "minimum": 1.0,
+            "title": "Maximum Files",
+            "type": "integer"
+          },
+          "path_prefix": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Path Prefix"
+          },
+          "repository": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}/[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+            "title": "Repository",
+            "type": "string"
+          },
+          "revision": {
+            "default": "main",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,127}$",
+            "title": "Revision",
+            "type": "string"
+          },
+          "source_kind": {
+            "const": "hugging_face",
+            "default": "hugging_face",
+            "title": "Source Kind",
+            "type": "string"
+          },
+          "split": {
+            "anyOf": [
+              {
+                "enum": [
+                  "train",
+                  "validation",
+                  "test"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Split"
+          },
+          "terms_reference": {
+            "maxLength": 4096,
+            "minLength": 1,
+            "title": "Terms Reference",
+            "type": "string"
+          },
+          "text_column": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text Column"
+          }
+        },
+        "required": [
+          "terms_reference",
+          "repository"
+        ],
+        "title": "HuggingFaceSourceSpec",
         "type": "object"
       },
       "ImageSummary": {
@@ -1039,6 +1870,48 @@
         "title": "PayloadCapacity",
         "type": "object"
       },
+      "PlannedAssetRecord": {
+        "additionalProperties": false,
+        "description": "Describe one file that a fetch would download or reuse.",
+        "properties": {
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "sha256": {
+            "anyOf": [
+              {
+                "pattern": "^[a-f0-9]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sha256"
+          },
+          "size_bytes": {
+            "anyOf": [
+              {
+                "maximum": 107374182400.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Size Bytes"
+          }
+        },
+        "required": [
+          "path",
+          "size_bytes",
+          "sha256"
+        ],
+        "title": "PlannedAssetRecord",
+        "type": "object"
+      },
       "TrainingPreflight": {
         "additionalProperties": false,
         "description": "Explain eligibility without creating files or reserving experiment time.",
@@ -1088,6 +1961,62 @@
           "remaining_experiment_slots"
         ],
         "title": "TrainingPreflight",
+        "type": "object"
+      },
+      "UploadSourceSpec": {
+        "additionalProperties": false,
+        "description": "Use an archive that the browser uploaded in parts.",
+        "properties": {
+          "archive_splits": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "enum": [
+                    "train",
+                    "tuning",
+                    "held_out"
+                  ],
+                  "type": "string"
+                },
+                "maxProperties": 64,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Archive Splits"
+          },
+          "maximum_download_bytes": {
+            "default": 26843545600,
+            "maximum": 107374182400.0,
+            "minimum": 1.0,
+            "title": "Maximum Download Bytes",
+            "type": "integer"
+          },
+          "source_kind": {
+            "const": "upload",
+            "default": "upload",
+            "title": "Source Kind",
+            "type": "string"
+          },
+          "terms_reference": {
+            "default": "not_reviewed",
+            "maxLength": 4096,
+            "minLength": 1,
+            "title": "Terms Reference",
+            "type": "string"
+          },
+          "upload_identifier": {
+            "pattern": "^upload_[0-9a-f]{32}$",
+            "title": "Upload Identifier",
+            "type": "string"
+          }
+        },
+        "required": [
+          "upload_identifier"
+        ],
+        "title": "UploadSourceSpec",
         "type": "object"
       },
       "UploadedImage": {
@@ -1791,7 +2720,7 @@
     },
     "/api/v1/capabilities": {
       "get": {
-        "description": "Advertise installed models and whether a server-side token exists.",
+        "description": "Advertise installed models, source kinds and whether a token exists.",
         "operationId": "read_capabilities",
         "responses": {
           "200": {
@@ -2239,6 +3168,903 @@
           }
         },
         "summary": "Dataset"
+      }
+    },
+    "/api/v1/datasets/cache/unused": {
+      "delete": {
+        "description": "Delete cached downloads no raw folder or revision uses, then summarize.",
+        "operationId": "remove_unused_dataset_downloads",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetStorageSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Gateway Timeout"
+          }
+        },
+        "summary": "Remove Unused Dataset Downloads"
+      }
+    },
+    "/api/v1/datasets/fetch_jobs": {
+      "post": {
+        "description": "Queue one download-and-prepare job; a repeated request replays it.",
+        "operationId": "submit_dataset_fetch_job",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatasetFetchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobSnapshot"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Gateway Timeout"
+          }
+        },
+        "summary": "Submit Dataset Fetch Job"
+      }
+    },
+    "/api/v1/datasets/inspections": {
+      "post": {
+        "description": "Report what a source holds and needs before any bytes are downloaded.",
+        "operationId": "inspect_dataset_source",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatasetInspectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetInspection"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Gateway Timeout"
+          }
+        },
+        "summary": "Inspect Dataset Source"
+      }
+    },
+    "/api/v1/datasets/storage": {
+      "get": {
+        "description": "Show cache, raw source and prepared dataset totals with disk headroom.",
+        "operationId": "read_dataset_storage",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetStorageSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Gateway Timeout"
+          }
+        },
+        "summary": "Read Dataset Storage"
+      }
+    },
+    "/api/v1/datasets/uploads": {
+      "post": {
+        "description": "Open an upload session for one archive; a repeated request replays it.",
+        "operationId": "create_dataset_upload",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatasetUploadCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetUploadSession"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "507": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Insufficient Storage"
+          }
+        },
+        "summary": "Create Dataset Upload"
+      }
+    },
+    "/api/v1/datasets/uploads/{upload_identifier}": {
+      "delete": {
+        "description": "Remove an upload and everything it stored; repeating is harmless.",
+        "operationId": "discard_dataset_upload",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "upload_identifier",
+            "required": true,
+            "schema": {
+              "title": "Upload Identifier",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "507": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Insufficient Storage"
+          }
+        },
+        "summary": "Discard Dataset Upload"
+      },
+      "get": {
+        "description": "Report which parts arrived so a reloaded browser can continue.",
+        "operationId": "read_dataset_upload",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "upload_identifier",
+            "required": true,
+            "schema": {
+              "title": "Upload Identifier",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetUploadSession"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "507": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Insufficient Storage"
+          }
+        },
+        "summary": "Read Dataset Upload"
+      }
+    },
+    "/api/v1/datasets/uploads/{upload_identifier}/chunks/{chunk_index}": {
+      "put": {
+        "description": "Store one raw part of exactly the expected size; parts arrive in any order.",
+        "operationId": "upload_dataset_chunk",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "upload_identifier",
+            "required": true,
+            "schema": {
+              "title": "Upload Identifier",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "chunk_index",
+            "required": true,
+            "schema": {
+              "title": "Chunk Index",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "format": "binary",
+                "type": "string"
+              }
+            }
+          },
+          "description": "One archive part: exactly the part size, at most 16 MiB.",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetUploadChunk"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "507": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Insufficient Storage"
+          }
+        },
+        "summary": "Upload Dataset Chunk"
+      }
+    },
+    "/api/v1/datasets/uploads/{upload_identifier}/complete": {
+      "post": {
+        "description": "Join every part into the archive and verify it; repeating is harmless.",
+        "operationId": "complete_dataset_upload",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "upload_identifier",
+            "required": true,
+            "schema": {
+              "title": "Upload Identifier",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatasetUploadCompleteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetUploadSession"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "507": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Insufficient Storage"
+          }
+        },
+        "summary": "Complete Dataset Upload"
       }
     },
     "/api/v1/decoding_jobs": {

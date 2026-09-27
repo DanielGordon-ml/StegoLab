@@ -59,6 +59,37 @@ labels to absolute folder paths. Only registered source roots and their safe
 subfolders are accessible. Generic local folders use the existing deterministic
 splits, so a folder with too few tuning images may not fit the CPU profile.
 
+## Bring in a dataset from a repository, an archive or an upload
+
+The dataset card in Train offers four sources: a server folder, an archive
+uploaded from the browser, a Hugging Face repository, or an https archive.
+
+- Fill in the source and two names: "Save raw files as" is the folder under
+  `data/` that receives the raw files, and "Prepared dataset name" is the
+  revision written under `datasets/`. Press "Check source" first: the backend
+  resolves the exact revision and reports the download size when it is known,
+  whether the folder can be reused, whether pause is available, and whether a
+  gated repository needs a server token. "Fetch and prepare" is enabled only
+  when those checks pass.
+- Browser uploads travel in 16 MiB parts up to 2 GiB. A reload continues where
+  the upload stopped; "Cancel upload" discards the parts.
+- The job shows received bytes against the total when the total is known and an
+  activity indicator otherwise. Cancel removes the job's partial download and
+  keeps completed cache entries; Pause is offered for sources that support byte
+  ranges, and Resume continues from the saved bytes. A paused download survives
+  a backend restart.
+- The summary card lists accepted and rejected files, the raw folder, the
+  prepared revision and storage use. It always says that a near-duplicate audit
+  has not been done: fetching never makes a dataset pilot-ready or approved for
+  training.
+- Config shows dataset storage: downloaded archives in the cache, raw source
+  folders under `data/`, prepared revisions and free disk space. "Remove unused
+  downloads" deletes cache entries that no raw folder uses; it is refused while
+  a dataset job is queued, running or paused.
+
+Gated Hugging Face datasets need `HF_ACCESS_TOKEN` in the backend environment;
+see [local setup](local_setup.md). The token never reaches the browser.
+
 ## Start, stop, and resume
 
 1. Choose a compatible dataset and a run name.
@@ -202,8 +233,9 @@ sidecar, a log, or a job record.
 
 ## Delivery boundaries
 
-Local dataset preparation, bounded CPU experiments, review, and export form the
-first working GUI release. GPU readiness, configurable/fine-tuning profiles,
-remote dataset downloads, and qualified inference remain later milestones.
+Local dataset preparation, dataset fetching from repositories, archives and
+uploads, bounded CPU experiments, review, and export form the first working GUI
+release. GPU readiness, configurable/fine-tuning profiles, the near-duplicate
+audit in the browser, and qualified inference remain later milestones.
 No cloud instance is started by the GUI. Tests use disposable storage and ledgers;
 they must not consume the remaining real CPU experiment slot.

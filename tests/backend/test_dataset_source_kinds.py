@@ -171,7 +171,12 @@ def test_token_presence_is_reported_without_its_value(
     ) as client:
         body = client.get("/api/v1/capabilities").json()
     assert body["hugging_face_token_configured"] is True
-    assert body["dataset_source_kinds"] == ["server_folder"]
+    assert body["dataset_source_kinds"] == [
+        "server_folder",
+        "upload",
+        "hugging_face",
+        "https_archive",
+    ]
     assert body["maximum_dataset_upload_bytes"] == 2 * 1024**3
     assert "hf_private_sentinel" not in json.dumps(body)
 

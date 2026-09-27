@@ -31,6 +31,19 @@ def inference_services(application: FastAPI) -> "InferenceServices":
     )
 
 
+def attach_dataset_services(application: FastAPI, state_directory: Path) -> None:
+    """Attach the upload store and the dataset source service to the job queue."""
+    from backend_service.dataset_source_service import DatasetSourceService
+    from backend_service.dataset_sources.upload_sessions import DatasetUploadStore
+
+    uploads = DatasetUploadStore(state_directory)
+    application.state.dataset_uploads = uploads
+    application.state.workspace_jobs.dataset_uploads = uploads
+    application.state.dataset_sources = DatasetSourceService(
+        application.state.workspace_catalog, uploads, application.state.workspace_jobs
+    )
+
+
 def create_application(
     data_directory: Path | None = None,
     log_directory: Path | None = None,
@@ -65,6 +78,11 @@ def create_application(
                 from backend_service.workspace_catalog import WorkspaceCatalog
                 from backend_service.workspace_jobs import WorkspaceJobService
 
+                try:
+                    # Fetched sources land here; the catalog lists it from startup.
+                    (selected_workspace / "data").mkdir(parents=True, exist_ok=True)
+                except OSError:
+                    logger.warning("workspace_data_folder_unavailable")
                 application.state.workspace_catalog = WorkspaceCatalog(
                     selected_workspace, selected_data_directory
                 )
@@ -86,6 +104,7 @@ def create_application(
                 application.state.workspace_jobs.inference = inference_services(
                     application
                 )
+                attach_dataset_services(application, selected_data_directory)
                 application.state.workspace_jobs.start()
             except ApplicationFailure:
                 logger.error("application_startup_failed")
@@ -112,6 +131,8 @@ def create_application(
         ),
     )
     application.include_router(router)
+    from backend_service.dataset_routes import dataset_router
+    from backend_service.dataset_upload_routes import dataset_upload_router
     from backend_service.image_routes import image_router
     from backend_service.inference_routes import inference_router
     from backend_service.model_routes import model_router
@@ -123,5 +144,7 @@ def create_application(
     application.include_router(inference_router)
     application.include_router(workspace_router)
     application.include_router(job_router)
+    application.include_router(dataset_router)
+    application.include_router(dataset_upload_router)
     install_error_handlers(application)
     return application

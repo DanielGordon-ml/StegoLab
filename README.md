@@ -104,8 +104,9 @@ review, evaluation, and exports through background jobs. Read the
 [GUI training guide](docs/gui_training.md) for mounted folders, compatibility,
 and the shared experiment budget. Encoding and decoding need a model installed
 from Train → Model exports and stay experimental: image quality is visibly
-reduced and recovery is not guaranteed. Dataset downloads remain unavailable,
-and no model is approved for release. GPU readiness and model quality gates
+reduced and recovery is not guaranteed. Datasets can be fetched from a Hugging
+Face repository, an https archive or a browser upload into `data/<source_name>/`,
+but no model is approved for release. GPU readiness and model quality gates
 remain open; the existing tools do not establish release-level recovery quality,
 pilot readiness, or SOTA results.
 

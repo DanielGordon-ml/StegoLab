@@ -48,7 +48,12 @@ def test_initial_capabilities_and_empty_lists(
         "maximum_dataset_upload_bytes": 2_147_483_648,
         "dataset_upload_chunk_bytes": 16_777_216,
         "hugging_face_token_configured": False,
-        "dataset_source_kinds": ["server_folder"],
+        "dataset_source_kinds": [
+            "server_folder",
+            "upload",
+            "hugging_face",
+            "https_archive",
+        ],
     }
     for collection in ("models", "jobs"):
         assert client.get(f"{PREFIX}/{collection}").json() == {"items": []}

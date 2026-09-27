@@ -6,6 +6,7 @@ import time
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
+from backend_service.dataset_fetch_jobs import initial_running_actions
 from backend_service.failures import ApplicationFailure, StorageFailure
 from backend_service.inference_jobs import is_inference
 from backend_service.workflow_lock import proof_busy
@@ -38,7 +39,7 @@ def next_job(service: "WorkspaceJobService") -> JobSnapshot | None:
                 queued,
                 status="running",
                 phase="preparing",
-                available_actions=["stop"] if queued.operation == "train" else [],
+                available_actions=initial_running_actions(queued),
             )
             service.active_identifier = queued.job_identifier
         return queued
@@ -104,14 +105,19 @@ def run_scheduler(service: "WorkspaceJobService") -> None:
 
 
 def maintain(service: "WorkspaceJobService") -> None:
-    """Forget expired inference files and texts without stopping the queue."""
-    if service.inference is None:
-        return
-    try:
-        service.inference.maintain()
-    except ApplicationFailure:
-        if service.logger is not None:
-            service.logger.error("inference_maintenance_failed")
+    """Forget expired inference files, texts and uploads without stopping the queue."""
+    if service.inference is not None:
+        try:
+            service.inference.maintain()
+        except ApplicationFailure:
+            if service.logger is not None:
+                service.logger.error("inference_maintenance_failed")
+    if service.dataset_uploads is not None:
+        try:
+            service.dataset_uploads.sweep()
+        except ApplicationFailure:
+            if service.logger is not None:
+                service.logger.error("dataset_upload_sweep_failed")
 
 
 def close_supervisor(service: "WorkspaceJobService") -> None:

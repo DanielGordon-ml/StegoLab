@@ -11,6 +11,7 @@ import pytest
 
 from backend_service import workflow_execution
 from backend_service.workflow_lock import proof_busy
+from schemas.base import StrictRecord
 from schemas.training import TrainingRun, TrainingStep
 
 
@@ -85,7 +86,7 @@ def test_stop_waits_for_a_safe_boundary_and_keeps_saved_result(
 
     monkeypatch.setattr("backend_service.workflow_execution.subprocess.Popen", spawn)
     monkeypatch.setattr("backend_service.workflow_execution.time.sleep", lambda _: None)
-    progress: list[TrainingStep] = []
+    progress: list[StrictRecord] = []
     code, result = workflow_execution.execute_command(
         tmp_path,
         "train",
