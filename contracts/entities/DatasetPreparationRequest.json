@@ -86,7 +86,10 @@
       "default": "uhd_iqa",
       "enum": [
         "uhd_iqa",
-        "local"
+        "local",
+        "hugging_face",
+        "https_archive",
+        "upload"
       ],
       "title": "Source Kind",
       "type": "string"
@@ -102,6 +105,11 @@
       "maxLength": 4096,
       "title": "Terms Reference",
       "type": "string"
+    },
+    "training_intended": {
+      "default": true,
+      "title": "Training Intended",
+      "type": "boolean"
     }
   },
   "required": [
@@ -116,7 +124,8 @@
     "selection_name",
     "selection",
     "source_url",
-    "terms_reference"
+    "terms_reference",
+    "training_intended"
   ],
   "title": "DatasetPreparationRequest",
   "type": "object"

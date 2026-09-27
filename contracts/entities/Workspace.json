@@ -366,6 +366,14 @@
       "additionalProperties": false,
       "description": "Name a server-approved source root without returning its private path.",
       "properties": {
+        "folders": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 200,
+          "title": "Folders",
+          "type": "array"
+        },
         "identifier": {
           "title": "Identifier",
           "type": "string"
@@ -377,7 +385,8 @@
       },
       "required": [
         "identifier",
-        "label"
+        "label",
+        "folders"
       ],
       "title": "WorkspaceSource",
       "type": "object"

@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Identify one benchmark image by archive member path and COCO identifier.",
+  "properties": {
+    "coco_image_identifier": {
+      "maximum": 1000000000,
+      "minimum": 1,
+      "title": "Coco Image Identifier",
+      "type": "integer"
+    },
+    "declared_height": {
+      "maximum": 8192,
+      "minimum": 1,
+      "title": "Declared Height",
+      "type": "integer"
+    },
+    "declared_width": {
+      "maximum": 8192,
+      "minimum": 1,
+      "title": "Declared Width",
+      "type": "integer"
+    },
+    "member_path": {
+      "pattern": "^(val2017|train2017)/[0-9]{12}\\.jpg$",
+      "title": "Member Path",
+      "type": "string"
+    },
+    "rank": {
+      "anyOf": [
+        {
+          "maximum": 1000000,
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Rank"
+    },
+    "role": {
+      "enum": [
+        "validation",
+        "training_source",
+        "reserve"
+      ],
+      "title": "Role",
+      "type": "string"
+    },
+    "source_split": {
+      "enum": [
+        "val2017",
+        "train2017"
+      ],
+      "title": "Source Split",
+      "type": "string"
+    }
+  },
+  "required": [
+    "member_path",
+    "coco_image_identifier",
+    "declared_width",
+    "declared_height",
+    "source_split",
+    "role",
+    "rank"
+  ],
+  "title": "BenchmarkMember",
+  "type": "object"
+}

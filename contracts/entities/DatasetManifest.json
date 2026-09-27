@@ -194,7 +194,10 @@
     "source_kind": {
       "enum": [
         "uhd_iqa",
-        "local"
+        "local",
+        "hugging_face",
+        "https_archive",
+        "upload"
       ],
       "title": "Source Kind",
       "type": "string"

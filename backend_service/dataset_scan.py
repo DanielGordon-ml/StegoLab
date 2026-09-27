@@ -50,7 +50,10 @@ def scan_source(
                 relative = f"{prefix}/{child.name}" if prefix else child.name
                 relative_parts(relative)
                 info = child.stat(follow_symlinks=False)
+                hidden = child.name.startswith(".")
                 if stat.S_ISDIR(info.st_mode):
+                    if hidden:
+                        continue
                     nested = os.open(
                         child.name,
                         os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW,
@@ -70,7 +73,7 @@ def scan_source(
                     raise dataset_failure("dataset_limits")
                 suffix = Path(child.name).suffix.lower()
                 sidecar = (
-                    child.name == ".DS_Store"
+                    hidden
                     or "__MACOSX" in Path(relative).parts
                     or suffix in (".csv", ".tags")
                 )

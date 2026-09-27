@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Ask the server to assemble and verify every received part.",
+  "properties": {
+    "client_request_identifier": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+      "title": "Client Request Identifier",
+      "type": "string"
+    }
+  },
+  "required": [
+    "client_request_identifier"
+  ],
+  "title": "DatasetUploadCompleteRequest",
+  "type": "object"
+}

@@ -6,11 +6,13 @@ from pydantic import Field, model_validator
 
 from schemas.base import StrictRecord
 from schemas.dataset_common import (
+    REMOTE_SOURCE_KINDS,
     SHA256,
     DatasetName,
     DatasetSplit,
     DatasetVersionedRecord,
     RelativePath,
+    SourceKind,
 )
 
 SOURCE_URL = "https://database.mmsp-kn.de/uhd-iqa-benchmark-database.html"
@@ -24,22 +26,28 @@ class DatasetPreparationRequest(DatasetVersionedRecord):
     source_directory: str = Field(min_length=1, max_length=4096)
     metadata_file: RelativePath | None = "uhd-iqa-metadata.csv"
     output_root: str = Field(default="datasets", min_length=1, max_length=4096)
-    source_kind: Literal["uhd_iqa", "local"] = "uhd_iqa"
+    source_kind: SourceKind = "uhd_iqa"
     policy_version: Literal["dataset_v1"] = "dataset_v1"
     seed: int = Field(default=0, ge=0, le=2**63 - 1)
     selection_name: DatasetName | None = None
     selection: list[RelativePath] | None = Field(default=None, max_length=200_000)
     source_url: str = Field(default=SOURCE_URL, max_length=4096)
     terms_reference: str = Field(default=SOURCE_URL, max_length=4096)
+    training_intended: bool = True
 
     @model_validator(mode="before")
     @classmethod
     def default_local_provenance(cls, value: object) -> object:
-        """Avoid attributing unlabelled local sources to the UHD-IQA database."""
+        """Never attribute local or remote sources to the UHD-IQA database."""
         if isinstance(value, dict) and value.get("source_kind") == "local":
             value = dict(value)
             value.setdefault("source_url", "local")
             value.setdefault("terms_reference", "not_reviewed")
+        if isinstance(value, dict) and value.get("source_kind") in REMOTE_SOURCE_KINDS:
+            value = dict(value)
+            value.setdefault("metadata_file", None)
+            if not value.get("source_url") or not value.get("terms_reference"):
+                raise ValueError("Remote sources need their reference and terms.")
         return value
 
     @model_validator(mode="after")

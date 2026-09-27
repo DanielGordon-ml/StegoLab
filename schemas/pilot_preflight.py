@@ -5,6 +5,7 @@ from typing import Literal
 from pydantic import Field, field_validator
 
 from schemas.base import StrictRecord
+from schemas.dataset_common import SHA256
 
 
 class PilotPreflightRequest(StrictRecord):
@@ -15,6 +16,12 @@ class PilotPreflightRequest(StrictRecord):
     output_root: str = Field(default=".", min_length=1, max_length=4096)
     device: Literal["cpu", "cuda"] = "cpu"
     session_identifier: str | None = Field(default=None, min_length=1, max_length=128)
+    near_duplicate_audit_report: str | None = Field(
+        default=None, min_length=1, max_length=4096
+    )
+    benchmark_identities_directory: str | None = Field(
+        default=None, min_length=1, max_length=4096
+    )
 
     @field_validator("schema_version", mode="before")
     @classmethod
@@ -31,6 +38,19 @@ class PilotReadinessCheck(StrictRecord):
     name: str
     status: Literal["passed_locally", "failed", "not_run"]
     detail: str
+
+
+class PreflightAuditSummary(StrictRecord):
+    """Summarize the near-duplicate report that preflight read and checked."""
+
+    report_checksum: SHA256
+    audit_identifier: str = Field(min_length=1, max_length=64)
+    method_version: str = Field(min_length=1, max_length=64)
+    threshold: Literal[8] = 8
+    cross_split_pairs: int = Field(ge=0)
+    benchmark_status: Literal["not_included", "pixels_unavailable", "compared"]
+    benchmark_pairs: int | None = Field(default=None, ge=0)
+    limited: bool
 
 
 class PilotPreflightReport(StrictRecord):
@@ -51,3 +71,5 @@ class PilotPreflightReport(StrictRecord):
     remaining_gpu_seconds: float | None = Field(default=None, ge=0, le=86400)
     environment: dict[str, str]
     checks: list[PilotReadinessCheck]
+    near_duplicate_audit: PreflightAuditSummary | None = None
+    benchmark_identities_checksum: SHA256 | None = None

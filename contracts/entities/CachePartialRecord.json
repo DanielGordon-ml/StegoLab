@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Describe an unfinished download so the owning job can resume or drop it.",
+  "properties": {
+    "bytes_received": {
+      "maximum": 107374182400,
+      "minimum": 0,
+      "title": "Bytes Received",
+      "type": "integer"
+    },
+    "etag": {
+      "anyOf": [
+        {
+          "maxLength": 256,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Etag"
+    },
+    "expected_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Expected Sha256"
+    },
+    "expected_size": {
+      "anyOf": [
+        {
+          "maximum": 107374182400,
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Expected Size"
+    },
+    "owner": {
+      "pattern": "^[a-z0-9_]{1,64}$",
+      "title": "Owner",
+      "type": "string"
+    },
+    "updated_at": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Updated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "owner",
+    "bytes_received",
+    "expected_size",
+    "expected_sha256",
+    "etag",
+    "updated_at"
+  ],
+  "title": "CachePartialRecord",
+  "type": "object"
+}

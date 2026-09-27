@@ -4,7 +4,7 @@ set -eu
 
 stegolab_project_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 cd "$stegolab_project_root"
-mkdir -p datasets checkpoints models state logs
+mkdir -p datasets checkpoints models state logs data .cache/stegolab/datasets
 
 if [ "$(uname -s)" = Linux ]; then
     if [ "$(id -u)" -eq 0 ] || [ "$(id -g)" -eq 0 ]; then

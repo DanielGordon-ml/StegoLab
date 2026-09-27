@@ -20,6 +20,37 @@ from backend_service.workspace_views import (
 )
 from schemas.workspace import Workspace, WorkspaceDataset, WorkspaceSource
 
+DATA_ROOT_LABEL = "Downloaded and uploaded sources"
+MAXIMUM_SOURCE_FOLDERS = 200
+
+
+def with_data_root(roots: dict[str, Path], root: Path) -> dict[str, Path]:
+    """Offer the workspace data folder as a source unless it is already listed."""
+    directory = root / "data"
+    if not directory.is_dir() or any(
+        path.absolute() == directory.absolute() for path in roots.values()
+    ):
+        return roots
+    return {
+        **roots,
+        ("Local source images" if not roots else DATA_ROOT_LABEL): directory,
+    }
+
+
+def source_folders(path: Path) -> list[str]:
+    """List visible real subfolders of a source root, sorted and bounded."""
+    names: list[str] = []
+    try:
+        with os.scandir(path) as entries:
+            for entry in entries:
+                if entry.is_dir(follow_symlinks=False) and not entry.name.startswith(
+                    "."
+                ):
+                    names.append(entry.name)
+    except OSError:
+        return []
+    return sorted(names)[:MAXIMUM_SOURCE_FOLDERS]
+
 
 class WorkspaceCatalog:
     """Discover existing research without resetting budgets or rewriting artifacts."""
@@ -47,8 +78,7 @@ class WorkspaceCatalog:
         """Read trusted host configuration, keeping paths out of browser payloads."""
         value = os.environ.get("STEGOLAB_SOURCE_ROOTS")
         if value is None:
-            directory = self.root / "data"
-            return {"Local source images": directory} if directory.is_dir() else {}
+            return with_data_root({}, self.root)
         try:
             parsed = json.loads(value)
             if not isinstance(parsed, dict) or len(parsed) > 20:
@@ -62,13 +92,14 @@ class WorkspaceCatalog:
                 for label, path in parsed.items()
             ):
                 raise ValueError
-            return {label: Path(path) for label, path in parsed.items()}
+            roots = {label: Path(path) for label, path in parsed.items()}
         except ValueError:
             raise ApplicationFailure(
                 "workspace_source_configuration",
                 "The server source-folder configuration is invalid. "
                 "Ask the server owner to check the registered folders.",
             ) from None
+        return with_data_root(roots, self.root)
 
     def _datasets(self) -> tuple[list[WorkspaceDataset], list[str]]:
         """Inspect frozen metadata and clearly defer full image-byte verification."""
@@ -115,6 +146,7 @@ class WorkspaceCatalog:
                     WorkspaceSource(
                         identifier=self.registry.register("source", path, path),
                         label=label,
+                        folders=source_folders(path),
                     )
                 )
             except (OSError, ValueError, ApplicationFailure):

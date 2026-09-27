@@ -1,0 +1,277 @@
+{
+  "$defs": {
+    "PlannedAssetRecord": {
+      "additionalProperties": false,
+      "description": "Describe one file that a fetch would download or reuse.",
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sha256"
+        },
+        "size_bytes": {
+          "anyOf": [
+            {
+              "maximum": 107374182400,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Size Bytes"
+        }
+      },
+      "required": [
+        "path",
+        "size_bytes",
+        "sha256"
+      ],
+      "title": "PlannedAssetRecord",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Report a resolved source honestly, including unknown sizes.",
+  "properties": {
+    "access": {
+      "enum": [
+        "available",
+        "access_required",
+        "not_found",
+        "unsupported"
+      ],
+      "title": "Access",
+      "type": "string"
+    },
+    "access_guidance": {
+      "anyOf": [
+        {
+          "maxLength": 1024,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Access Guidance"
+    },
+    "asset_count": {
+      "maximum": 10000,
+      "minimum": 0,
+      "title": "Asset Count",
+      "type": "integer"
+    },
+    "assets": {
+      "items": {
+        "$ref": "#/$defs/PlannedAssetRecord"
+      },
+      "maxItems": 200,
+      "title": "Assets",
+      "type": "array"
+    },
+    "cached_bytes": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Cached Bytes",
+      "type": "integer"
+    },
+    "content": {
+      "enum": [
+        "images",
+        "text"
+      ],
+      "title": "Content",
+      "type": "string"
+    },
+    "declared_splits": {
+      "title": "Declared Splits",
+      "type": "boolean"
+    },
+    "disk_sufficient": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Disk Sufficient"
+    },
+    "download_bytes": {
+      "anyOf": [
+        {
+          "maximum": 107374182400,
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Download Bytes"
+    },
+    "free_disk_bytes": {
+      "minimum": 0,
+      "title": "Free Disk Bytes",
+      "type": "integer"
+    },
+    "materialization_identity": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Materialization Identity",
+      "type": "string"
+    },
+    "materialized_bytes": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Materialized Bytes"
+    },
+    "raw_folder": {
+      "anyOf": [
+        {
+          "enum": [
+            "available",
+            "reusable",
+            "conflict"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Raw Folder"
+    },
+    "reference": {
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Reference",
+      "type": "string"
+    },
+    "requested_revision": {
+      "anyOf": [
+        {
+          "maxLength": 128,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Requested Revision"
+    },
+    "required_free_bytes": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Required Free Bytes"
+    },
+    "resolved_revision": {
+      "anyOf": [
+        {
+          "maxLength": 128,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Resolved Revision"
+    },
+    "server_token_configured": {
+      "title": "Server Token Configured",
+      "type": "boolean"
+    },
+    "source_kind": {
+      "enum": [
+        "uhd_iqa",
+        "local",
+        "hugging_face",
+        "https_archive",
+        "upload"
+      ],
+      "title": "Source Kind",
+      "type": "string"
+    },
+    "suggested_source_name": {
+      "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+      "title": "Suggested Source Name",
+      "type": "string"
+    },
+    "supports_pause": {
+      "title": "Supports Pause",
+      "type": "boolean"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 64,
+      "title": "Warnings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "source_kind",
+    "reference",
+    "requested_revision",
+    "resolved_revision",
+    "suggested_source_name",
+    "access",
+    "access_guidance",
+    "content",
+    "asset_count",
+    "assets",
+    "download_bytes",
+    "materialized_bytes",
+    "cached_bytes",
+    "supports_pause",
+    "declared_splits",
+    "materialization_identity",
+    "raw_folder",
+    "free_disk_bytes",
+    "required_free_bytes",
+    "disk_sufficient",
+    "server_token_configured",
+    "warnings"
+  ],
+  "title": "DatasetInspection",
+  "type": "object"
+}

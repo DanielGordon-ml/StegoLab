@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Use an archive that the browser uploaded in parts.",
+  "properties": {
+    "archive_splits": {
+      "anyOf": [
+        {
+          "additionalProperties": {
+            "enum": [
+              "train",
+              "tuning",
+              "held_out"
+            ],
+            "type": "string"
+          },
+          "maxProperties": 64,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Archive Splits"
+    },
+    "maximum_download_bytes": {
+      "default": 26843545600,
+      "maximum": 107374182400,
+      "minimum": 1,
+      "title": "Maximum Download Bytes",
+      "type": "integer"
+    },
+    "source_kind": {
+      "const": "upload",
+      "default": "upload",
+      "title": "Source Kind",
+      "type": "string"
+    },
+    "terms_reference": {
+      "default": "not_reviewed",
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Terms Reference",
+      "type": "string"
+    },
+    "upload_identifier": {
+      "pattern": "^upload_[0-9a-f]{32}$",
+      "title": "Upload Identifier",
+      "type": "string"
+    }
+  },
+  "required": [
+    "archive_splits",
+    "maximum_download_bytes",
+    "terms_reference",
+    "source_kind",
+    "upload_identifier"
+  ],
+  "title": "UploadSourceSpec",
+  "type": "object"
+}

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Describe one file that a fetch would download or reuse.",
+  "properties": {
+    "path": {
+      "title": "Path",
+      "type": "string"
+    },
+    "sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Sha256"
+    },
+    "size_bytes": {
+      "anyOf": [
+        {
+          "maximum": 107374182400,
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Size Bytes"
+    }
+  },
+  "required": [
+    "path",
+    "size_bytes",
+    "sha256"
+  ],
+  "title": "PlannedAssetRecord",
+  "type": "object"
+}

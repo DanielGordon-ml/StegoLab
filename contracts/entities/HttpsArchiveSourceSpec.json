@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Download one zip or tar archive from a plain https address.",
+  "properties": {
+    "archive_splits": {
+      "anyOf": [
+        {
+          "additionalProperties": {
+            "enum": [
+              "train",
+              "tuning",
+              "held_out"
+            ],
+            "type": "string"
+          },
+          "maxProperties": 64,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Archive Splits"
+    },
+    "expected_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Expected Sha256"
+    },
+    "maximum_download_bytes": {
+      "default": 26843545600,
+      "maximum": 107374182400,
+      "minimum": 1,
+      "title": "Maximum Download Bytes",
+      "type": "integer"
+    },
+    "source_kind": {
+      "const": "https_archive",
+      "default": "https_archive",
+      "title": "Source Kind",
+      "type": "string"
+    },
+    "terms_reference": {
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Terms Reference",
+      "type": "string"
+    },
+    "url": {
+      "title": "Url",
+      "type": "string"
+    }
+  },
+  "required": [
+    "archive_splits",
+    "maximum_download_bytes",
+    "terms_reference",
+    "source_kind",
+    "url",
+    "expected_sha256"
+  ],
+  "title": "HttpsArchiveSourceSpec",
+  "type": "object"
+}

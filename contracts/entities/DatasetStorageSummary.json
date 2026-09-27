@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Show where dataset bytes live and whether unused downloads can go.",
+  "properties": {
+    "active_fetch_jobs": {
+      "minimum": 0,
+      "title": "Active Fetch Jobs",
+      "type": "integer"
+    },
+    "cache_bytes": {
+      "minimum": 0,
+      "title": "Cache Bytes",
+      "type": "integer"
+    },
+    "cache_entries": {
+      "minimum": 0,
+      "title": "Cache Entries",
+      "type": "integer"
+    },
+    "cache_unused_bytes": {
+      "minimum": 0,
+      "title": "Cache Unused Bytes",
+      "type": "integer"
+    },
+    "cache_unused_entries": {
+      "minimum": 0,
+      "title": "Cache Unused Entries",
+      "type": "integer"
+    },
+    "cleanup_available": {
+      "title": "Cleanup Available",
+      "type": "boolean"
+    },
+    "free_disk_bytes": {
+      "minimum": 0,
+      "title": "Free Disk Bytes",
+      "type": "integer"
+    },
+    "minimum_free_bytes": {
+      "minimum": 0,
+      "title": "Minimum Free Bytes",
+      "type": "integer"
+    },
+    "prepared_bytes": {
+      "minimum": 0,
+      "title": "Prepared Bytes",
+      "type": "integer"
+    },
+    "prepared_revisions": {
+      "minimum": 0,
+      "title": "Prepared Revisions",
+      "type": "integer"
+    },
+    "raw_source_bytes": {
+      "minimum": 0,
+      "title": "Raw Source Bytes",
+      "type": "integer"
+    },
+    "raw_source_folders": {
+      "minimum": 0,
+      "title": "Raw Source Folders",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "cache_bytes",
+    "cache_entries",
+    "cache_unused_bytes",
+    "cache_unused_entries",
+    "raw_source_bytes",
+    "raw_source_folders",
+    "prepared_bytes",
+    "prepared_revisions",
+    "free_disk_bytes",
+    "minimum_free_bytes",
+    "active_fetch_jobs",
+    "cleanup_available"
+  ],
+  "title": "DatasetStorageSummary",
+  "type": "object"
+}

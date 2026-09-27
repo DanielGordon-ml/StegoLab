@@ -31,6 +31,10 @@ export const capabilities_with_model = {
   minimum_image_side: 512,
   maximum_image_side: 1024,
   maximum_upload_bytes: 16777216,
+  maximum_dataset_upload_bytes: 2147483648,
+  dataset_upload_chunk_bytes: 16777216,
+  hugging_face_token_configured: false,
+  dataset_source_kinds: ['server_folder'],
 };
 
 export const encoded_upload = {

@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Audit one prepared revision, optionally against the frozen benchmark.",
+  "properties": {
+    "benchmark_dataset_directory": {
+      "anyOf": [
+        {
+          "maxLength": 4096,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Benchmark Dataset Directory"
+    },
+    "benchmark_identities_directory": {
+      "anyOf": [
+        {
+          "maxLength": 4096,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Benchmark Identities Directory"
+    },
+    "dataset_directory": {
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Dataset Directory",
+      "type": "string"
+    },
+    "limit": {
+      "anyOf": [
+        {
+          "maximum": 200000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Limit"
+    },
+    "output_root": {
+      "anyOf": [
+        {
+          "maxLength": 4096,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Output Root"
+    },
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "dataset_directory",
+    "output_root",
+    "benchmark_identities_directory",
+    "benchmark_dataset_directory",
+    "limit"
+  ],
+  "title": "NearDuplicateAuditRequest",
+  "type": "object"
+}

@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Report which parts arrived so a reloaded browser can continue.",
+  "properties": {
+    "chunk_bytes": {
+      "const": 16777216,
+      "default": 16777216,
+      "title": "Chunk Bytes",
+      "type": "integer"
+    },
+    "chunk_count": {
+      "maximum": 128,
+      "minimum": 1,
+      "title": "Chunk Count",
+      "type": "integer"
+    },
+    "complete": {
+      "default": false,
+      "title": "Complete",
+      "type": "boolean"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "expires_at": {
+      "format": "date-time",
+      "title": "Expires At",
+      "type": "string"
+    },
+    "file_name": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9 ._-]{0,254}$",
+      "title": "File Name",
+      "type": "string"
+    },
+    "received_chunks": {
+      "items": {
+        "type": "integer"
+      },
+      "maxItems": 128,
+      "title": "Received Chunks",
+      "type": "array"
+    },
+    "sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Sha256"
+    },
+    "total_bytes": {
+      "maximum": 2147483648,
+      "minimum": 1,
+      "title": "Total Bytes",
+      "type": "integer"
+    },
+    "upload_identifier": {
+      "pattern": "^upload_[0-9a-f]{32}$",
+      "title": "Upload Identifier",
+      "type": "string"
+    }
+  },
+  "required": [
+    "upload_identifier",
+    "file_name",
+    "total_bytes",
+    "chunk_bytes",
+    "chunk_count",
+    "received_chunks",
+    "complete",
+    "sha256",
+    "created_at",
+    "expires_at"
+  ],
+  "title": "DatasetUploadSession",
+  "type": "object"
+}

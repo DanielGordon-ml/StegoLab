@@ -1,0 +1,390 @@
+{
+  "$defs": {
+    "DatasetSummary": {
+      "additionalProperties": false,
+      "description": "Report safe counts while distinguishing inspection from verification.",
+      "properties": {
+        "accepted_count": {
+          "title": "Accepted Count",
+          "type": "integer"
+        },
+        "completion": {
+          "const": "complete",
+          "default": "complete",
+          "title": "Completion",
+          "type": "string"
+        },
+        "dataset_name": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "title": "Dataset Name",
+          "type": "string"
+        },
+        "discovered_images": {
+          "title": "Discovered Images",
+          "type": "integer"
+        },
+        "duplicate_count": {
+          "title": "Duplicate Count",
+          "type": "integer"
+        },
+        "eligible_by_split": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Eligible By Split",
+          "type": "object"
+        },
+        "eligible_count": {
+          "title": "Eligible Count",
+          "type": "integer"
+        },
+        "expected_images": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expected Images"
+        },
+        "full_coverage": {
+          "title": "Full Coverage",
+          "type": "boolean"
+        },
+        "ineligible_count": {
+          "title": "Ineligible Count",
+          "type": "integer"
+        },
+        "integrity": {
+          "enum": [
+            "not_checked",
+            "verified"
+          ],
+          "title": "Integrity",
+          "type": "string"
+        },
+        "pilot_ready": {
+          "const": false,
+          "default": false,
+          "title": "Pilot Ready",
+          "type": "boolean"
+        },
+        "prepared_bytes": {
+          "title": "Prepared Bytes",
+          "type": "integer"
+        },
+        "rejection_count": {
+          "title": "Rejection Count",
+          "type": "integer"
+        },
+        "rejection_reasons": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Rejection Reasons",
+          "type": "object"
+        },
+        "reused": {
+          "default": false,
+          "title": "Reused",
+          "type": "boolean"
+        },
+        "revision": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Revision",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "selected_images": {
+          "title": "Selected Images",
+          "type": "integer"
+        },
+        "source_bytes": {
+          "title": "Source Bytes",
+          "type": "integer"
+        },
+        "split_counts": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Split Counts",
+          "type": "object"
+        },
+        "unique_eligible_by_split": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Unique Eligible By Split",
+          "type": "object"
+        },
+        "unique_eligible_count": {
+          "title": "Unique Eligible Count",
+          "type": "integer"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "schema_version",
+        "dataset_name",
+        "revision",
+        "completion",
+        "integrity",
+        "reused",
+        "full_coverage",
+        "expected_images",
+        "discovered_images",
+        "selected_images",
+        "accepted_count",
+        "rejection_count",
+        "eligible_count",
+        "ineligible_count",
+        "duplicate_count",
+        "unique_eligible_count",
+        "split_counts",
+        "eligible_by_split",
+        "unique_eligible_by_split",
+        "rejection_reasons",
+        "source_bytes",
+        "prepared_bytes",
+        "pilot_ready",
+        "warnings"
+      ],
+      "title": "DatasetSummary",
+      "type": "object"
+    },
+    "TextCorpusSummary": {
+      "additionalProperties": false,
+      "description": "Describe saved text files without quoting their content.",
+      "properties": {
+        "bytes": {
+          "minimum": 0,
+          "title": "Bytes",
+          "type": "integer"
+        },
+        "characters": {
+          "minimum": 0,
+          "title": "Characters",
+          "type": "integer"
+        },
+        "files": {
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Files",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "files",
+        "characters",
+        "bytes"
+      ],
+      "title": "TextCorpusSummary",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Public result of a fetch; never a readiness or compatibility claim.",
+  "properties": {
+    "assets_completed": {
+      "minimum": 0,
+      "title": "Assets Completed",
+      "type": "integer"
+    },
+    "assets_total": {
+      "minimum": 0,
+      "title": "Assets Total",
+      "type": "integer"
+    },
+    "bytes_received": {
+      "minimum": 0,
+      "title": "Bytes Received",
+      "type": "integer"
+    },
+    "bytes_total": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Bytes Total"
+    },
+    "dataset": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DatasetSummary"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "materialization_identity": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Materialization Identity",
+      "type": "string"
+    },
+    "member_count": {
+      "maximum": 200000,
+      "minimum": 0,
+      "title": "Member Count",
+      "type": "integer"
+    },
+    "near_duplicate_audit": {
+      "const": "not_done",
+      "default": "not_done",
+      "title": "Near Duplicate Audit",
+      "type": "string"
+    },
+    "pilot_ready": {
+      "const": false,
+      "default": false,
+      "title": "Pilot Ready",
+      "type": "boolean"
+    },
+    "raw_folder": {
+      "title": "Raw Folder",
+      "type": "string"
+    },
+    "reference": {
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Reference",
+      "type": "string"
+    },
+    "rejected_member_count": {
+      "maximum": 200000,
+      "minimum": 0,
+      "title": "Rejected Member Count",
+      "type": "integer"
+    },
+    "rejection_reasons": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Rejection Reasons",
+      "type": "object"
+    },
+    "resolved_revision": {
+      "anyOf": [
+        {
+          "maxLength": 128,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Resolved Revision"
+    },
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "source_kind": {
+      "enum": [
+        "uhd_iqa",
+        "local",
+        "hugging_face",
+        "https_archive",
+        "upload"
+      ],
+      "title": "Source Kind",
+      "type": "string"
+    },
+    "source_name": {
+      "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+      "title": "Source Name",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "completed",
+        "stopped",
+        "reused"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "stop_signal": {
+      "anyOf": [
+        {
+          "maximum": 64,
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Stop Signal"
+    },
+    "text_corpus": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TextCorpusSummary"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 64,
+      "title": "Warnings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "status",
+    "stop_signal",
+    "source_kind",
+    "source_name",
+    "reference",
+    "resolved_revision",
+    "materialization_identity",
+    "raw_folder",
+    "bytes_received",
+    "bytes_total",
+    "assets_completed",
+    "assets_total",
+    "member_count",
+    "rejected_member_count",
+    "rejection_reasons",
+    "text_corpus",
+    "dataset",
+    "near_duplicate_audit",
+    "pilot_ready",
+    "warnings"
+  ],
+  "title": "DatasetFetchSummary",
+  "type": "object"
+}

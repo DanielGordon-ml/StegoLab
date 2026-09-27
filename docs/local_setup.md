@@ -66,6 +66,11 @@ qualified model availability are read-only.
   stay in the repository's mounted folders. The setup helper creates these folders
   and configures write access for fresh Linux installations; see the
   [GUI training guide](gui_training.md) for existing installations.
+- Raw dataset files that the application downloads or receives from the browser
+  are saved under the mounted `data/<source_name>/` folder, next to any dataset
+  you place there yourself, and downloaded archives are kept under
+  `.cache/stegolab/datasets/`. Both folders are mounted read-write into the
+  backend container and are ignored by Git.
 - Docker output is limited to three 10 MiB files per service. Request access
   logs are disabled so request values do not enter proxy logs.
 - Stop containers while keeping saved data:

@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Byte and file counters written by the worker while a fetch runs.",
+  "properties": {
+    "assets_completed": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Assets Completed",
+      "type": "integer"
+    },
+    "assets_total": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Assets Total",
+      "type": "integer"
+    },
+    "bytes_received": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Bytes Received",
+      "type": "integer"
+    },
+    "bytes_total": {
+      "anyOf": [
+        {
+          "maximum": 107374182400,
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Bytes Total"
+    },
+    "files_completed": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Files Completed",
+      "type": "integer"
+    },
+    "files_total": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Files Total"
+    },
+    "partial_directories": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 8,
+      "title": "Partial Directories",
+      "type": "array"
+    },
+    "phase": {
+      "enum": [
+        "resolving",
+        "downloading",
+        "extracting",
+        "preparing",
+        "cleaning",
+        "completed"
+      ],
+      "title": "Phase",
+      "type": "string"
+    },
+    "sequence": {
+      "minimum": 0,
+      "title": "Sequence",
+      "type": "integer"
+    },
+    "supports_pause": {
+      "default": false,
+      "title": "Supports Pause",
+      "type": "boolean"
+    },
+    "updated_at": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Updated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "sequence",
+    "phase",
+    "bytes_received",
+    "bytes_total",
+    "files_completed",
+    "files_total",
+    "assets_completed",
+    "assets_total",
+    "supports_pause",
+    "partial_directories",
+    "updated_at"
+  ],
+  "title": "DatasetFetchProgress",
+  "type": "object"
+}
