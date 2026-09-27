@@ -24,6 +24,22 @@ export const capabilities = {
   dataset_source_kinds: ['server_folder'],
 };
 
+/** Disk use as GET /datasets/storage reports it, with unused downloads to remove. */
+export const dataset_storage = {
+  cache_bytes: 1500000000,
+  cache_entries: 3,
+  cache_unused_bytes: 500000000,
+  cache_unused_entries: 1,
+  raw_source_bytes: 1200000000,
+  raw_source_folders: 2,
+  prepared_bytes: 800000000,
+  prepared_revisions: 4,
+  free_disk_bytes: 40000000000,
+  minimum_free_bytes: 5000000000,
+  active_fetch_jobs: 0,
+  cleanup_available: true,
+};
+
 export const uploaded_image = {
   image_reference: 'image_0123456789abcdef0123456789abcdef',
   purpose: 'cover',
@@ -111,6 +127,8 @@ export function mock_backend(
       if (String(url).endsWith('/workspace'))
         return Response.json(empty_workspace);
       if (String(url).endsWith('/jobs')) return Response.json({ items: [] });
+      if (String(url).endsWith('/datasets/storage'))
+        return Response.json(dataset_storage);
       return Response.json(saved_configuration);
     },
   );
