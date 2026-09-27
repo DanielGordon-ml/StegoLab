@@ -72,9 +72,9 @@ function result_lines(inspection: DatasetInspection, folder: string) {
   const extracted =
     inspection.materialized_bytes === null
       ? ''
-      : ` (${format_bytes(inspection.materialized_bytes)})`;
+      : ` (about ${format_bytes(inspection.materialized_bytes)} after extraction)`;
   lines.push({
-    text: `Files after extraction: about ${inspection.asset_count}${extracted}`,
+    text: `Files to download: ${inspection.asset_count}${extracted}`,
   });
   const verdict =
     inspection.disk_sufficient === null

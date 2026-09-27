@@ -123,9 +123,9 @@ test(
     await expect(page.getByText(/Upload complete/).first()).toBeVisible({
       timeout: 60000,
     });
-    await expect(
-      page.getByText(/Files after extraction: about 2\b/),
-    ).toBeVisible({ timeout: 60000 });
+    await expect(page.getByText(/Files to download: 1\b/)).toBeVisible({
+      timeout: 60000,
+    });
     await page.getByLabel('Save raw files as').fill(source_name);
     await page.getByLabel('Prepared dataset name').fill(dataset_name);
     // A renamed raw folder needs a fresh check before the fetch is allowed.
