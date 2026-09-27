@@ -1,3 +1,4 @@
+import type { DatasetFetchSummary } from '../contracts/datasets';
 import type { Workspace } from '../contracts/workspace';
 import type { JobSnapshot } from '../contracts/workflows';
 
@@ -45,3 +46,71 @@ export const saved_job: JobSnapshot = {
   requested_action: null,
   latest_event_identifier: 1,
 };
+/** A dataset download in progress with a known total, as the backend reports it. */
+export const fetch_job: JobSnapshot = {
+  ...saved_job,
+  job_identifier: 'job_fetch_example',
+  status: 'running',
+  phase: 'downloading',
+  available_actions: ['cancel', 'pause'],
+  progress: 0.12,
+  operation: 'fetch_dataset',
+  experiment_identifier: null,
+  metrics: {
+    sequence: 3,
+    bytes_received: 12000000,
+    bytes_total: 100000000,
+    files_completed: 0,
+    assets_completed: 0,
+    assets_total: 1,
+  },
+};
+/** The result of a finished download that also prepared a dataset. */
+export const fetch_summary = {
+  schema_version: 1,
+  status: 'completed',
+  stop_signal: null,
+  source_kind: 'upload',
+  source_name: 'example_source',
+  reference: 'example_images.zip',
+  resolved_revision: null,
+  materialization_identity: '0123456789abcdef'.repeat(4),
+  raw_folder: 'data/example_source',
+  bytes_received: 12000000,
+  bytes_total: 12000000,
+  assets_completed: 1,
+  assets_total: 1,
+  member_count: 3,
+  rejected_member_count: 1,
+  rejection_reasons: { not_an_image: 1 },
+  text_corpus: null,
+  dataset: {
+    schema_version: 1,
+    dataset_name: 'example_prepared',
+    revision: 'abcdef1234567890'.repeat(4),
+    completion: 'complete',
+    integrity: 'not_checked',
+    reused: false,
+    full_coverage: true,
+    expected_images: null,
+    discovered_images: 2,
+    selected_images: 2,
+    accepted_count: 2,
+    rejection_count: 0,
+    eligible_count: 2,
+    ineligible_count: 0,
+    duplicate_count: 0,
+    unique_eligible_count: 2,
+    split_counts: { train: 2 },
+    eligible_by_split: { train: 2 },
+    unique_eligible_by_split: { train: 2 },
+    rejection_reasons: {},
+    source_bytes: 12000000,
+    prepared_bytes: 9000000,
+    pilot_ready: false,
+    warnings: [],
+  },
+  near_duplicate_audit: 'not_done',
+  pilot_ready: false,
+  warnings: [],
+} satisfies DatasetFetchSummary;

@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { expect, it, vi } from 'vitest';
 import { ConfigurationPanel } from '../components/configuration_panel';
+import { dataset_storage } from './fixtures';
 
 /** A late read must not overwrite the saved result in the shared cache. */
 it('cancels reads racing with a successful configuration write', async () => {
@@ -13,11 +14,14 @@ it('cancels reads racing with a successful configuration write', async () => {
   let read_count = 0;
   vi.stubGlobal(
     'fetch',
-    vi.fn(async (_url: string, options?: RequestInit) => {
+    vi.fn(async (url: string, options?: RequestInit) => {
       if (options?.method === 'PUT')
         return new Promise<Response>((resolve) => {
           finish_write = resolve;
         });
+      // The storage card reads on its own; only configuration reads race here.
+      if (url.endsWith('/datasets/storage'))
+        return Response.json(dataset_storage);
       read_count += 1;
       if (read_count === 1) return Response.json(original);
       return new Promise<Response>((resolve) => {

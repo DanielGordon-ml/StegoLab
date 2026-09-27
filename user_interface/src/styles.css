@@ -4,6 +4,8 @@
 @import './forms.css';
 @import './tables.css';
 @import './inference.css';
+@import './datasets.css';
+@import './dataset_cards.css';
 
 :root {
   font-family: 'Avenir Next', Avenir, 'Segoe UI', sans-serif;

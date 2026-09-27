@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { useWorkspace } from '../hooks/use_workspace';
 import { is_active_job } from '../hooks/use_workspace';
+import type { Capabilities } from '../contracts/capabilities';
 import { is_inference_job } from '../contracts/inference_service';
 import type { WorkspaceCheckpoint } from '../contracts/workspace';
 import type { JobSnapshot } from '../contracts/workflows';
@@ -12,11 +13,21 @@ import { SavedAssets } from './saved_assets';
 import { RunHistory } from './run_history';
 import { ErrorNotice } from './error_notice';
 
+/** A paused dataset download waits for the user, so it must not block a new run. */
+function blocks_new_run(job: JobSnapshot) {
+  return (
+    is_active_job(job) &&
+    !(job.operation === 'fetch_dataset' && job.status === 'paused')
+  );
+}
+
 /** Train-first home combining durable work with the existing artifact catalog. */
 export function TrainingPanel({
   state,
+  capabilities,
 }: {
   state: ReturnType<typeof useWorkspace>;
+  capabilities?: Capabilities;
 }) {
   const [setup, set_setup] = useState<{ resume?: WorkspaceCheckpoint } | null>(
     null,
@@ -28,6 +39,7 @@ export function TrainingPanel({
     (item) => !is_inference_job(item),
   );
   const active_job = jobs.find(is_active_job);
+  const blocking_job = jobs.find(blocks_new_run);
   const job =
     jobs.find((item) => item.job_identifier === selected_job) ??
     active_job ??
@@ -68,7 +80,7 @@ export function TrainingPanel({
             !workspace ||
             state.jobs.isError ||
             Boolean(setup) ||
-            Boolean(active_job)
+            Boolean(blocking_job)
           }
           onClick={() => set_setup({})}
         >
@@ -241,7 +253,11 @@ export function TrainingPanel({
               </p>
             )}
           </section>
-          <DatasetPreparation workspace={workspace} on_started={on_started} />
+          <DatasetPreparation
+            workspace={workspace}
+            capabilities={capabilities}
+            on_started={on_started}
+          />
           <SavedAssets
             workspace={workspace}
             on_resume={(checkpoint) => {
@@ -252,8 +268,8 @@ export function TrainingPanel({
           />
           <p className="configuration_note">
             CPU proof profile · fixed five-minute saves · original shared
-            experiment budget. Fine-tuning, checkpoint pinning, GPU jobs, and
-            remote data sources need later backend support.
+            experiment budget. Fine-tuning, checkpoint pinning and GPU jobs need
+            later backend support.
           </p>
         </>
       )}

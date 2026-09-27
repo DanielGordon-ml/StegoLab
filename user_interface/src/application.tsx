@@ -41,7 +41,9 @@ export function Application() {
       ? 'Encode job'
       : active_job.operation === 'decode'
         ? 'Decode job'
-        : active_job.experiment_identifier || active_job.operation || 'Job'
+        : active_job.operation === 'fetch_dataset'
+          ? 'Dataset download'
+          : active_job.experiment_identifier || active_job.operation || 'Job'
     : '';
   const active_job_tab: Tab =
     active_job?.operation === 'encode' || active_job?.operation === 'decode'
@@ -184,7 +186,7 @@ export function Application() {
             hidden={active_tab !== tab}
           >
             {tab === 'train' ? (
-              <TrainingPanel state={state} />
+              <TrainingPanel state={state} capabilities={capabilities.data} />
             ) : tab === 'config' ? (
               <ConfigurationPanel />
             ) : active_tab !== tab ? null : tab === 'encode' ? (
