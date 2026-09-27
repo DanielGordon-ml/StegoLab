@@ -10,6 +10,11 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
+from backend_service.dataset_fetch_jobs import (
+    FETCH_INTERRUPTED,
+    fetch_action_changes,
+    is_fetch,
+)
 from backend_service.failures import ApplicationFailure, StorageFailure
 from backend_service.inference_jobs import InferenceServices, interruption_error
 from backend_service.workflow_preflight import resolve_request, training_preflight
@@ -20,6 +25,7 @@ from schemas.jobs import JobSnapshot
 from schemas.workflows import TrainingPreflight, WorkflowActionRequest, WorkflowRequest
 
 if TYPE_CHECKING:
+    from backend_service.dataset_sources.upload_sessions import DatasetUploadStore
     from backend_service.workspace_catalog import WorkspaceCatalog
 
 
@@ -40,6 +46,10 @@ class WorkspaceJobService:
         self.logger: logging.Logger | None = None
         self.persistence_failed = False
         self.inference: InferenceServices | None = None
+        self.dataset_uploads: DatasetUploadStore | None = None
+        # Raised under the lock while unused downloads are being removed, so
+        # no fetch job is admitted until the cache is settled again.
+        self.cache_cleanup_in_progress = False
 
     def start(self) -> None:
         """Reconcile unfinished metadata and start an empty, single-worker scheduler."""
@@ -168,24 +178,11 @@ class WorkspaceJobService:
                     "This action is no longer available. Refresh the job.",
                     409,
                 )
-            changes: dict[str, object] = {
-                "requested_action": request.action,
-                "available_actions": [],
-            }
-            if request.action == "cancel" and job.status == "queued":
-                changes.update(status="cancelled", phase="cancelled")
-            elif (
-                request.action == "stop"
-                and job.status == "running"
-                and job.operation == "train"
-            ):
-                changes["phase"] = "saving"
-            else:
-                raise ApplicationFailure(
-                    "action_unavailable",
-                    "This action is not supported for this job.",
-                    409,
-                )
+            changes = (
+                fetch_action_changes(self, job, request.action)
+                if is_fetch(job)
+                else self._action_changes(job, request.action)
+            )
             changed = self._change(
                 job,
                 mutation=(request.client_request_identifier, fingerprint),
@@ -195,6 +192,24 @@ class WorkspaceJobService:
                 self.inference.secrets.discard(identifier)
             return changed
 
+    def _action_changes(self, job: JobSnapshot, action: str) -> dict[str, object]:
+        """Describe the transition one action causes for a training-family job."""
+        changes: dict[str, object] = {
+            "requested_action": action,
+            "available_actions": [],
+        }
+        if action == "cancel" and job.status == "queued":
+            changes.update(status="cancelled", phase="cancelled")
+        elif action == "stop" and job.status == "running" and job.operation == "train":
+            changes["phase"] = "saving"
+        else:
+            raise ApplicationFailure(
+                "action_unavailable",
+                "This action is not supported for this job.",
+                409,
+            )
+        return changes
+
     def interrupt(self, job: JobSnapshot) -> JobSnapshot:
         """Mark an unfinished job interrupted; inference jobs also lose inputs."""
         return self._change(
@@ -202,7 +217,7 @@ class WorkspaceJobService:
             status="interrupted",
             phase="interrupted",
             available_actions=[],
-            error=interruption_error(job),
+            error=dict(FETCH_INTERRUPTED) if is_fetch(job) else interruption_error(job),
         )
 
     def _change(

@@ -9,7 +9,7 @@ from backend_service.hugging_face_credentials import hugging_face_token_configur
 from backend_service.model_installation import InstalledModelStore
 from backend_service.storage import StateStore
 from backend_service.workspace_jobs import WorkspaceJobService
-from schemas.capabilities import Capabilities, HealthStatus
+from schemas.capabilities import Capabilities, DatasetSourceKindName, HealthStatus
 from schemas.configuration import (
     ConfigurationProfile,
     ConfigurationReset,
@@ -18,6 +18,12 @@ from schemas.configuration import (
 from schemas.errors import ErrorEnvelope
 from schemas.jobs import JobList, JobSnapshot
 
+DATASET_SOURCE_KINDS: list[DatasetSourceKindName] = [
+    "server_folder",
+    "upload",
+    "hugging_face",
+    "https_archive",
+]
 router = APIRouter(
     prefix="/api/v1",
     responses={
@@ -50,12 +56,13 @@ def read_health() -> HealthStatus:
     "/capabilities", response_model=Capabilities, operation_id="read_capabilities"
 )
 def read_capabilities(request: Request) -> Capabilities:
-    """Advertise installed models and whether a server-side token exists."""
+    """Advertise installed models, source kinds and whether a token exists."""
     installed = cast(InstalledModelStore, request.app.state.installed_models)
     return Capabilities.model_validate(
         {
             **installed.capabilities().model_dump(),
             "hugging_face_token_configured": hugging_face_token_configured(),
+            "dataset_source_kinds": DATASET_SOURCE_KINDS,
         }
     )
 

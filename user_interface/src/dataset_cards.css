@@ -128,3 +128,10 @@
     margin: 18px;
   }
 }
+
+/* The card background is lighter than the form panels, so the shared muted
+   label colour drops below the 4.5:1 contrast ratio there. */
+.summary_card .detail_list dt,
+.storage_card .detail_list dt {
+  color: #4b5c69;
+}

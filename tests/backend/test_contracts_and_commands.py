@@ -26,7 +26,15 @@ def test_committed_contracts_match_and_detect_drift(tmp_path: Path) -> None:
 
 def test_serialized_response_contracts_require_default_fields() -> None:
     """Require all promised fields when validating server responses."""
-    for name in ("ConfigurationProfile", "Capabilities", "HealthStatus", "ModelList"):
+    for name in (
+        "ConfigurationProfile",
+        "Capabilities",
+        "HealthStatus",
+        "ModelList",
+        "DatasetInspection",
+        "DatasetUploadSession",
+        "DatasetStorageSummary",
+    ):
         document = json.loads(Path(f"contracts/entities/{name}.json").read_text())
         assert document["additionalProperties"] is False
         assert set(document["required"]) == set(document["properties"])

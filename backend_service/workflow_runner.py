@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING
 from backend_service.failures import ApplicationFailure
 from backend_service.workflow_execution import execute_command, public_result
 from backend_service.workflow_preflight import resolve_request
+from schemas.base import StrictRecord
+from schemas.dataset_fetch import DatasetFetchRequest
 from schemas.inference_jobs import InferenceJobRecord
 from schemas.training import TrainingStep
 
@@ -20,6 +22,11 @@ def run_job(self: "WorkspaceJobService", identifier: str) -> None:
         from backend_service.inference_runner import run_inference
 
         run_inference(self, identifier, request)
+        return
+    if isinstance(request, DatasetFetchRequest):
+        from backend_service.workflow_fetch_runner import run_fetch_job
+
+        run_fetch_job(self, identifier, request)
         return
     if request.operation == "train":
         checked = self.preflight(request)
@@ -40,8 +47,10 @@ def run_job(self: "WorkspaceJobService", identifier: str) -> None:
             or self.store.get(identifier).requested_action == "stop"
         )
 
-    def progress(step: TrainingStep) -> None:
+    def progress(step: StrictRecord) -> None:
         """Publish measured scalar progress without inventing an ETA."""
+        if not isinstance(step, TrainingStep):
+            return
         with self.lock:
             job = self.store.get(identifier)
             self._change(

@@ -10,6 +10,7 @@ from backend_service.inference_files import InferenceFileStore
 from backend_service.inference_storage import upload_failure
 from backend_service.model_installation import InstalledModelStore
 from backend_service.payload_capacity import calculate_capacity
+from backend_service.request_bodies import read_bounded_body
 from schemas.capabilities import MAXIMUM_UPLOAD_BYTES
 from schemas.errors import ErrorEnvelope
 from schemas.inference import CapacityRequest, CapacityResult, UploadedImage
@@ -44,23 +45,6 @@ def inference_files(request: Request) -> InferenceFileStore:
     return cast(InferenceFileStore, request.app.state.inference_files)
 
 
-async def read_bounded_body(request: Request) -> bytes:
-    """Collect the raw body while refusing anything above the upload limit."""
-    declared = request.headers.get("content-length")
-    if declared is not None and (
-        not declared.isdigit() or int(declared) > MAXIMUM_UPLOAD_BYTES
-    ):
-        raise upload_failure("upload_too_large")
-    chunks: list[bytes] = []
-    size = 0
-    async for chunk in request.stream():
-        size += len(chunk)
-        if size > MAXIMUM_UPLOAD_BYTES:
-            raise upload_failure("upload_too_large")
-        chunks.append(chunk)
-    return b"".join(chunks)
-
-
 @image_router.post(
     "/images",
     response_model=UploadedImage,
@@ -75,7 +59,9 @@ async def upload_image(
     media_type = request.headers.get("content-type", "").split(";")[0].strip()
     if media_type.lower() not in UPLOAD_CONTENT_TYPES:
         raise upload_failure("upload_content_type")
-    data = await read_bounded_body(request)
+    data = await read_bounded_body(
+        request, MAXIMUM_UPLOAD_BYTES, lambda: upload_failure("upload_too_large")
+    )
     record = await run_in_threadpool(inference_files(request).store, purpose, data)
     request.app.state.event_logger.info("image_upload_completed")
     return record

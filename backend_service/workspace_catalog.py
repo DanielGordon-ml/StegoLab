@@ -101,6 +101,31 @@ class WorkspaceCatalog:
             ) from None
         return with_data_root(roots, self.root)
 
+    @property
+    def data_root(self) -> Path:
+        """Return the folder for downloaded and uploaded sources, creating it."""
+        directory = self.root / "data"
+        try:
+            directory.mkdir(parents=True, exist_ok=True)
+            if not os.access(directory, os.W_OK):
+                raise OSError
+        except OSError:
+            raise ApplicationFailure(
+                "data_root_unavailable",
+                "The server has no writable folder for downloaded sources. "
+                "Ask the server owner to mount the data folder.",
+                503,
+            ) from None
+        return directory
+
+    @property
+    def cache_root(self) -> Path:
+        """Return the download cache folder from configuration or its default."""
+        configured = os.environ.get("STEGOLAB_CACHE_DIRECTORY")
+        if configured:
+            return Path(configured).absolute()
+        return self.root / ".cache" / "stegolab" / "datasets"
+
     def _datasets(self) -> tuple[list[WorkspaceDataset], list[str]]:
         """Inspect frozen metadata and clearly defer full image-byte verification."""
         datasets: list[WorkspaceDataset] = []
