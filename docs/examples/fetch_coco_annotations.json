@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "run_label": "coco2017_annotations",
+  "source": {
+    "source_kind": "hugging_face",
+    "repository": "pcuenq/coco-2017-mirror",
+    "revision": "a4cd8b69bd45a35e9a0a9c8692f3a7f4f23321fe",
+    "content": "images",
+    "file_names": ["annotations_trainval2017.zip"],
+    "terms_reference": "https://cocodataset.org/#termsofuse"
+  },
+  "source_name": "coco2017_annotations",
+  "dataset_name": "coco2017_annotations",
+  "data_root": "data",
+  "cache_root": ".cache/stegolab/datasets",
+  "output_root": "datasets",
+  "training_intended": false,
+  "prepare": false
+}

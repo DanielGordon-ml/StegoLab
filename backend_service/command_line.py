@@ -68,6 +68,24 @@ def build_parser() -> argparse.ArgumentParser:
     ):
         dataset = commands.add_parser(name, help=help_text)
         dataset.add_argument("dataset_input")
+    for name, help_text in (
+        (
+            "freeze_benchmark",
+            "Freeze the release benchmark identities from JSON (or - for stdin).",
+        ),
+        (
+            "audit_near_duplicates",
+            "Audit a revision for near duplicates from request JSON (or - for stdin).",
+        ),
+    ):
+        research = commands.add_parser(name, help=help_text)
+        research.add_argument("research_input")
+    benchmark = commands.add_parser(
+        "validate_benchmark",
+        help="Verify a frozen benchmark identities folder without changing it.",
+    )
+    benchmark.add_argument("benchmark_directory")
+    benchmark.add_argument("--annotations-directory", default=None)
     for command in PLANNED_COMMANDS:
         commands.add_parser(command, help="Planned; unavailable in this release.")
     from backend_service.model_commands import MODEL_COMMANDS
@@ -109,6 +127,19 @@ def main(arguments: list[str] | None = None) -> int:
 
     if selected.command in DATASET_COMMANDS:
         return execute_dataset_command(selected.command, selected.dataset_input)
+    from backend_service.research_commands import (
+        RESEARCH_COMMANDS,
+        execute_research_command,
+    )
+
+    if selected.command == "validate_benchmark":
+        return execute_research_command(
+            selected.command,
+            selected.benchmark_directory,
+            selected.annotations_directory,
+        )
+    if selected.command in RESEARCH_COMMANDS:
+        return execute_research_command(selected.command, selected.research_input)
     from backend_service.model_commands import MODEL_COMMANDS, execute_model_command
 
     if selected.command in MODEL_COMMANDS:

@@ -1,8 +1,9 @@
 """Near-duplicate audit reports kept outside immutable dataset revisions."""
 
+import re
 from typing import Annotated, Literal, Self
 
-from pydantic import Field, model_validator
+from pydantic import AfterValidator, Field, model_validator
 
 from schemas.base import StrictRecord
 from schemas.dataset_common import (
@@ -17,6 +18,19 @@ AuditIdentifier = Annotated[str, Field(pattern=r"^[a-f0-9]{12}_[0-9]{8}T[0-9]{6}
 AuditThreshold = Literal[0, 4, 8, 12]
 AUDIT_THRESHOLDS: tuple[AuditThreshold, ...] = (0, 4, 8, 12)
 MAXIMUM_REPORTED_PAIRS = 2000
+MAXIMUM_PAIR_COUNT = 10**12
+
+
+def check_pair_counts(value: dict[str, int]) -> dict[str, int]:
+    """Keep pair counters nonnegative, safely named and above any real total."""
+    if any(count < 0 or count > MAXIMUM_PAIR_COUNT for count in value.values()):
+        raise ValueError("Pair counts are outside the supported range.")
+    if any(not re.fullmatch(r"[a-z][a-z0-9_]{0,63}", key) for key in value):
+        raise ValueError("Pair counters must use safe names.")
+    return value
+
+
+PairCountMap = Annotated[dict[str, int], AfterValidator(check_pair_counts)]
 
 
 class NearDuplicateAuditRequest(DatasetVersionedRecord):
@@ -50,10 +64,10 @@ class NearDuplicateThresholdCounts(StrictRecord):
     """Pair counts at one Hamming distance level."""
 
     threshold: AuditThreshold
-    within_split: CounterMap = Field(default_factory=dict)
-    cross_split: CounterMap = Field(default_factory=dict)
+    within_split: PairCountMap = Field(default_factory=dict)
+    cross_split: PairCountMap = Field(default_factory=dict)
     cross_split_total: int = Field(ge=0)
-    benchmark_by_split: CounterMap | None = None
+    benchmark_by_split: PairCountMap | None = None
     benchmark_total: int | None = Field(default=None, ge=0)
 
 

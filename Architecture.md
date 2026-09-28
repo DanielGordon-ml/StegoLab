@@ -75,7 +75,7 @@ Kubernetes, a distributed scheduler, or a multi-user account service.
 | Shared contracts | Strict Pydantic records for settings, datasets, training, checkpoints, evaluation, exports, installed models, uploads, capacity, jobs and decoded text; exported schemas; browser validation | Model-promotion records |
 | Persistent storage | SQLite settings, jobs, durable events and retry results; installed-model store; expiring uploads and results; structured run logs; raw source folders under `data/`; the verified download cache under `.cache/stegolab/datasets/`; prepared datasets; checkpoints, exports and ledgers | GPU host transfer |
 | Independent packages | Experimental separate CPU encoder/decoder packages, installed explicitly and run in isolated processes | Qualified CPU/GPU deployment packages |
-| External sources | Local image folders, UHD-IQA metadata, Hugging Face repositories over the Hub REST interface, https archives, and uploaded archives | Gated datasets beyond a server-side token; benchmark annotation members |
+| External sources | Local image folders, UHD-IQA metadata, Hugging Face repositories over the Hub REST interface, https archives, uploaded archives, and COCO annotation `.json` members kept as text | Gated datasets beyond a server-side token; benchmark pixels |
 
 Current request flow is browser → frontend/proxy → API → scheduler and state
 stores. The browser reaches uploads, capacity, encode/decode jobs and decoded
@@ -256,7 +256,9 @@ RGB pixels and shared upstream identities, and publishes verified revisions.
 Dataset limits are separate from production: 1–8192 per side, 32 million pixels,
 50 MiB source files, and 128 MiB prepared PNGs. A destination-root lock protects
 the disk budget and owned staging; completed revisions work without sources.
-The CLI exposes `prepare_dataset`, `inspect_dataset`, and `validate_dataset`.
+The CLI exposes `prepare_dataset`, `inspect_dataset`, and `validate_dataset`,
+plus the research commands `freeze_benchmark`, `validate_benchmark`, and
+`audit_near_duplicates`.
 The offline reader supplies eligible unique examples from one requested split.
 See [the dataset guide](docs/datasets.md) for contracts and failure behavior.
 
@@ -267,7 +269,11 @@ traversal, escaping links, and decompression bombs. Pause depends on source
 support; cancel removes only that job's partial assets.
 
 Train/tuning/test source identities are frozen before crops. Exact duplicate
-checks are implemented; a near-duplicate audit is required before the pilot.
+checks are implemented, and `audit_near_duplicates` writes a perceptual-hash
+near-duplicate report under `<output_root>/.audits/` that pilot preflight
+verifies and gates at Hamming distance 8; `freeze_benchmark` fixes the COCO
+benchmark identity list without pixels or a preparation policy, and
+`pilot_ready` stays false.
 Cover augmentations happen before embedding. Post-embedding channel
 attacks are a separate later profile. COCO supplies the main planned benchmark;
 native DIV2K/high-resolution tests are reported separately. Dataset mirrors,

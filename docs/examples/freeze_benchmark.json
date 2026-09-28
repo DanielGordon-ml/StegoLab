@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "annotations_directory": "data/coco2017_annotations/annotations",
+  "output_directory": "docs/benchmarks/release_benchmark_v1",
+  "source_archives": [
+    {
+      "repository": "pcuenq/coco-2017-mirror",
+      "repository_kind": "huggingface_dataset",
+      "revision": "a4cd8b69bd45a35e9a0a9c8692f3a7f4f23321fe",
+      "archive_path": "annotations_trainval2017.zip",
+      "archive_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "archive_bytes": 252907541
+    },
+    {
+      "repository": "pcuenq/coco-2017-mirror",
+      "repository_kind": "huggingface_dataset",
+      "revision": "a4cd8b69bd45a35e9a0a9c8692f3a7f4f23321fe",
+      "archive_path": "val2017.zip",
+      "archive_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "archive_bytes": 815585330
+    },
+    {
+      "repository": "pcuenq/coco-2017-mirror",
+      "repository_kind": "huggingface_dataset",
+      "revision": "a4cd8b69bd45a35e9a0a9c8692f3a7f4f23321fe",
+      "archive_path": "train2017.zip",
+      "archive_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "archive_bytes": 19336861798
+    }
+  ],
+  "seed": 0,
+  "training_source_count": 5000,
+  "reserve_count": 1000,
+  "expect_official_counts": true
+}

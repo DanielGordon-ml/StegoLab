@@ -7,9 +7,14 @@ from pathlib import Path
 
 import torch
 
+from backend_service.dataset_validation import load_manifest
 from backend_service.failures import ApplicationFailure
 from backend_service.pilot_budget import inspect_budget, read_session
 from backend_service.pilot_data import load_pilot_data
+from backend_service.pilot_preflight_audit import (
+    benchmark_identities_check,
+    near_duplicate_check,
+)
 from schemas.pilot_preflight import (
     PilotPreflightReport,
     PilotPreflightRequest,
@@ -131,14 +136,7 @@ def preflight_pilot(request: PilotPreflightRequest) -> PilotPreflightReport:
             else "CUDA is unavailable; no CPU fallback was selected.",
         )
     )
-    for name in (
-        "gpu_training",
-        "gpu_resume",
-        "gpu_exports",
-        "physical_shutdown",
-        "data_near_duplicate_audit",
-        "release_benchmark",
-    ):
+    for name in ("gpu_training", "gpu_resume", "gpu_exports", "physical_shutdown"):
         checks.append(
             PilotReadinessCheck(
                 name=name,
@@ -146,6 +144,22 @@ def preflight_pilot(request: PilotPreflightRequest) -> PilotPreflightReport:
                 detail="Requires a later explicit readiness or research gate.",
             )
         )
+    try:
+        records_checksum: str | None = load_manifest(
+            Path(request.dataset_directory)
+        ).records_checksum
+    except (ApplicationFailure, OSError, ValueError, MemoryError):
+        records_checksum = None
+    benchmark_check, report.benchmark_identities_checksum = benchmark_identities_check(
+        request
+    )
+    audit_check, report.near_duplicate_audit = near_duplicate_check(
+        request,
+        dataset_revision=report.dataset_revision,
+        records_checksum=records_checksum,
+        identities_checksum=report.benchmark_identities_checksum,
+    )
+    checks.extend([audit_check, benchmark_check])
     report.checks = checks
     report.preparation_passed = all(check.status != "failed" for check in checks)
     return PilotPreflightReport.model_validate(report.model_dump())

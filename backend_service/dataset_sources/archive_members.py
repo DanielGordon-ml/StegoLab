@@ -1,5 +1,6 @@
 """Decide which archive members are safe images or text before extracting them."""
 
+import codecs
 import os
 import struct
 from dataclasses import dataclass
@@ -25,7 +26,8 @@ ZIP64_RECORD_SIGNATURE = b"PK\x06\x06"
 ZIP64_RECORD_BYTES = 56
 MAXIMUM_DIRECTORY_BYTES = 64 * 1024**2
 IMAGE_EXTENSIONS = {"png": PNG_MAGIC, "jpg": JPEG_MAGIC, "jpeg": JPEG_MAGIC}
-TEXT_EXTENSIONS = frozenset({"txt"})
+TEXT_EXTENSIONS = frozenset({"txt", "json"})
+JSON_OPENING_BYTES = (b"{", b"[")
 METADATA_FOLDER = "__MACOSX"
 REJECTION_REASONS = frozenset(
     {
@@ -190,6 +192,21 @@ def _rejected(reason: str) -> MemberDecision:
     return MemberDecision("rejected", reason)
 
 
+def _text_content_matches(extension: str, first_bytes: bytes) -> bool:
+    """Tell whether the first bytes of a text member fit its extension.
+
+    Plain text only has to be free of zero bytes. A json member must also
+    open an object or an array once an optional UTF-8 byte order mark and
+    leading ASCII whitespace are skipped; anything else is not annotations.
+    """
+    if b"\x00" in first_bytes:
+        return False
+    if extension != "json":
+        return True
+    remainder = first_bytes.removeprefix(codecs.BOM_UTF8).lstrip()
+    return remainder.startswith(JSON_OPENING_BYTES)
+
+
 def classify_member(
     name: str, first_bytes: bytes, policy: MemberPolicy
 ) -> MemberDecision:
@@ -214,6 +231,6 @@ def classify_member(
         return _rejected("unsupported_file_type")
     if kind == "image" and not first_bytes.startswith(IMAGE_EXTENSIONS[extension]):
         return _rejected("content_mismatch")
-    if kind == "text" and b"\x00" in first_bytes:
+    if kind == "text" and not _text_content_matches(extension, first_bytes):
         return _rejected("content_mismatch")
     return MemberDecision(kind, None)

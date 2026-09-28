@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "dataset_directory": "datasets/uhd_iqa/75bef6dab2b3de136d1c5c359d6753a25e4a750d5387fe75921e394482f0776c",
+  "output_root": null,
+  "benchmark_identities_directory": "docs/benchmarks/release_benchmark_v1",
+  "benchmark_dataset_directory": null,
+  "limit": 200
+}

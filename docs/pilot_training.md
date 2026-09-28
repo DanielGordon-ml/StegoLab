@@ -16,7 +16,10 @@ Preflight reports metadata checks, the immutable tuning selection, free space,
 runtime versions, and remaining instance budget. Missing GPU accounting is
 reported as unused; preflight never initializes it. It does not read held-out
 pixels or prove whole-corpus image integrity. Each image is checked against its
-recorded checksum when used. GPU and release checks remain `not_run`.
+recorded checksum when used. GPU checks remain `not_run`. The
+`data_near_duplicate_audit` check reads the audit report named in the request,
+and `release_benchmark` stays `not_run` while recording the frozen identities
+checksum when that folder exists (see below).
 
 The smoke command performs two engineering-test updates on CPU. It does not
 select a model, measure image quality, or modify the dataset. Its outputs live
@@ -26,6 +29,55 @@ absolute optimizer steps and a requested allowance no greater than 120 seconds.
 Work stops at completed-step boundaries with up to ten seconds reserved for
 saving; a slow final step or atomic save can finish after the nominal allowance.
 It uses neither the Sprint 4 proof ledger nor the GPU ledger.
+
+## Audit the data before a pilot
+
+Preflight requests (schema version two) accept two optional fields:
+
+- `near_duplicate_audit_report`: the path of a `near_duplicate_audit.json`
+  written by `stegolab audit_near_duplicates` for the same revision. `null`
+  leaves the `data_near_duplicate_audit` check `not_run` with guidance.
+- `benchmark_identities_directory`: the folder written by
+  `stegolab freeze_benchmark`. A missing folder leaves `release_benchmark`
+  `not_run` with the guidance to freeze first; a folder that exists but fails
+  validation makes the check `failed`.
+
+The workflow before a pilot is:
+
+1. Prepare or validate the revision with `stegolab validate_dataset`.
+2. Run `stegolab audit_near_duplicates docs/examples/audit_uhd_iqa.json`. The
+   `_smoke` example with `limit: 200` checks the setup first; its limited
+   report fails the gate on purpose.
+3. Compose the report path from the printed report:
+   `<output_root>/.audits/<dataset_name>/<audit_identifier>/near_duplicate_audit.json`
+   (`output_root` defaults to `datasets/`), put it in
+   `near_duplicate_audit_report` and run `stegolab preflight_pilot`.
+
+The updated example request:
+
+```json
+{
+  "schema_version": 2,
+  "dataset_directory": "datasets/uhd_iqa/75bef6dab2b3de136d1c5c359d6753a25e4a750d5387fe75921e394482f0776c",
+  "output_root": ".",
+  "device": "cpu",
+  "near_duplicate_audit_report": null,
+  "benchmark_identities_directory": "docs/benchmarks/release_benchmark_v1"
+}
+```
+
+The audit check passes locally only when the report is intact, describes this
+revision (same revision and records checksum), is not limited, and counts zero
+cross-split pairs at Hamming distance 8 or less. When the report includes the
+benchmark block, its identities checksum must match the given folder and its
+benchmark pair count at distance 8 must be zero. The preflight report's
+`near_duplicate_audit` summary records the report checksum, the audit
+identifier, the method version, the distance-8 counts, the benchmark status and
+the `limited` flag; `benchmark_identities_checksum` records the frozen
+identities. A passing gate is evidence about one revision, not an approval:
+`pilot_ready` and `gpu_checks_run` stay `false`. The
+[dataset guide](datasets.md#benchmark-identities-and-near-duplicate-audit)
+describes the commands, the report layout and the four distance levels.
 
 ## Frozen training behavior
 
@@ -139,6 +191,7 @@ real training run yet, and neither changes the exported packages.
 The readiness report keeps `passed_locally`, `failed`, and `not_run` distinct.
 The [data guide](pilot_data.md) records exact selection and loading measurements.
 The [Sprint 5 record](../plan/sprint_05.md) records acceptance and remaining gates.
-No COCO benchmark, near-duplicate review, critic training run, 4K, GUI model
-operation or new model-quality experiment is included in this sprint; the critic
+No COCO benchmark pixels, critic training run, 4K, GUI model operation or new
+model-quality experiment is included. The near-duplicate audit report and the
+frozen benchmark identities are evidence files that preflight reads; the critic
 and fork exist as code only.
